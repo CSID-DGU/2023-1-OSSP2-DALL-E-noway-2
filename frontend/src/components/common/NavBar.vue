@@ -5,8 +5,8 @@ import { ref } from 'vue';
 <template>
   <div class="wrap">
     <nav>
-      <RouterLink to="/home"> HOME </RouterLink>
-      <RouterLink to="/board"> BOARD </RouterLink>
+      <RouterLink to="/"> HOME </RouterLink>
+      <RouterLink to="/board-list"> BOARD </RouterLink>
       <RouterLink to="/calendar"> CALENDAR </RouterLink>
       <RouterLink to="/profile"> PROFILE </RouterLink>
     </nav>

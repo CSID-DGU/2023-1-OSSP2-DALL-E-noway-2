@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
-import HelloWorld from './components/HelloWorld.vue';
+import { RouterView } from 'vue-router';
 import { onMounted } from 'vue';
 import HeaderBar from './components/common/HeaderBar.vue';
 import NavBar from './components/common/NavBar.vue';
