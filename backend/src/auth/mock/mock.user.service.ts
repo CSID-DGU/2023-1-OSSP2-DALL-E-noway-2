@@ -2,6 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UserDto } from 'src/dto/user.dto';
 import { SocialProfile } from 'src/type/social.profile';
 
+/**
+ * UserService에 대한 가짜 구현체입니다.
+ * 개발 단계에서만 사용하며, 추후 구현이 완료되면 사용하지 않습니다.
+ */
 @Injectable()
 export class MockUserService {
   private logger = new Logger(MockUserService.name);

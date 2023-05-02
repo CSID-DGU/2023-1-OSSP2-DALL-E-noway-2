@@ -1,6 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { SocialProfile } from 'src/type/social.profile';
 
+/**
+ * 카카오 로그인 후, payload로 전달받은 유저 정보를 가져오는 커스텀 데코레이터
+ */
 export const RequestKakaoProfile = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): SocialProfile => {
     const request = ctx.switchToHttp().getRequest();
