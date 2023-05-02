@@ -19,5 +19,6 @@ services:
     env_file:
       - ./mariadb/.env
     restart: always
-    # volumes:
-    #   - ./mariadb/dalle.sql:/docker-entrypoint-initdb.d/dalle.sql
+    # import sql file
+    volumes:
+      - ./mariadb/dalle.sql:/docker-entrypoint-initdb.d/dalle.sql
