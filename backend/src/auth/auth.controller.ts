@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Inject,
   InternalServerErrorException,
   Logger,
   Res,
@@ -17,6 +18,10 @@ import { GoogleGuard } from './google/google.guard';
 import { RequestGoogleProfile } from 'src/decorator/google.user.decorator';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
+import { IUserService } from 'src/user/interface/user.service.interface';
+import { JwtAuthGuard } from './jwt/jwt.auth.guard';
+import { User } from 'src/decorator/user.decorator';
+import { UserDto } from 'src/dto/user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,6 +31,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    @Inject('IUserService') private readonly userService: IUserService,
   ) {}
 
   @ApiOperation({
@@ -36,7 +42,7 @@ export class AuthController {
   @Get('naver/login')
   @UseGuards(NaverGuard)
   naverLogin() {
-    // NOTE: Cannot reach here
+    // Cannot reach here
     return;
   }
 
@@ -53,7 +59,7 @@ export class AuthController {
   ) {
     this.logger.debug(`Called ${this.naverLoginCallback.name}`);
     try {
-      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
       const user = await this.userService.findOrCreateUserBySocialProfile(
         profile,
       );
@@ -77,7 +83,7 @@ export class AuthController {
   @Get('kakao/login')
   @UseGuards(KakaoGuard)
   kakaoLogin() {
-    // NOTE: Cannot reach here
+    // Cannot reach here
     return;
   }
 
@@ -94,7 +100,7 @@ export class AuthController {
   ) {
     this.logger.debug(`Called ${this.kakaoLoginCallback.name}`);
     try {
-      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
       const user = await this.userService.findOrCreateUserBySocialProfile(
         profile,
       );
@@ -118,7 +124,7 @@ export class AuthController {
   @Get('google/login')
   @UseGuards(GoogleGuard)
   googleLogin() {
-    // NOTE: Cannot reach here
+    // Cannot reach here
     return;
   }
 
@@ -135,7 +141,7 @@ export class AuthController {
   ) {
     this.logger.debug(`Called ${this.googleLoginCallback.name}`);
     try {
-      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
       const user = await this.userService.findOrCreateUserBySocialProfile(
         profile,
       );
@@ -149,5 +155,15 @@ export class AuthController {
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('test')
+  /**
+   * 인증 테스트용 API
+   */
+  async test(@User() user: UserDto) {
+    this.logger.debug(`Called ${this.test.name}`);
+    console.log(user);
   }
 }

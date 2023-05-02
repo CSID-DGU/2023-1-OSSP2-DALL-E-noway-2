@@ -14,7 +14,6 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   }
 
   validate(accessToken, refreshToken, profile, callback) {
-    console.log(profile);
     callback(null, profile);
   }
 }

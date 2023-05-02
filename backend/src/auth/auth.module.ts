@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { MockUserService } from './mock/mock.user.service';
 
 @Module({
   imports: [
@@ -28,6 +29,10 @@ import { AuthService } from './auth.service';
     GoogleStrategy,
     JwtStrategy,
     AuthService,
+    {
+      provide: 'IUserService',
+      useClass: MockUserService,
+    },
   ],
   controllers: [AuthController],
 })
