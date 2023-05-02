@@ -1,5 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10),
+  feHost: process.env.FE_HOST,
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRESIN,

@@ -1,4 +1,11 @@
-import { Controller, Get, Logger, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Logger,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NaverGuard } from './naver/naver.guard';
 import { RequestNaverProfile } from 'src/decorator/naver.user.decorator';
@@ -8,11 +15,18 @@ import { KakaoGuard } from './kakao/kakao.guard';
 import { RequestKakaoProfile } from 'src/decorator/kakao.user.decorator';
 import { GoogleGuard } from './google/google.guard';
 import { RequestGoogleProfile } from 'src/decorator/google.user.decorator';
+import { AuthService } from './auth.service';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   private logger = new Logger(AuthController.name);
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @ApiOperation({
     summary: '네이버 로그인',
@@ -38,7 +52,21 @@ export class AuthController {
     @Res() res: Response,
   ) {
     this.logger.debug(`Called ${this.naverLoginCallback.name}`);
-    return res.status(200).json(profile);
+    try {
+      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      const user = await this.userService.findOrCreateUserBySocialProfile(
+        profile,
+      );
+
+      // JWT 토큰을 발급 후 쿠키에 저장합니다.
+      const token = this.authService.generateJwtToken(user);
+      res.cookie('accessToken', token);
+
+      // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
+      return res.redirect(this.configService.get<string>('feHost') + '/home');
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
   }
 
   @ApiOperation({
@@ -65,7 +93,21 @@ export class AuthController {
     @Res() res: Response,
   ) {
     this.logger.debug(`Called ${this.kakaoLoginCallback.name}`);
-    return res.status(200).json(profile);
+    try {
+      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      const user = await this.userService.findOrCreateUserBySocialProfile(
+        profile,
+      );
+
+      // JWT 토큰을 발급 후 쿠키에 저장합니다.
+      const token = this.authService.generateJwtToken(user);
+      res.cookie('accessToken', token);
+
+      // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
+      return res.redirect(this.configService.get<string>('feHost') + '/home');
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
   }
 
   @ApiOperation({
@@ -92,6 +134,20 @@ export class AuthController {
     @Res() res: Response,
   ) {
     this.logger.debug(`Called ${this.googleLoginCallback.name}`);
-    return res.status(200).json(profile);
+    try {
+      // TODO: 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
+      const user = await this.userService.findOrCreateUserBySocialProfile(
+        profile,
+      );
+
+      // JWT 토큰을 발급 후 쿠키에 저장합니다.
+      const token = this.authService.generateJwtToken(user);
+      res.cookie('accessToken', token);
+
+      // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
+      return res.redirect(this.configService.get<string>('feHost') + '/home');
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
   }
 }
