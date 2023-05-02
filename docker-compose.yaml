@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx
+    container_name: dalle_nginx
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "81:80"
+    restart: always
+
+  mariadb:
+    image: mariadb:latest
+    container_name: dalle_mariadb
+    ports:
+      - "3308:3306"
+    env_file:
+      - ./mariadb/.env
+    restart: always
+    # volumes:
+    #   - ./mariadb/dalle.sql:/docker-entrypoint-initdb.d/dalle.sql
