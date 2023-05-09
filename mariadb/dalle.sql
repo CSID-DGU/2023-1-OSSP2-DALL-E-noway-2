@@ -16,6 +16,87 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+<<<<<<< Updated upstream
+-- Table structure for table `category`
+--
+
+DROP TABLE IF EXISTS `category`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`)
+=======
+-- Table structure for table `board`
+--
+
+DROP TABLE IF EXISTS `board`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `board_type` varchar(255) NOT NULL,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `disclosure_scope` varchar(255) NOT NULL DEFAULT 'PRIVATE',
+  PRIMARY KEY (`post_id`),
+  KEY `board_user_null_fk` (`user_id`),
+  CONSTRAINT `board_user_null_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `board_type_check` CHECK (`board_type` in ('FREE','TIP','REQUEST')),
+  CONSTRAINT `disclosure_scope_check` CHECK (`disclosure_scope` in ('PRIVATE','PUBLIC','LIMITED_PUBLIC'))
+>>>>>>> Stashed changes
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+<<<<<<< Updated upstream
+-- Dumping data for table `category`
+--
+
+=======
+-- Dumping data for table `board`
+--
+
+LOCK TABLES `board` WRITE;
+/*!40000 ALTER TABLE `board` DISABLE KEYS */;
+/*!40000 ALTER TABLE `board` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bookmark`
+--
+
+DROP TABLE IF EXISTS `bookmark`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookmark` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'diary_id or post_id',
+  `filter_type` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`,`filter_type`),
+  KEY `bookmark_user_fk` (`user_id`),
+  CONSTRAINT `bookmark_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filter_type_check` CHECK (`filter_type` in ('DIARY','FREE','TIP','REQUEST'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bookmark`
+--
+
+LOCK TABLES `bookmark` WRITE;
+/*!40000 ALTER TABLE `bookmark` DISABLE KEYS */;
+/*!40000 ALTER TABLE `bookmark` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `category`
 --
 
@@ -33,12 +114,48 @@ CREATE TABLE `category` (
 -- Dumping data for table `category`
 --
 
+>>>>>>> Stashed changes
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
+<<<<<<< Updated upstream
+=======
+-- Table structure for table `comment`
+--
+
+DROP TABLE IF EXISTS `comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL COMMENT 'diary_id or post_id',
+  `filter_type` varchar(255) NOT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `comment_id_fk` (`parent_comment_id`),
+  KEY `comment_user_null_fk` (`user_id`),
+  CONSTRAINT `comment_id_fk` FOREIGN KEY (`parent_comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_user_null_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filter_type_check` CHECK (`filter_type` in ('DIARY','FREE','TIP','REQUEST'))
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `comment`
+--
+
+LOCK TABLES `comment` WRITE;
+/*!40000 ALTER TABLE `comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+>>>>>>> Stashed changes
 -- Table structure for table `diary_category`
 --
 
@@ -156,6 +273,37 @@ LOCK TABLES `dream_diary` WRITE;
 UNLOCK TABLES;
 
 --
+<<<<<<< Updated upstream
+=======
+-- Table structure for table `favorite`
+--
+
+DROP TABLE IF EXISTS `favorite`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `favorite` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'diary_id or post_id',
+  `filter_type` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`,`filter_type`),
+  KEY `like_user_fk` (`user_id`),
+  CONSTRAINT `like_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filter_type_check` CHECK (`filter_type` in ('DIARY','FREE','TIP','REQUEST'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `favorite`
+--
+
+LOCK TABLES `favorite` WRITE;
+/*!40000 ALTER TABLE `favorite` DISABLE KEYS */;
+/*!40000 ALTER TABLE `favorite` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+>>>>>>> Stashed changes
 -- Table structure for table `follow`
 --
 
@@ -249,4 +397,8 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+<<<<<<< Updated upstream
 -- Dump completed on 2023-05-07 20:24:25
+=======
+-- Dump completed on 2023-05-09 11:36:33
+>>>>>>> Stashed changes
