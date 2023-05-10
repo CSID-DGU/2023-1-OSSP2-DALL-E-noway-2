@@ -16,18 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
-<<<<<<< Updated upstream
--- Table structure for table `category`
---
-
-DROP TABLE IF EXISTS `category`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `category` (
-  `category_id` int(11) NOT NULL AUTO_INCREMENT,
-  `category_name` varchar(255) NOT NULL,
-  PRIMARY KEY (`category_id`)
-=======
 -- Table structure for table `board`
 --
 
@@ -50,16 +38,10 @@ CREATE TABLE `board` (
   CONSTRAINT `board_user_null_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `board_type_check` CHECK (`board_type` in ('FREE','TIP','REQUEST')),
   CONSTRAINT `disclosure_scope_check` CHECK (`disclosure_scope` in ('PRIVATE','PUBLIC','LIMITED_PUBLIC'))
->>>>>>> Stashed changes
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
-<<<<<<< Updated upstream
--- Dumping data for table `category`
---
-
-=======
 -- Dumping data for table `board`
 --
 
@@ -114,15 +96,12 @@ CREATE TABLE `category` (
 -- Dumping data for table `category`
 --
 
->>>>>>> Stashed changes
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
-<<<<<<< Updated upstream
-=======
 -- Table structure for table `comment`
 --
 
@@ -155,7 +134,6 @@ LOCK TABLES `comment` WRITE;
 UNLOCK TABLES;
 
 --
->>>>>>> Stashed changes
 -- Table structure for table `diary_category`
 --
 
@@ -259,7 +237,7 @@ CREATE TABLE `dream_diary` (
   KEY `dream_diary_user_fk` (`user_id`),
   CONSTRAINT `dream_diary_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `dream_score_check` CHECK (`dream_score` in (1,2,3,4,5)),
-  CONSTRAINT `check_disclosure_scope` CHECK (`disclosure_scope` in ('PRIVATE','PUBLIC','LIMITED_PRIVATE'))
+  CONSTRAINT `check_disclosure_scope` CHECK (`disclosure_scope` in ('PRIVATE','PUBLIC','LIMITED_PUBLIC'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -273,8 +251,6 @@ LOCK TABLES `dream_diary` WRITE;
 UNLOCK TABLES;
 
 --
-<<<<<<< Updated upstream
-=======
 -- Table structure for table `favorite`
 --
 
@@ -303,7 +279,6 @@ LOCK TABLES `favorite` WRITE;
 UNLOCK TABLES;
 
 --
->>>>>>> Stashed changes
 -- Table structure for table `follow`
 --
 
@@ -397,8 +372,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-<<<<<<< Updated upstream
--- Dump completed on 2023-05-07 20:24:25
-=======
--- Dump completed on 2023-05-09 11:36:33
->>>>>>> Stashed changes
+-- Dump completed on 2023-05-10 22:00:32
