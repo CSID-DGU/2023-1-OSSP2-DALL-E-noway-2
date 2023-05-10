@@ -24,4 +24,11 @@ export default () => ({
   debug: {
     log: process.env.DEBUG_LOG === 'true' ? true : false,
   },
+  database: {
+    host: process.env.DATABASE_HOST,
+    user: process.env.DATABASE_USER,
+    port: parseInt(process.env.DATABASE_PORT, 10),
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_DATABASE,
+  },
 });
