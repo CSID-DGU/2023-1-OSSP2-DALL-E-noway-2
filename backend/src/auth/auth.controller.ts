@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Inject,
   InternalServerErrorException,
   Logger,
   Res,
@@ -18,10 +17,7 @@ import { GoogleGuard } from './google/google.guard';
 import { RequestGoogleProfile } from 'src/decorator/google.user.decorator';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
-import { IUserService } from 'src/user/interface/user.service.interface';
-import { JwtAuthGuard } from './jwt/jwt.auth.guard';
-import { User } from 'src/decorator/user.decorator';
-import { UserDto } from 'src/dto/user.dto';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,7 +27,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    @Inject('IUserService') private readonly userService: IUserService,
+    private readonly userService: UserService,
   ) {}
 
   @ApiOperation({
@@ -71,6 +67,7 @@ export class AuthController {
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
       return res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
+      this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
     }
   }
@@ -112,6 +109,7 @@ export class AuthController {
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
       return res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
+      this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
     }
   }
@@ -153,17 +151,8 @@ export class AuthController {
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
       return res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
+      this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
     }
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('test')
-  /**
-   * 인증 테스트용 API
-   */
-  async test(@User() user: UserDto) {
-    this.logger.debug(`Called ${this.test.name}`);
-    console.log(user);
   }
 }
