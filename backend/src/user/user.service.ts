@@ -62,14 +62,12 @@ export class UserService {
           .getRepository(User)
           .insert(user);
 
-        const oauthRepo = transactionalEntityManager
-          .getRepository(OAuth)
-          .insert({
-            userId: result.identifiers[0].userId,
-            oauthId: profile.oauthId,
-            accessToken: null,
-            provider: provider,
-          });
+        await transactionalEntityManager.getRepository(OAuth).insert({
+          userId: result.identifiers[0].userId,
+          oauthId: profile.oauthId,
+          accessToken: null,
+          provider: provider,
+        });
       },
     );
 
