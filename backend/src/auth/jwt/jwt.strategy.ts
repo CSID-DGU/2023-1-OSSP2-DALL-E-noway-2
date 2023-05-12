@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
-import { IUserService } from 'src/user/interface/user.service.interface';
+import { UserService } from 'src/user/user.service';
 
 /**
  * request에서 토큰을 추출합니다.
@@ -26,7 +26,7 @@ const extracter = (req) => {
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @Inject(ConfigService) private configService: ConfigService,
-    @Inject('IUserService') private readonly userService: IUserService,
+    private readonly userService: UserService,
   ) {
     super({
       jwtFromRequest: extracter,
