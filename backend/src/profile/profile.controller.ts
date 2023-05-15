@@ -15,21 +15,23 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ProfileResponseDto } from 'src/dto/profile.response.dto';
+import {
+  DreamDiaryFeedsResponseDto,
+  DreamDiaryFeedDto,
+  ProfileResponseDto,
+} from 'src/dto/profile.response.dto';
 import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
 import { ProfileUpdatetDto } from 'src/dto/profile.update.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetUser } from 'src/decorator/user.decorator';
+import { response } from 'express';
 
 @ApiTags('Profile')
 @Controller('users')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  /**
-   * service의 getProfile 메소드를 통해
-   * user, 팔로잉수, 팔로워수 dto 반환
-   */
   @ApiOperation({
     summary: '해당 유저 프로필 조회',
     description:
@@ -63,10 +65,6 @@ export class ProfileController {
     }
   }
 
-  /**
-   * service의 getProfileDetail 메소드를 통해
-   * user의 모든 상세정보 dto 반환
-   */
   @ApiOperation({
     summary: '해당 유저 프로필 상세 조회',
     description: '해당 userId를 가지는 유저의 프로필 상세 정보를 반환합니다.',
@@ -148,14 +146,13 @@ export class ProfileController {
     @Param('userId', new ParseUUIDPipe()) userId: string,
     //default 1
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    //default null
-    @Query('nickname', new DefaultValuePipe('')) nickname: string,
+    @Query('length', new DefaultValuePipe(10), ParseIntPipe) length: number,
   ) {
     try {
       const followings = await this.profileService.getFollowings(
         userId,
         page,
-        nickname,
+        length,
       );
 
       return followings;
@@ -187,12 +184,14 @@ export class ProfileController {
   async getFollowers(
     @Param('userId', new ParseUUIDPipe()) userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('length', new DefaultValuePipe(10), ParseIntPipe) length: number,
     @Query('nickname', new DefaultValuePipe('')) nickname: string,
   ) {
     try {
       const followers = await this.profileService.getFollowers(
         userId,
         page,
+        length,
         nickname,
       );
 
@@ -210,5 +209,31 @@ export class ProfileController {
 
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '유저 프로필에서 꿈일기 피드 조회',
+    description:
+      '유저 프로필에서 공개 범위 및 제한된 공개 범위 꿈 일기 피드를 조회합니다.',
+  })
+  @Get('users/:userId/dream-diary/feeds')
+  @UseGuards(AuthGuard('jwt'))
+  async getDreamDiariesByUserId(
+    @Param('userId') userId: number,
+    @Query('page') currentPage: number,
+    @Query('length') length: number,
+    @GetUser() user: { id: number },
+  ): Promise<DreamDiaryFeedsResponseDto> {
+    const targetUserId = Number(userId);
+    const authorizedUserId = user.id;
+
+    const responseDto = await this.profileService.getDreamDiariesByUserId(
+      targetUserId,
+      currentPage,
+      length,
+      authorizedUserId,
+    );
+
+    return responseDto;
   }
 }
