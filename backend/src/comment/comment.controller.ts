@@ -17,4 +17,18 @@ export class CommentController {
     async getAllComments(@Param('filter_type') filterType: FilterType, @Param('id') id: number): Promise<Comment[]> {
         return await this.commentService.getAllComments(filterType, id);
     }
+
+    // 댓글 생성 기능 / 글의 종류, 글 id, 글 내용을 받아와 해당하는 글에 댓글을 등록하는 API
+    @Post('/:filter_type/:id')
+    async createComment(@Body() commentResponseDto:CommentResponseDto,
+    @Param('filter_type') filter_type: FilterType,
+     @Param('id') id: number,
+     @GetUser() user: User,
+     ){
+        commentResponseDto.filterType = filter_type;
+        commentResponseDto.id = id;
+
+        const result = await this.commentService.createComment(commentResponseDto, user);
+        return result.commentId; 
+    }
 }
