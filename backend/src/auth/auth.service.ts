@@ -15,6 +15,10 @@ export class AuthService {
    */
   generateJwtToken(user: UserDto): string {
     this.logger.debug(`Called ${this.generateJwtToken.name}`);
-    return this.jwtService.sign(user);
+    return this.jwtService.sign({
+      userId: user.userId,
+      nickname: user.nickname,
+      imageUrl: user.imageUrl,
+    });
   }
 }
