@@ -8,7 +8,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
-import { MockUserService } from './mock/mock.user.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -22,6 +22,7 @@ import { MockUserService } from './mock/mock.user.service';
       inject: [ConfigService],
     }),
     PassportModule,
+    UserModule,
   ],
   providers: [
     NaverStrategy,
@@ -29,10 +30,6 @@ import { MockUserService } from './mock/mock.user.service';
     GoogleStrategy,
     JwtStrategy,
     AuthService,
-    {
-      provide: 'IUserService',
-      useClass: MockUserService,
-    },
   ],
   controllers: [AuthController],
 })
