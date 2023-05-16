@@ -8,7 +8,6 @@ import {
   InternalServerErrorException,
   Param,
   ParseIntPipe,
-  ParseUUIDPipe,
   Put,
   Query,
   UnauthorizedException,
@@ -17,15 +16,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import {
   DreamDiaryFeedsResponseDto,
-  DreamDiaryFeedDto,
   ProfileResponseDto,
+  BoardListResponseDto,
 } from 'src/dto/profile.response.dto';
 import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
-import { ProfileUpdatetDto } from 'src/dto/profile.update.request.dto';
+import { ProfileUpdateRequestDto } from 'src/dto/profile.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/user.decorator';
-import { response } from 'express';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -72,7 +70,7 @@ export class ProfileController {
   @Get(':userId/profile-detail')
   @UseGuards(AuthGuard('jwt'))
   async getProfileDetail(
-    @Param('userId') userId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<ProfileDetailResponseDto> {
     try {
       const profileDetailResponseDto: ProfileDetailResponseDto =
@@ -106,13 +104,13 @@ export class ProfileController {
   @Put(':userId/profile')
   @UseGuards(AuthGuard('jwt'))
   async updateProfile(
-    @Param('userId') userId: number,
-    @Body() profileUpdatetDto: ProfileUpdatetDto,
-  ): Promise<ProfileUpdatetDto> {
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() profileUpdateDto: ProfileUpdateRequestDto,
+  ): Promise<ProfileUpdateRequestDto> {
     try {
       const profile = await this.profileService.updateProfile(
         userId,
-        profileUpdatetDto,
+        profileUpdateDto,
       );
 
       return profile;
@@ -142,18 +140,12 @@ export class ProfileController {
   @UseGuards(AuthGuard('jwt'))
   @Get(':userId/followings')
   async getFollowings(
-    //UUID인지 체크
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     //default 1
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('length', new DefaultValuePipe(10), ParseIntPipe) length: number,
   ) {
     try {
-      const followings = await this.profileService.getFollowings(
-        userId,
-        page,
-        length,
-      );
+      const followings = await this.profileService.getFollowings(userId, page);
 
       return followings;
     } catch (err) {
@@ -182,18 +174,11 @@ export class ProfileController {
   @UseGuards(AuthGuard('jwt'))
   @Get(':userId/followers')
   async getFollowers(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('length', new DefaultValuePipe(10), ParseIntPipe) length: number,
-    @Query('nickname', new DefaultValuePipe('')) nickname: string,
   ) {
     try {
-      const followers = await this.profileService.getFollowers(
-        userId,
-        page,
-        length,
-        nickname,
-      );
+      const followers = await this.profileService.getFollowers(userId, page);
 
       return followers;
     } catch (err) {
@@ -216,24 +201,68 @@ export class ProfileController {
     description:
       '유저 프로필에서 공개 범위 및 제한된 공개 범위 꿈 일기 피드를 조회합니다.',
   })
-  @Get('users/:userId/dream-diary/feeds')
+  @Get(':userId/dream-diary/feeds')
   @UseGuards(AuthGuard('jwt'))
   async getDreamDiariesByUserId(
-    @Param('userId') userId: number,
-    @Query('page') currentPage: number,
-    @Query('length') length: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('page', ParseIntPipe) currentPage: number,
     @GetUser() user: { id: number },
   ): Promise<DreamDiaryFeedsResponseDto> {
-    const targetUserId = Number(userId);
-    const authorizedUserId = user.id;
+    try {
+      const responseDto = await this.profileService.getFeeds(
+        userId,
+        currentPage,
+        user.id,
+      );
 
-    const responseDto = await this.profileService.getDreamDiariesByUserId(
-      targetUserId,
-      currentPage,
-      length,
-      authorizedUserId,
-    );
+      return responseDto;
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof UnauthorizedException) {
+        throw new UnauthorizedException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
 
-    return responseDto;
+  @ApiOperation({
+    summary: '유저 프로필에서 작성 게시글 조회',
+    description:
+      '유저 프로필에서 해당 post-type인 공개 범위 게시글을 조회합니다.',
+  })
+  @Get(':userId/:type/boards')
+  @UseGuards(AuthGuard('jwt'))
+  async getBoardList(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('type') postType: string,
+    @Query('page', ParseIntPipe) currentPage: number,
+    @GetUser() user: { id: number },
+  ): Promise<BoardListResponseDto> {
+    try {
+      const responseDto = await this.profileService.getBoardList(
+        userId,
+        postType,
+        currentPage,
+        user.id,
+      );
+
+      return responseDto;
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof UnauthorizedException) {
+        throw new UnauthorizedException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
   }
 }

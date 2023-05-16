@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 /**
  * 유저 프로필 수정 시 요청되는 DTO입니다.
  */
-export class ProfileUpdatetDto {
+export class ProfileUpdateRequestDto {
   @ApiProperty({
     example: 'formData',
     description: '프로필 이미지',

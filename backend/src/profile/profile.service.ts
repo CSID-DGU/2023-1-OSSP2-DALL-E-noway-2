@@ -1,20 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  DreamDiaryFeedDto,
   DreamDiaryFeedsResponseDto,
+  FollowResponseDto,
   ProfileResponseDto,
+  BoardListResponseDto,
 } from 'src/dto/profile.response.dto';
 import { UserDto } from 'src/dto/user.dto';
 import { User } from '../entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
 import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
-import { ProfileUpdatetDto } from 'src/dto/profile.update.request.dto';
-import { FollowingsResponseDto } from 'src/dto/profile.response.dto';
-import { Follow } from 'src/entities/follow.entity';
+import { ProfileUpdateRequestDto } from 'src/dto/profile.request.dto';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
-import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
+import { Follow } from 'src/entities/follow.entity';
+import { Board } from 'src/entities/board.entity';
+import { BoardType } from 'src/enum/board.type';
 /**
  * 프로필 정보와 팔로워, 팔로잉 수를 가져와 dto를 반환하는 service
  */
@@ -25,6 +26,10 @@ export class ProfileService {
     private readonly profileRepository: Repository<User>,
     @InjectRepository(DreamDiary)
     private readonly dreamDiaryRepository: Repository<DreamDiary>,
+    @InjectRepository(Follow)
+    private readonly followRepository: Repository<Follow>,
+    @InjectRepository(Board)
+    private readonly boardRepository: Repository<Board>,
   ) {}
 
   /**
@@ -97,16 +102,16 @@ export class ProfileService {
     responseDto.presentation = user.presentation;
     responseDto.credits = user.credits;
 
-    const queryBuilder = this.profileRepository.createQueryBuilder('user');
+    const queryBuilder = this.followRepository.createQueryBuilder('follow');
 
     const followerCount = await queryBuilder
-      .leftJoin('user.followers', 'followers')
-      .where('followers.followerId = :userId', { userId: userId })
+      .leftJoin('follow.following', 'following')
+      .where('following.userId = :userId', { userId: userId })
       .getCount();
 
     const followingCount = await queryBuilder
-      .leftJoin('user.following', 'following')
-      .where('following.followingId = :userId', { userId: userId })
+      .leftJoin('follow.follower', 'follower')
+      .where('follower.userId = :userId', { userId: userId })
       .getCount();
 
     responseDto.followerCount = followerCount;
@@ -119,13 +124,13 @@ export class ProfileService {
    * 유저의 프로필 정보(이미지,닉네임,자기소개)를
    * 업데이트 하는 메소드
    * @param userId
-   * @param profileUpdateDto
+   * @param profileUpdateRequestDto
    * @returns
    */
   async updateProfile(
     userId: number,
-    profileUpdateDto: ProfileUpdatetDto,
-  ): Promise<ProfileUpdatetDto> {
+    profileUpdateDto: ProfileUpdateRequestDto,
+  ): Promise<ProfileUpdateRequestDto> {
     const user = await this.profileRepository.findOne({
       where: { userId: userId },
     });
@@ -157,17 +162,15 @@ export class ProfileService {
   }
 
   /**
-   * 유저의 팔로워 목록을 가져오는 메소드
+   * 유저의 팔로잉 목록을 반환하는 메소드
    * @param userId
    * @query currentPage
-   * @query length
    * @returns
    */
   async getFollowings(
-    userId: string,
+    userId: number,
     currentPage: number,
-    length: number,
-  ): Promise<FollowingsResponseDto> {
+  ): Promise<FollowResponseDto> {
     //table에서 select할 column
     const select = [
       'follower.userId',
@@ -179,31 +182,40 @@ export class ProfileService {
     //skip할 페이지 수
     const skip = (currentPage - 1) * take;
 
-    //팔로잉 목록을 가져오는 쿼리
-    const followingsQuery = this.profileRepository
-      .createQueryBuilder('user')
-      .innerJoin('Follow', 'follow', 'user.userId = follow.followingId')
-      .innerJoin('User', 'follower', 'follow.followerId = follower.userId')
-      .select(select)
-      .orderBy('follower.nickname', 'ASC')
+    const followersQuery = this.followRepository
+      .createQueryBuilder('follow')
+      .innerJoin('follow.follower', 'follower')
+      .innerJoin('follow.following', 'following')
+      .where('following.userId = :userId', { userId: userId })
+      .addSelect(select)
+      .orderBy('follow.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 
-    const [followings, totalLength] = await followingsQuery.getManyAndCount();
+    // 마지막 페이지일 때 보여질 개수
+    const totalLength = await followersQuery.getCount();
+    const rest = totalLength % 10;
+    const lastTake =
+      currentPage === Math.ceil(totalLength / 10)
+        ? rest > 0
+          ? rest
+          : 10
+        : take;
 
-    //팔로잉 목록을 담은 dto
-    const followingsDto = followings.map((user) => ({
-      userId: user.userId,
-      nickname: user.nickname,
-      imageUrl: user.imageUrl,
+    const followers = await followersQuery.take(lastTake).getMany();
+
+    const followersDto = followers.map((follow) => ({
+      userId: follow.follower.userId,
+      nickname: follow.follower.nickname,
+      imageUrl: follow.follower.imageUrl,
     }));
 
     //다음 페이지, 이전 페이지 존재 여부를 통해 페이지네이션에 사용
     const hasNextPage = totalLength > currentPage * take;
     const hasPrevPage = currentPage > 1;
 
-    const responseDto: FollowingsResponseDto = {
-      followings: followingsDto,
+    const responseDto: FollowResponseDto = {
+      follows: followersDto,
       hasNextPage,
       hasPrevPage,
     };
@@ -212,19 +224,15 @@ export class ProfileService {
   }
 
   /**
-   * 나를 팔로우 하는 사용자들의 목록을 반환하는 메소드
+   * 유저의 팔로워 목록을 반환하는 메소드
    * @param userId
    * @query currentPage
-   * @query length
-   * @query searchNickname
    * @returns
    */
   async getFollowers(
-    userId: string,
+    userId: number,
     currentPage: number,
-    length: number,
-    searchNickname?: string,
-  ): Promise<FollowingsResponseDto> {
+  ): Promise<FollowResponseDto> {
     //table에서 select할 column
     const select = [
       'following.userId',
@@ -236,31 +244,40 @@ export class ProfileService {
     //skip할 페이지 수
     const skip = (currentPage - 1) * take;
 
-    //팔로워 목록을 가져오는 쿼리
-    const followersQuery = this.profileRepository
-      .createQueryBuilder('user')
-      .innerJoin('Follow', 'follow', 'user.userId = follow.followerId')
-      .innerJoin('User', 'following', 'follow.followingId = following.userId')
-      .select(select)
-      .orderBy('follower.nickname', 'ASC')
+    const followingsQuery = this.followRepository
+      .createQueryBuilder('follow')
+      .innerJoin('follow.following', 'following')
+      .innerJoin('follow.follower', 'follower')
+      .where('follower.userId = :userId', { userId: userId })
+      .addSelect(select)
+      .orderBy('follow.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 
-    const [followers, totalLength] = await followersQuery.getManyAndCount();
+    // 마지막 페이지일 때 보여질 개수
+    const totalLength = await followingsQuery.getCount();
+    const rest = totalLength % 10;
+    const lastTake =
+      currentPage === Math.ceil(totalLength / 10)
+        ? rest > 0
+          ? rest
+          : 10
+        : take;
 
-    //팔로워 목록을 담은 dto
-    const followersDto = followers.map((user) => ({
-      userId: user.userId,
-      nickname: user.nickname,
-      imageUrl: user.imageUrl,
+    const followings = await followingsQuery.take(lastTake).getMany();
+
+    const followersDto = followings.map((follow) => ({
+      userId: follow.following.userId,
+      nickname: follow.following.nickname,
+      imageUrl: follow.following.imageUrl,
     }));
 
     //다음 페이지, 이전 페이지 존재 여부를 통해 페이지네이션에 사용
     const hasNextPage = totalLength > currentPage * take;
     const hasPrevPage = currentPage > 1;
 
-    const responseDto: FollowingsResponseDto = {
-      followings: followersDto,
+    const responseDto: FollowResponseDto = {
+      follows: followersDto,
       hasNextPage,
       hasPrevPage,
     };
@@ -270,68 +287,53 @@ export class ProfileService {
 
   /**
    *
-   *프로필에 보일 PUBLIC 및 LIMITED_PUBLIC 범위의 꿈일기를 확인하고 반환하는 메소드
+   *프로필에 보일 PUBLIC 범위의 꿈일기를 확인하고 반환하는 메소드
    * @param userId
-   * @param loggedInUserId
+   * @query currentPage
    * @returns
    */
-  async getDreamDiariesByUserId(
+  async getFeeds(
     userId: number,
-    loggedInUserId: number,
     currentPage: number,
-    length: number = 10, // 한 페이지에 보여질 게시물 수, 기본값은 10
+    loggedInUserId: number,
   ): Promise<DreamDiaryFeedsResponseDto> {
-    const take = length; // 한 페이지에 보여질 게시물 수
-    const skip = (currentPage - 1) * length; // 건너뛸 게시물 수
+    const take = 10; // 한 페이지에 보여질 게시물 수
+    const skip = (currentPage - 1) * take; // 건너뛸 게시물 수
 
     const query = this.dreamDiaryRepository
-      .createQueryBuilder('DreamDiary')
-      .leftJoin('DreamDiary.author', 'author')
-      .where('DreamDiary.userId = :userId', { userId })
-      .andWhere('DreamDiary.disclosureScope = :public', {
-        public: DisclosureScopeType.PUBLIC,
+      .createQueryBuilder('dream_diary')
+      .leftJoinAndSelect('dream_diary.author', 'author')
+      .where('dream_diary.userId = :userId', { userId })
+      .andWhere('dream_diary.disclosureScope = :PUBLIC', {
+        PUBLIC: DisclosureScopeType.PUBLIC,
       });
-
-    query.leftJoinAndSelect(
-      'author.follower',
-      'follower',
-      'follower.userId = :loggedInUserId',
-      {
-        loggedInUserId,
-      },
-    );
 
     query.andWhere(
       new Brackets((q) => {
-        q.where('DreamDiary.disclosureScope = :public', {
-          public: DisclosureScopeType.PUBLIC,
+        q.where('dream_diary.disclosureScope = :PUBLIC', {
+          PUBLIC: DisclosureScopeType.PUBLIC,
         });
-        q.orWhere(
-          'DreamDiary.disclosureScope = :limitedPublic AND (author.userId = :loggedInUserId OR follower.userId = :loggedInUserId)',
-          {
-            limitedPublic: DisclosureScopeType.LIMITED_PUBLIC,
-            loggedInUserId,
-          },
-        );
+        q.orWhere('author.userId = :loggedInUserId', {
+          loggedInUserId,
+        });
       }),
     );
 
-    const [dreamDiaries, totalCount] = await query
-      .orderBy('DreamDiary.createdAt', 'DESC')
+    const totalCount = await query.getCount(); //전체 게시물 수
+    const totalPages = Math.ceil(totalCount / take); // 전체 페이지 수
+    const lastPageRemainder = totalCount % take;
+    const lastPageCount = lastPageRemainder === 0 ? take : lastPageRemainder;
+
+    const dreamDiaries = await query
+      .orderBy('dream_diary.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .select([
-        'DreamDiary.diaryId as diaryId',
-        'DreamDiary.title as title',
-        'DreamDiary.imageUrl as imageUrl',
-        'DreamDiary.viewCount as viewCount',
-        'author.nickname as nickname',
-      ])
-      .getRawMany();
+      .take(currentPage === totalPages ? lastPageCount : take)
+      .getMany();
 
     const dreamDiaryFeeds = dreamDiaries.map((dreamDiary) => {
-      const { diaryId, title, viewCount, nickname, imageUrls } = dreamDiary;
-      const diaryImageUrl = imageUrls ? imageUrls[0] : null;
+      const { diaryId, title, viewCount, author, imageUrl } = dreamDiary;
+      const diaryImageUrl = imageUrl ? imageUrl : null;
+      const { nickname } = author;
 
       return {
         diaryId,
@@ -342,12 +344,95 @@ export class ProfileService {
       };
     });
 
-    const totalPages = Math.ceil(totalCount / length); // 전체 페이지 수
     const hasNextPage = currentPage < totalPages; // 다음 페이지가 있는지 여부
     const hasPrevPage = currentPage > 1; // 이전 페이지가 있는지 여부
 
     return {
       dreamDiaryFeeds,
+      totalLength: totalCount,
+      hasNextPage,
+      hasPrevPage,
+    };
+  }
+  /**
+   *프로필에서 post-type에 따라 조회되는 게시물을 반환하는 메소드
+   * @param userId
+   * @param postType
+   * @param currentPage
+   * @param loggedInUserId
+   * @returns
+   */
+  async getBoardList(
+    userId: number,
+    postType: string,
+    currentPage: number,
+    loggedInUserId: number,
+  ): Promise<BoardListResponseDto> {
+    const take = 10;
+    const skip = (currentPage - 1) * take;
+
+    const query = this.boardRepository
+      .createQueryBuilder('board')
+      .leftJoinAndSelect('board.author', 'author')
+      .where('board.userId = :userId', { userId });
+
+    if (postType === 'FREE') {
+      query.andWhere('board.boardType = :FREE', { FREE: BoardType.FREE });
+    } else if (postType === 'TIP') {
+      query.andWhere('board.boardType = :TIP', { TIP: BoardType.TIP });
+    } else if (postType === 'REQUEST') {
+      query.andWhere('board.boardType = :REQUEST', {
+        REQUEST: BoardType.REQUEST,
+      });
+    } else {
+      throw new BadRequestException('존재하지 않는 게시판입니다.');
+    }
+
+    query.andWhere('board.disclosureScope = :PUBLIC', {
+      PUBLIC: DisclosureScopeType.PUBLIC,
+    });
+
+    query.andWhere(
+      new Brackets((q) => {
+        q.where('board.disclosureScope = :PUBLIC', {
+          PUBLIC: DisclosureScopeType.PUBLIC,
+        }).andWhere('board.boardType = :type', { type: postType });
+        q.orWhere('author.userId = :loggedInUserId', {
+          loggedInUserId,
+        });
+      }),
+    );
+
+    const totalCount = await query.getCount(); //전체 게시글 수
+    const totalPages = Math.ceil(totalCount / take); // 전체 페이지 수
+    const lastPageRemainder = totalCount % take;
+    const lastPageCount = lastPageRemainder === 0 ? take : lastPageRemainder;
+
+    const boards = await query
+      .orderBy('board.createdAt', 'DESC')
+      .skip(skip)
+      .take(currentPage === totalPages ? lastPageCount : take)
+      .getMany();
+
+    const boardList = boards.map((board) => {
+      const { postId, title, viewCount, author, imageUrl } = board;
+      const boardImageUrl = imageUrl ? imageUrl : null;
+      const { nickname } = author;
+
+      return {
+        postId,
+        title,
+        viewCount,
+        nickname,
+        boardImageUrl,
+      };
+    });
+
+    const hasNextPage = currentPage < totalPages; // 다음 페이지가 있는지 여부
+    const hasPrevPage = currentPage > 1; // 이전 페이지가 있는지 여부
+
+    return {
+      boardList,
       totalLength: totalCount,
       hasNextPage,
       hasPrevPage,

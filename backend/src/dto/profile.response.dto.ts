@@ -93,12 +93,12 @@ export class ProfileDetailResponseDto {
 /**
  * 유저의 팔로잉 목록을 반환하는 DTO입니다.
  */
-export class FollowingsResponseDto {
+export class FollowResponseDto {
   @ApiProperty({
     type: [UserDto],
     description: '팔로잉 중인 유저 정보 배열',
   })
-  followings: UserDto[];
+  follows: UserDto[];
 
   @ApiProperty({
     example: true,
@@ -130,8 +130,8 @@ export class DreamDiaryFeedDto {
   title: string;
 
   @ApiProperty({
-    example: '2021-01-01',
-    description: '다이어리 생성 날짜',
+    example: '0',
+    description: '조회수',
   })
   viewCount: number;
 
@@ -161,6 +161,64 @@ export class DreamDiaryFeedsResponseDto {
   @ApiProperty({
     example: 10,
     description: '다이어리 목록의 총 길이',
+  })
+  totalLength: number;
+
+  @ApiProperty({
+    example: true,
+    description: '다음 페이지 존재 여부',
+  })
+  hasNextPage: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: '이전 페이지 존재 여부',
+  })
+  hasPrevPage: boolean;
+}
+
+export class BoardListDto {
+  @ApiProperty({
+    example: 1,
+    description: '게시글 아이디',
+  })
+  postId: number;
+
+  @ApiProperty({
+    example: '제목1',
+    description: '게시글 제목',
+  })
+  title: string;
+
+  @ApiProperty({
+    example: '0',
+    description: '조회수',
+  })
+  viewCount: number;
+
+  @ApiProperty({
+    example: '닉네임1',
+    description: '유저 닉네임',
+  })
+  nickname: string;
+
+  @ApiProperty({
+    example: 'https://example.com',
+    description: '유저 프로필 이미지 URL',
+  })
+  boardImageUrl: string;
+}
+
+export class BoardListResponseDto {
+  @ApiProperty({
+    type: [BoardListDto],
+    description: '게시글 목록',
+  })
+  boardList: BoardListDto[];
+
+  @ApiProperty({
+    example: 10,
+    description: '게시글 목록의 총 길이',
   })
   totalLength: number;
 
