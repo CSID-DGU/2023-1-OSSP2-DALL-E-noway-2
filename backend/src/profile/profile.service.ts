@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DreamDiaryFeedsResponseDto,
@@ -130,35 +134,40 @@ export class ProfileService {
   async updateProfile(
     userId: number,
     profileUpdateDto: ProfileUpdateRequestDto,
+    authorizedUserId: number,
   ): Promise<ProfileUpdateRequestDto> {
-    const user = await this.profileRepository.findOne({
-      where: { userId: userId },
-    });
-    if (profileUpdateDto.image) {
-      const formData = profileUpdateDto.image;
-      const entries = Object.fromEntries(formData.entries());
-      const imageFile = entries['image'];
-      // FormDataEntryValue -> Blob 변환
-      const file: Blob = imageFile as any;
+    if (userId === authorizedUserId) {
+      const user = await this.profileRepository.findOne({
+        where: { userId: userId },
+      });
+      if (profileUpdateDto.image) {
+        const formData = profileUpdateDto.image;
+        const entries = Object.fromEntries(formData.entries());
+        const imageFile = entries['image'];
+        // FormDataEntryValue -> Blob 변환
+        const file: Blob = imageFile as any;
 
-      // File 객체로 변환 된 경우 파일 이름 저장
-      if (file instanceof File) {
-        user.imageUrl = file.name;
+        // File 객체로 변환 된 경우 파일 이름 저장
+        if (file instanceof File) {
+          user.imageUrl = file.name;
+        }
+        // 파일 이름 정보가 없는 경우 임의의 이름 저장
+        else {
+          user.imageUrl = 'unknown';
+        }
       }
-      // 파일 이름 정보가 없는 경우 임의의 이름 저장
-      else {
-        user.imageUrl = 'unknown';
+      if (profileUpdateDto.nickname) {
+        user.nickname = profileUpdateDto.nickname;
       }
-    }
-    if (profileUpdateDto.nickname) {
-      user.nickname = profileUpdateDto.nickname;
-    }
-    if (profileUpdateDto.presentation) {
-      user.presentation = profileUpdateDto.presentation;
-    }
+      if (profileUpdateDto.presentation) {
+        user.presentation = profileUpdateDto.presentation;
+      }
 
-    await this.profileRepository.save(user);
-    return profileUpdateDto;
+      await this.profileRepository.save(user);
+      return profileUpdateDto;
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 
   /**
@@ -295,7 +304,7 @@ export class ProfileService {
   async getFeeds(
     userId: number,
     currentPage: number,
-    loggedInUserId: number,
+    authorizedUserId: number,
   ): Promise<DreamDiaryFeedsResponseDto> {
     const take = 10; // 한 페이지에 보여질 게시물 수
     const skip = (currentPage - 1) * take; // 건너뛸 게시물 수
@@ -313,8 +322,8 @@ export class ProfileService {
         q.where('dream_diary.disclosureScope = :PUBLIC', {
           PUBLIC: DisclosureScopeType.PUBLIC,
         });
-        q.orWhere('author.userId = :loggedInUserId', {
-          loggedInUserId,
+        q.orWhere('author.userId = :authorizedUserId', {
+          authorizedUserId,
         });
       }),
     );
@@ -359,14 +368,14 @@ export class ProfileService {
    * @param userId
    * @param postType
    * @param currentPage
-   * @param loggedInUserId
+   * @param authorizedUserId
    * @returns
    */
   async getBoardList(
     userId: number,
     postType: string,
     currentPage: number,
-    loggedInUserId: number,
+    authorizedUserId: number,
   ): Promise<BoardListResponseDto> {
     const take = 10;
     const skip = (currentPage - 1) * take;
@@ -397,8 +406,8 @@ export class ProfileService {
         q.where('board.disclosureScope = :PUBLIC', {
           PUBLIC: DisclosureScopeType.PUBLIC,
         }).andWhere('board.boardType = :type', { type: postType });
-        q.orWhere('author.userId = :loggedInUserId', {
-          loggedInUserId,
+        q.orWhere('author.userId = :authorizedUserId', {
+          authorizedUserId,
         });
       }),
     );

@@ -106,11 +106,13 @@ export class ProfileController {
   async updateProfile(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() profileUpdateDto: ProfileUpdateRequestDto,
+    @GetUser() user: { id: number },
   ): Promise<ProfileUpdateRequestDto> {
     try {
       const profile = await this.profileService.updateProfile(
         userId,
         profileUpdateDto,
+        user.id,
       );
 
       return profile;
