@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import TypeOrmConfigService from './config/typeorm.config';
+import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import TypeOrmConfigService from './config/typeorm.config';
     }),
     AuthModule,
     UserModule,
+    DreamDiaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
