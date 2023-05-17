@@ -32,7 +32,11 @@ export class UserService {
       },
     });
     if (find) {
-      return find;
+      return {
+        userId: find.userId,
+        nickname: find.nickname,
+        imageUrl: find.imageUrl,
+      };
     }
 
     let provider: ProviderType;
