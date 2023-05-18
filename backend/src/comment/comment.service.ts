@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommentRequestDto } from 'src/dto/comment.request.dto';
+import { UserDto } from 'src/dto/user.dto';
 import { Comment } from 'src/entities/comment.entity';
 import { User } from 'src/entities/user.entity';
-import { FilterType } from 'src/enum/filter.type';
 import { Repository } from 'typeorm';
 import { CommentResponseDto } from '../dto/comment.response.dto';
 
@@ -14,65 +15,60 @@ export class CommentService {
   ) {}
 
   // 조회 기능 / 글의 종류와 글 id를 받아와 해당하는 글의 댓글들을 모두 가져오는 API
-  async getAllComments(filterType: FilterType, id: number): Promise<Comment[]> {
+  async getAllComments(
+    commentRequestDto: CommentRequestDto,
+  ): Promise<CommentResponseDto> {
     const query = this.commentRepository
       .createQueryBuilder('comment')
-      .where('comment.filterType = :filterType', { filterType })
-      .andWhere('comment.id = :id', { id });
-
-    const comments = await query.getMany();
-    return comments;
+      .where('comment.filterType = :filterType', {
+        filterType: commentRequestDto.filterType,
+      })
+      .andWhere('comment.id = :id', { id: commentRequestDto.id });
+    const commentResponseDto = new CommentResponseDto();
+    commentResponseDto.comments = await query.getMany();
+    return commentResponseDto;
   }
 
   // 댓글 생성 기능 / 글의 종류, 글 id, 글 내용을 받아와 해당하는 글에 댓글을 등록하는 API
   async createComment(
-    commentResponseDto: CommentResponseDto,
-    user: User,
+    commentRequestDto: CommentRequestDto,
+    userId: number,
   ): Promise<Comment> {
-    // const comment = new Comment()
-    // comment.id = commentResponseDto.id;
-    // comment.content = commentResponseDto.content;
-    // comment.filterType = commentResponseDto.filterType;
-    // comment.parentCommentId = null;
-    // comment.createdAt = new Date();
-    // comment.userId = user.userId;
-    // return await this.commentRepository.save(comment); //아래와 같이 간략화할 수 있지만 확실하진 않아서 주석처리
-
-    const comment = this.commentRepository.create(commentResponseDto);
+    const comment = this.commentRepository.create(commentRequestDto);
     comment.parentCommentId = null;
     comment.createdAt = new Date();
-    comment.userId = user.userId;
+    comment.userId = userId;
     return await this.commentRepository.save(comment);
   }
 
   // 답글 생성 기능 / 글의 종류, 글 id, 부모 댓글 id를 받아와 답글을 등록하는 API
   async createReply(
-    commentResponseDto: CommentResponseDto,
-    user: User,
+    commentRequestDto: CommentRequestDto,
+    userId: number,
   ): Promise<Comment> {
-    // const replyComment = new Comment();
-    // replyComment.id = commentResponseDto.id;
-    // replyComment.content = commentResponseDto.content;
-    // replyComment.filterType = commentResponseDto.filterType;
-    // replyComment.parentCommentId = commentResponseDto.parentCommentId;
-    // replyComment.createdAt = new Date();
-    // replyComment.userId = user.userId;
-    // return await this.commentRepository.save(replyComment);//아래와 같이 간략화할 수 있지만 확실하진 않아서 주석처리
-
-    const replyComment = this.commentRepository.create(commentResponseDto);
+    const replyComment = this.commentRepository.create(commentRequestDto);
     replyComment.createdAt = new Date();
-    replyComment.userId = user.userId;
+    replyComment.userId = userId;
 
     return await this.commentRepository.save(replyComment);
   }
 
   // 답글 삭제 기능 / 글의 종류와 글 id를 받아와 해당하는 댓글을 삭제하는 API
-  async deleteComment(commentId: number) {
-    const result = await this.commentRepository.delete(commentId);
+  async deleteComment(commentId: number, userId: number) {
+    // commentId와 user.userId가 모두 일치하는 레코드를 삭제
+    const result = await this.commentRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Comment)
+      .where('commentId = :commentId', { commentId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
+    console.log(result);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Can't find CommentId with id ${commentId}`);
+      throw new NotFoundException(
+        `Can't find CommentId with id ${commentId} and userId ${userId}`,
+      );
     }
-    //console.log('result', result);
   }
 }
