@@ -5,10 +5,13 @@ import { DreamDiaryService } from './dreamdiary.service';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { DreamDiaryController } from './dreamdiary.controller';
 import { User } from 'src/entities/user.entity';
-
+import { DiaryCategory } from 'src/entities/diary.category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DreamDiary,User]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([DreamDiary, User, DiaryCategory]),
+    AuthModule,
+  ],
   controllers: [DreamDiaryController],
   providers: [DreamDiaryService],
 })

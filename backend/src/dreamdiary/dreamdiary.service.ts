@@ -7,6 +7,7 @@ import {
 import { DreamDiaryRequestDto } from 'src/dto/dreamdiary.request.dto';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { UserDto } from 'src/dto/user.dto';
+import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
@@ -24,12 +25,14 @@ export class DreamDiaryService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(DreamDiary)
     private readonly dreamDiaryRepository: Repository<DreamDiary>,
+    @InjectRepository(DiaryCategory)
+    private readonly diaryCategoryRepository: Repository<DiaryCategory>,
   ) {}
 
   async getAllFeeds(
     searchType: SearchType,
     currentPage: number,
-    length: number = 12,
+    length = 12,
     keyWord: string,
   ): Promise<DreamDiaryFeedsResponseDto> {
     const feedQuery = this.dreamDiaryRepository
@@ -46,21 +49,21 @@ export class DreamDiaryService {
       .take(length);
 
     //if로 searchType을 기준으로 받는 쿼리를 다르게 해야함 ex)닉네임에 경우 NICKNAME
-    if (searchType === 'NONE') {
+    if (searchType === SearchType.NONE) {
       feedQuery.where(
         'DreamDiary.title =:keyWord OR DreamDiary.content =:keyWord OR author.nickname =:keyWord',
         { keyWord: `${keyWord}` },
       );
-    } else if (searchType === 'TITLE') {
+    } else if (searchType === SearchType.TITLE) {
       feedQuery.where('DreamDiary.title =:keyWord', { keyWord: `${keyWord}` });
-    } else if (searchType === 'CONTENT') {
+    } else if (searchType === SearchType.CONTENT) {
       feedQuery.where('DreamDiary.content =:keyWord', {
         keyWord: `${keyWord}`,
       });
-    } else if (searchType === 'NICKNAME') {
+    } else if (searchType === SearchType.NICKNAME) {
       feedQuery.where('author.nickname =:keyWord', { keyWord: `${keyWord}` });
     } else {
-      throw new BadRequestException('존재하지 않는 게시판입니다.');
+      throw new BadRequestException('검색결과가 없습니다.');
     }
 
     const [dreamDiaryFeed, totalLength] = await feedQuery.getManyAndCount();
@@ -84,22 +87,32 @@ export class DreamDiaryService {
   async getFeedbyDiaryId(diaryId: number): Promise<DreamDiaryResponseDto> {
     const dreamDiary = await this.dreamDiaryRepository.findOne({
       where: { diaryId: diaryId },
+      relations: ['author'],
     });
-    //
-    const userDto = new UserDto();
-    userDto.userId = dreamDiary.author.userId;
-    userDto.nickname = dreamDiary.author.nickname;
-    userDto.imageUrl = dreamDiary.author.imageUrl;
+    const getCategory = await this.diaryCategoryRepository
+      .createQueryBuilder('DiaryCategory')
+      .leftJoinAndSelect('diaryCategory.category', 'category')
+      .where('diaryCategory.diary_id = :diaryId', { diaryId })
+      .select('category.category_name', 'categoryName')
+      .getRawMany();
+    // const userDto = new UserDto();
+    // userDto.userId = dreamDiary.author.userId; //
+    // userDto.nickname = dreamDiary.author.nickname;
+    // userDto.imageUrl = dreamDiary.author.imageUrl;
 
     const responseDto = new DreamDiaryResponseDto();
 
     responseDto.diaryId = dreamDiary.diaryId;
     responseDto.title = dreamDiary.title;
     responseDto.content = dreamDiary.content;
-    //responseDto.category = dreamDiary.diaryCategories.categoryName;
+    responseDto.category = getCategory; //category값 가지고 오는 방법?
     responseDto.dreamScore = dreamDiary.dreamScore;
     responseDto.viewCount = dreamDiary.viewCount;
-    responseDto.user = userDto;
+    responseDto.user = {
+      userId: dreamDiary.author.userId,
+      nickname: dreamDiary.author.nickname,
+      imageUrl: dreamDiary.author.imageUrl,
+    };
     responseDto.createdAt = dreamDiary.createdAt;
     responseDto.diaryImageUrl = dreamDiary.imageUrl;
     responseDto.disclosureScope = dreamDiary.disclosureScope;
@@ -111,12 +124,14 @@ export class DreamDiaryService {
     return responseDto;
   }
 
-  async creatDreamDiary(
-    dreamDiaryRequestDto: DreamDiaryRequestDto,
-  ): Promise<DreamDiary> {
-    const { title, category, dreamScore, image, disclosureScope, content } =
-      dreamDiaryRequestDto;
-    // formdata부분 검색해보기
-    //.create 사용해서 새 인스턴스 생성하고 .save 저장 return .create로 생성한 변수 반환
-  }
+  // async creatDreamDiary(
+  //   dreamDiaryRequestDto: DreamDiaryRequestDto,
+  // ): Promise<DreamDiary> {
+  //   const { title, category, dreamScore, image, disclosureScope, content } =
+  //     dreamDiaryRequestDto;
+  //   // formdata부분 검색해보기
+  //   //.create 사용해서 새 인스턴스 생성하고 .save 저장 return .create로 생성한 변수 반환
+
+  //   //return;
+  // }
 }
