@@ -23,7 +23,7 @@ import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
 import { ProfileUpdateRequestDto } from 'src/dto/profile.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetUser } from 'src/decorator/user.decorator';
+import { GetUser, UserDto } from 'src/decorator/user.decorator';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -104,15 +104,15 @@ export class ProfileController {
   @Put(':userId/profile')
   @UseGuards(AuthGuard('jwt'))
   async updateProfile(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe) targetUserId: number,
     @Body() profileUpdateDto: ProfileUpdateRequestDto,
-    @GetUser() user: { id: number },
+    @GetUser() user: UserDto,
   ): Promise<ProfileUpdateRequestDto> {
     try {
       const profile = await this.profileService.updateProfile(
-        userId,
+        targetUserId,
         profileUpdateDto,
-        user.id,
+        user.userId,
       );
 
       return profile;
@@ -208,13 +208,13 @@ export class ProfileController {
   async getDreamDiariesByUserId(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('page', ParseIntPipe) currentPage: number,
-    @GetUser() user: { id: number },
+    @GetUser() user: UserDto,
   ): Promise<DreamDiaryFeedsResponseDto> {
     try {
       const responseDto = await this.profileService.getFeeds(
         userId,
         currentPage,
-        user.id,
+        user.userId,
       );
 
       return responseDto;
@@ -243,14 +243,14 @@ export class ProfileController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('type') postType: string,
     @Query('page', ParseIntPipe) currentPage: number,
-    @GetUser() user: { id: number },
+    @GetUser() user: UserDto,
   ): Promise<BoardListResponseDto> {
     try {
       const responseDto = await this.profileService.getBoardList(
         userId,
         postType,
         currentPage,
-        user.id,
+        user.userId,
       );
 
       return responseDto;
