@@ -10,20 +10,18 @@ import {
   ParseIntPipe,
   Put,
   Query,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  DreamDiaryFeedsResponseDto,
-  ProfileResponseDto,
-  BoardListResponseDto,
-} from 'src/dto/profile.response.dto';
-import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
+import {  ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
-import { ProfileUpdateRequestDto } from 'src/dto/profile.request.dto';
+import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetUser, UserDto } from 'src/decorator/user.decorator';
+import { GetUser } from 'src/decorator/user.decorator';
+import { UserDto } from 'src/dto/user.dto';
+import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
+import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
+import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -48,10 +46,6 @@ export class ProfileController {
       //요청 파라미터가 잘못된 경우
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
-      }
-      //로그인하지 않은 사용자
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
       }
       //존재하지 않는 유저(탈퇴한 유저)
       if (err instanceof ForbiddenException) {
@@ -82,10 +76,6 @@ export class ProfileController {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
       }
-      //로그인하지 않은 사용자
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
-      }
       //존재하지 않는 유저(탈퇴한 유저)
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);
@@ -104,13 +94,11 @@ export class ProfileController {
   @Put(':userId/profile')
   @UseGuards(AuthGuard('jwt'))
   async updateProfile(
-    @Param('userId', ParseIntPipe) targetUserId: number,
     @Body() profileUpdateDto: ProfileUpdateRequestDto,
     @GetUser() user: UserDto,
   ): Promise<ProfileUpdateRequestDto> {
     try {
       const profile = await this.profileService.updateProfile(
-        targetUserId,
         profileUpdateDto,
         user.userId,
       );
@@ -120,10 +108,6 @@ export class ProfileController {
       //요청 파라미터가 잘못된 경우
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
-      }
-      //로그인하지 않은 사용자
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
       }
       //존재하지 않는 유저(탈퇴한 유저)
       if (err instanceof ForbiddenException) {
@@ -155,10 +139,6 @@ export class ProfileController {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
       }
-      //로그인하지 않은 사용자
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
-      }
       //존재하지 않는 유저(탈퇴한 유저)
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);
@@ -187,9 +167,6 @@ export class ProfileController {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
       }
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
-      }
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);
       }
@@ -209,7 +186,7 @@ export class ProfileController {
     @Param('userId', ParseIntPipe) userId: number,
     @Query('page', ParseIntPipe) currentPage: number,
     @GetUser() user: UserDto,
-  ): Promise<DreamDiaryFeedsResponseDto> {
+  ): Promise<DreamDiaryFeedResponseDto> {
     try {
       const responseDto = await this.profileService.getFeeds(
         userId,
@@ -221,9 +198,6 @@ export class ProfileController {
     } catch (err) {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
-      }
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
       }
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);
@@ -257,9 +231,6 @@ export class ProfileController {
     } catch (err) {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
-      }
-      if (err instanceof UnauthorizedException) {
-        throw new UnauthorizedException(err.message);
       }
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);

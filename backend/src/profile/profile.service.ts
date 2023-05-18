@@ -1,25 +1,24 @@
 import {
   BadRequestException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DreamDiaryFeedsResponseDto,
-  FollowResponseDto,
-  ProfileResponseDto,
-  BoardListResponseDto,
-} from 'src/dto/profile.response.dto';
+import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { UserDto } from 'src/dto/user.dto';
 import { User } from '../entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
-import { ProfileDetailResponseDto } from 'src/dto/profile.response.dto';
-import { ProfileUpdateRequestDto } from 'src/dto/profile.request.dto';
+import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { Follow } from 'src/entities/follow.entity';
 import { Board } from 'src/entities/board.entity';
 import { BoardType } from 'src/enum/board.type';
+import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
+import { FollowResponseDto } from 'src/dto/profile.follow.response.dto';
+import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
+import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
+import { v1 as uuid } from 'uuid';
+
 /**
  * 프로필 정보와 팔로워, 팔로잉 수를 가져와 dto를 반환하는 service
  */
@@ -132,13 +131,11 @@ export class ProfileService {
    * @returns
    */
   async updateProfile(
-    userId: number,
     profileUpdateDto: ProfileUpdateRequestDto,
     authorizedUserId: number,
   ): Promise<ProfileUpdateRequestDto> {
-    if (userId === authorizedUserId) {
       const user = await this.profileRepository.findOne({
-        where: { userId: userId },
+        where: { userId: authorizedUserId },
       });
       if (profileUpdateDto.image) {
         const formData = profileUpdateDto.image;
@@ -153,7 +150,7 @@ export class ProfileService {
         }
         // 파일 이름 정보가 없는 경우 임의의 이름 저장
         else {
-          user.imageUrl = 'unknown';
+          user.imageUrl = uuid();
         }
       }
       if (profileUpdateDto.nickname) {
@@ -165,9 +162,7 @@ export class ProfileService {
 
       await this.profileRepository.save(user);
       return profileUpdateDto;
-    } else {
-      throw new UnauthorizedException();
-    }
+
   }
 
   /**
@@ -225,6 +220,7 @@ export class ProfileService {
 
     const responseDto: FollowResponseDto = {
       follows: followersDto,
+      totalLength,
       hasNextPage,
       hasPrevPage,
     };
@@ -287,6 +283,7 @@ export class ProfileService {
 
     const responseDto: FollowResponseDto = {
       follows: followersDto,
+      totalLength,
       hasNextPage,
       hasPrevPage,
     };
@@ -305,7 +302,7 @@ export class ProfileService {
     userId: number,
     currentPage: number,
     authorizedUserId: number,
-  ): Promise<DreamDiaryFeedsResponseDto> {
+  ): Promise<DreamDiaryFeedResponseDto> {
     const take = 10; // 한 페이지에 보여질 게시물 수
     const skip = (currentPage - 1) * take; // 건너뛸 게시물 수
 
@@ -448,3 +445,4 @@ export class ProfileService {
     };
   }
 }
+
