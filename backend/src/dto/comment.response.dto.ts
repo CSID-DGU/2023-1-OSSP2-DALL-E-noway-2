@@ -1,11 +1,5 @@
-import { FilterType } from "src/enum/filter.type";
+import { Comment } from 'src/entities/comment.entity';
 
 export class CommentResponseDto {
-    commentId: number;
-    id: number;
-    content: string;
-    filterType: FilterType
-    parentCommentId: number;
-    createdAt: Date;
-    userId: number;
+  comments: Comment[];
 }
