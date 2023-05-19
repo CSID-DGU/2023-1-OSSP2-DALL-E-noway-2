@@ -1,57 +1,74 @@
 <script setup lang="ts">
-import GoogleLoginButton from '@/components/login/GoogleLoginButton.vue';
-import KakaoLoginButton from '@/components/login/KakaoLoginButton.vue';
-import NaverLoginButton from '@/components/login/NaverLoginButton.vue';
 import { ref } from 'vue';
+
+const login = (socialType: String) => {
+  window.location.replace(
+    import.meta.env.VITE_BE_HOST + `/api/auth/${socialType}/login`,
+  );
+};
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="social-login-wrap">
-      <NaverLoginButton class="social-login-button" />
-      <KakaoLoginButton class="social-login-button" />
-      <GoogleLoginButton class="social-login-button" />
+  <div class="wrap">
+    <h1 class="explain">Dream Vision 시작하기</h1>
+    <div class="space-y-4">
+      <button class="social-button social-button-naver" @click="login('naver')">
+        <img
+          src="@/assets/images/naver-login.svg"
+          alt="네이버 아이콘"
+          class="social-button-icon"
+        />네이버 로그인
+      </button>
+      <button class="social-button social-button-kakao" @click="login('kakao')">
+        <img
+          src="@/assets/images/kakao-login.svg"
+          alt="카카오 아이콘"
+          class="social-button-icon"
+        />
+        카카오 로그인
+      </button>
+      <button
+        class="social-button social-button-google"
+        @click="login('google')"
+      >
+        <img
+          src="@/assets/images/google-login.svg"
+          alt="구글 아이콘"
+          class="social-button-icon"
+        />
+        구글 로그인
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  background-color: #ffffff;
+.wrap {
+  z-index: 1;
+  @apply flex flex-col items-center justify-center h-screen;
 }
 
-.social-login-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.explain {
+  @apply text-3xl font-bold mb-6 text-white;
 }
 
-.social-login-button {
-  width: 80%;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  color: #ffffff;
+.social-button {
+  @apply w-64 text-black font-bold py-2 px-4 rounded flex items-center justify-center;
 }
 
-/* 네이버 로그인 버튼 스타일 */
-.social-login-button.naver {
-  background-color: #1ec800;
+.social-button-naver {
+  @apply bg-[#03C75A] hover:bg-[#02B14E];
 }
 
-/* 카카오 로그인 버튼 스타일 */
-.social-login-button.kakao {
-  background-color: #fee500;
+.social-button-kakao {
+  @apply bg-[#FFE812] hover:bg-[#FFD900];
 }
 
-/* 구글 로그인 버튼 스타일 */
-.social-login-button.google {
-  background-color: #4285f4;
+.social-button-google {
+  @apply bg-white hover:bg-[#BDBDBD];
+}
+
+.social-button-icon {
+  @apply h-4 w-4 mr-4;
 }
 </style>
