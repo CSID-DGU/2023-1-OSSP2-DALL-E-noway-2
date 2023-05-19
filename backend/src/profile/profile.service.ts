@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { UserDto } from 'src/dto/user.dto';
@@ -134,46 +131,47 @@ export class ProfileService {
     profileUpdateDto: ProfileUpdateRequestDto,
     authorizedUserId: number,
   ): Promise<ProfileUpdateRequestDto> {
-      const user = await this.profileRepository.findOne({
-        where: { userId: authorizedUserId },
-      });
-      if (profileUpdateDto.image) {
-        const formData = profileUpdateDto.image;
-        const entries = Object.fromEntries(formData.entries());
-        const imageFile = entries['image'];
-        // FormDataEntryValue -> Blob 변환
-        const file: Blob = imageFile as any;
+    const user = await this.profileRepository.findOne({
+      where: { userId: authorizedUserId },
+    });
+    if (profileUpdateDto.image) {
+      const formData = profileUpdateDto.image;
+      const entries = Object.fromEntries(formData.entries());
+      const imageFile = entries['image'];
+      // FormDataEntryValue -> Blob 변환
+      const file: Blob = imageFile as any;
 
-        // File 객체로 변환 된 경우 파일 이름 저장
-        if (file instanceof File) {
-          user.imageUrl = file.name;
-        }
-        // 파일 이름 정보가 없는 경우 임의의 이름 저장
-        else {
-          user.imageUrl = uuid();
-        }
+      // File 객체로 변환 된 경우 파일 이름 저장
+      if (file instanceof File) {
+        user.imageUrl = file.name;
       }
-      if (profileUpdateDto.nickname) {
-        user.nickname = profileUpdateDto.nickname;
+      // 파일 이름 정보가 없는 경우 임의의 이름 저장
+      else {
+        user.imageUrl = uuid();
       }
-      if (profileUpdateDto.presentation) {
-        user.presentation = profileUpdateDto.presentation;
-      }
+    }
+    if (profileUpdateDto.nickname) {
+      user.nickname = profileUpdateDto.nickname;
+    }
+    if (profileUpdateDto.presentation) {
+      user.presentation = profileUpdateDto.presentation;
+    }
 
-      await this.profileRepository.save(user);
-      return profileUpdateDto;
-
+    await this.profileRepository.save(user);
+    return profileUpdateDto;
   }
 
   /**
    * 유저의 팔로잉 목록을 반환하는 메소드
    * @param userId
    * @query currentPage
+   * @query length
    * @returns
    */
   async getFollowings(
     userId: number,
     currentPage: number,
+    length: number,
   ): Promise<FollowResponseDto> {
     //table에서 select할 column
     const select = [
@@ -182,7 +180,7 @@ export class ProfileService {
       'follower.imageUrl',
     ];
     //페이지네이션
-    const take = 10;
+    const take = length;
     //skip할 페이지 수
     const skip = (currentPage - 1) * take;
 
@@ -198,12 +196,12 @@ export class ProfileService {
 
     // 마지막 페이지일 때 보여질 개수
     const totalLength = await followersQuery.getCount();
-    const rest = totalLength % 10;
+    const rest = totalLength % take;
     const lastTake =
-      currentPage === Math.ceil(totalLength / 10)
+      currentPage === Math.ceil(totalLength / take)
         ? rest > 0
           ? rest
-          : 10
+          : length
         : take;
 
     const followers = await followersQuery.take(lastTake).getMany();
@@ -214,15 +212,9 @@ export class ProfileService {
       imageUrl: follow.follower.imageUrl,
     }));
 
-    //다음 페이지, 이전 페이지 존재 여부를 통해 페이지네이션에 사용
-    const hasNextPage = totalLength > currentPage * take;
-    const hasPrevPage = currentPage > 1;
-
     const responseDto: FollowResponseDto = {
       follows: followersDto,
       totalLength,
-      hasNextPage,
-      hasPrevPage,
     };
 
     return responseDto;
@@ -232,11 +224,13 @@ export class ProfileService {
    * 유저의 팔로워 목록을 반환하는 메소드
    * @param userId
    * @query currentPage
+   * @query length
    * @returns
    */
   async getFollowers(
     userId: number,
     currentPage: number,
+    length: number,
   ): Promise<FollowResponseDto> {
     //table에서 select할 column
     const select = [
@@ -245,7 +239,7 @@ export class ProfileService {
       'following.imageUrl',
     ];
     //페이지네이션
-    const take = 10;
+    const take = length;
     //skip할 페이지 수
     const skip = (currentPage - 1) * take;
 
@@ -261,12 +255,12 @@ export class ProfileService {
 
     // 마지막 페이지일 때 보여질 개수
     const totalLength = await followingsQuery.getCount();
-    const rest = totalLength % 10;
+    const rest = totalLength % take;
     const lastTake =
-      currentPage === Math.ceil(totalLength / 10)
+      currentPage === Math.ceil(totalLength / take)
         ? rest > 0
           ? rest
-          : 10
+          : take
         : take;
 
     const followings = await followingsQuery.take(lastTake).getMany();
@@ -277,15 +271,9 @@ export class ProfileService {
       imageUrl: follow.following.imageUrl,
     }));
 
-    //다음 페이지, 이전 페이지 존재 여부를 통해 페이지네이션에 사용
-    const hasNextPage = totalLength > currentPage * take;
-    const hasPrevPage = currentPage > 1;
-
     const responseDto: FollowResponseDto = {
       follows: followersDto,
       totalLength,
-      hasNextPage,
-      hasPrevPage,
     };
 
     return responseDto;
@@ -296,14 +284,16 @@ export class ProfileService {
    *프로필에 보일 PUBLIC 범위의 꿈일기를 확인하고 반환하는 메소드
    * @param userId
    * @query currentPage
+   * @query length
    * @returns
    */
   async getFeeds(
     userId: number,
     currentPage: number,
+    length: number,
     authorizedUserId: number,
   ): Promise<DreamDiaryFeedResponseDto> {
-    const take = 10; // 한 페이지에 보여질 게시물 수
+    const take = length; // 한 페이지에 보여질 게시물 수
     const skip = (currentPage - 1) * take; // 건너뛸 게시물 수
 
     const query = this.dreamDiaryRepository
@@ -350,21 +340,17 @@ export class ProfileService {
       };
     });
 
-    const hasNextPage = currentPage < totalPages; // 다음 페이지가 있는지 여부
-    const hasPrevPage = currentPage > 1; // 이전 페이지가 있는지 여부
-
     return {
       dreamDiaryFeeds,
       totalLength: totalCount,
-      hasNextPage,
-      hasPrevPage,
     };
   }
   /**
    *프로필에서 post-type에 따라 조회되는 게시물을 반환하는 메소드
    * @param userId
    * @param postType
-   * @param currentPage
+   * @query currentPage
+   * @query length
    * @param authorizedUserId
    * @returns
    */
@@ -372,9 +358,10 @@ export class ProfileService {
     userId: number,
     postType: string,
     currentPage: number,
+    length: number,
     authorizedUserId: number,
   ): Promise<BoardListResponseDto> {
-    const take = 10;
+    const take = length;
     const skip = (currentPage - 1) * take;
 
     const query = this.boardRepository
@@ -434,15 +421,9 @@ export class ProfileService {
       };
     });
 
-    const hasNextPage = currentPage < totalPages; // 다음 페이지가 있는지 여부
-    const hasPrevPage = currentPage > 1; // 이전 페이지가 있는지 여부
-
     return {
       boardList,
       totalLength: totalCount,
-      hasNextPage,
-      hasPrevPage,
     };
   }
 }
-

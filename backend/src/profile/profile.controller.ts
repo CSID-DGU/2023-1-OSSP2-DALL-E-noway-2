@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {  ProfileResponseDto } from 'src/dto/profile.response.dto';
+import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
 import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -129,9 +129,14 @@ export class ProfileController {
     @Param('userId', ParseIntPipe) userId: number,
     //default 1
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('length', ParseIntPipe) length: number,
   ) {
     try {
-      const followings = await this.profileService.getFollowings(userId, page);
+      const followings = await this.profileService.getFollowings(
+        userId,
+        page,
+        length,
+      );
 
       return followings;
     } catch (err) {
@@ -158,9 +163,14 @@ export class ProfileController {
   async getFollowers(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('length', ParseIntPipe) length: number,
   ) {
     try {
-      const followers = await this.profileService.getFollowers(userId, page);
+      const followers = await this.profileService.getFollowers(
+        userId,
+        page,
+        length,
+      );
 
       return followers;
     } catch (err) {
@@ -185,12 +195,14 @@ export class ProfileController {
   async getDreamDiariesByUserId(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('page', ParseIntPipe) currentPage: number,
+    @Query('length', ParseIntPipe) length: number,
     @GetUser() user: UserDto,
   ): Promise<DreamDiaryFeedResponseDto> {
     try {
       const responseDto = await this.profileService.getFeeds(
         userId,
         currentPage,
+        length,
         user.userId,
       );
 
@@ -217,6 +229,7 @@ export class ProfileController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('type') postType: string,
     @Query('page', ParseIntPipe) currentPage: number,
+    @Query('length', ParseIntPipe) length: number,
     @GetUser() user: UserDto,
   ): Promise<BoardListResponseDto> {
     try {
@@ -224,6 +237,7 @@ export class ProfileController {
         userId,
         postType,
         currentPage,
+        length,
         user.userId,
       );
 
