@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentRequestDto } from 'src/dto/comment.request.dto';
-import { UserDto } from 'src/dto/user.dto';
 import { Comment } from 'src/entities/comment.entity';
-import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CommentResponseDto } from '../dto/comment.response.dto';
 
@@ -63,7 +61,6 @@ export class CommentService {
       .where('commentId = :commentId', { commentId })
       .andWhere('userId = :userId', { userId })
       .execute();
-    console.log(result);
 
     if (result.affected === 0) {
       throw new NotFoundException(
