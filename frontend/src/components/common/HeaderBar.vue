@@ -1,7 +1,4 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <header class="wrap">

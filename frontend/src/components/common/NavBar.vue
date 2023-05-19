@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import IconHome from '@/components/icons/IconHome.vue';
 import IconGlobal from '@/components/icons/IconGlobal.vue';
 import IconCalendar from '@/components/icons/IconCalendar.vue';

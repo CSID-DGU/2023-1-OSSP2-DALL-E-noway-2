@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
 const login = (socialType: String) => {
   window.location.replace(
     import.meta.env.VITE_BE_HOST + `/api/auth/${socialType}/login`,
