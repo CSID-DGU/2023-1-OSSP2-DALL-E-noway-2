@@ -70,13 +70,23 @@ export class DreamDiaryController {
   //@UseGuards(AuthGuard('jwt'))
   @Get('dreamdiary/:diary-id')
   async getFeedbyDiaryId(
-    @Param('diaryId', ParseIntPipe) diaryId: number,
+    @Param('diary-id', ParseIntPipe) diaryId: number,
     //@GetUser() user:{id: number},
   ) {
-    const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
-      diaryId,
-    );
+    try {
+      const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
+        diaryId,
+      );
 
-    return dreamDiaryfeed;
+      return dreamDiaryfeed;
+    } catch (err) {
+      //존재하지 않는 유저(탈퇴한 유저)
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
   }
 }

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DreamDiaryFeedDto,
@@ -95,10 +99,18 @@ export class DreamDiaryService {
       .where('diaryCategory.diary_id = :diaryId', { diaryId })
       .select('category.category_name', 'categoryName')
       .getRawMany();
-    // const userDto = new UserDto();
+    // const userDto = new UserDto(); 이거로 Dto(ex값을 넣어서 swagger에서 test를 할 수 있지않을까..?)
     // userDto.userId = dreamDiary.author.userId; //
     // userDto.nickname = dreamDiary.author.nickname;
     // userDto.imageUrl = dreamDiary.author.imageUrl;
+
+    if (!dreamDiary) {
+      throw new NotFoundException('삭제된 일기입니다.');
+    }
+
+    dreamDiary.viewCount += 1;
+
+    await this.dreamDiaryRepository.save(dreamDiary);
 
     const responseDto = new DreamDiaryResponseDto();
 
@@ -116,10 +128,6 @@ export class DreamDiaryService {
     responseDto.createdAt = dreamDiary.createdAt;
     responseDto.diaryImageUrl = dreamDiary.imageUrl;
     responseDto.disclosureScope = dreamDiary.disclosureScope;
-
-    //disclosurScope 부분 처리 흠.. 어케하지... 권한부여 변수만들어서??
-
-    //만약 작성자일 경우 삭제,수정 가능 버튼
 
     return responseDto;
   }

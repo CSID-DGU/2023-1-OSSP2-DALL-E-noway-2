@@ -4,7 +4,7 @@ export class DreamDiaryRequestDto {
   title: string;
   category: string;
   dreamScore: number;
-  image?: FormData;
+  image?: Express.Multer.File;
   disclosureScope: DisclosureScopeType;
-  content: string;
+  content: Text;
 }
