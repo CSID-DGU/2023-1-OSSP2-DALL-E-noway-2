@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   DefaultValuePipe,
   ForbiddenException,
@@ -8,6 +9,7 @@ import {
   Param,
   ParseEnumPipe,
   ParseIntPipe,
+  Post,
   Query,
   UnauthorizedException,
   UseGuards,
@@ -22,6 +24,9 @@ import {
 } from '@nestjs/swagger';
 import { SearchType } from 'src/enum/search.type';
 import { SortType } from 'src/enum/sort.type';
+import { DreamDiaryCreateRequestDto } from 'src/dto/dreamdiary.create.request.dto';
+import { User } from 'src/decorator/user.decorator';
+import { UserDto } from 'src/dto/user.dto';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
@@ -34,7 +39,7 @@ export class DreamDiaryController {
   })
   @ApiCreatedResponse({ description: '꿈일기 피드 목록을 조회합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
-  //@UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @Get('dream-diary/feeds/:search-type/:sort-type/')
   async getDreamDiaryFeeds(
     @Param('search-type') searchType: SearchType,
@@ -67,12 +72,9 @@ export class DreamDiaryController {
   })
   @ApiCreatedResponse({ description: '꿈일기 피드를 조회합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
-  //@UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @Get('dreamdiary/:diary-id')
-  async getFeedbyDiaryId(
-    @Param('diary-id', ParseIntPipe) diaryId: number,
-    //@GetUser() user:{id: number},
-  ) {
+  async getFeedbyDiaryId(@Param('diary-id', ParseIntPipe) diaryId: number) {
     try {
       const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
         diaryId,
@@ -85,6 +87,29 @@ export class DreamDiaryController {
         throw new ForbiddenException(err.message);
       }
 
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 생성',
+    description: '꿈일기 생성합니다.',
+  })
+  @ApiCreatedResponse({ description: '꿈일기 생성합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  async createDreamDiary(
+    @Body() dreamDiaryRequestDto: DreamDiaryCreateRequestDto,
+    @User() user: UserDto,
+  ) {
+    try {
+      return this.dreamdiaryService.creatDreamDiary(
+        dreamDiaryRequestDto,
+        user.userId,
+      );
+    } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);
     }

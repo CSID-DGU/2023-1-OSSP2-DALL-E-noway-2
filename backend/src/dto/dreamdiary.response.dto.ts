@@ -1,7 +1,6 @@
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { UserDto } from './user.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/decorator/user.decorator';
 
 export class DreamDiaryResponseDto {
   @ApiProperty({

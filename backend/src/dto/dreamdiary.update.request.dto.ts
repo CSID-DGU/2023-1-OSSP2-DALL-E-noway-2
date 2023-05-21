@@ -1,10 +1,10 @@
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 
-export class DreamDiaryRequestDto {
+export class DreamDiaryUpdateRequestDto {
   title: string;
   category: string;
   dreamScore: number;
-  image?: Express.Multer.File;
+  image?: FormData;
   disclosureScope: DisclosureScopeType;
-  content: Text;
+  content: string;
 }
