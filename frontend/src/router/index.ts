@@ -1,16 +1,18 @@
+import { getCookie } from '@/api/cookie';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // Route for dream diary
+    // Route for login
     {
       path: '/',
-      name: 'home',
-      redirect: '/dream-diary-feed',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
     },
+    // Route for dream diary
     {
-      path: '/dream-diary-feed',
+      path: '/home',
       name: 'dream-diary-feed',
       component: () => import('@/views/DreamDiaryFeedView.vue'),
     },
@@ -30,12 +32,6 @@ const router = createRouter({
           component: () => import('@/views/CommentView.vue'),
         },
       ],
-    },
-    // Route for login
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
     },
     // Route for board
     {
@@ -94,6 +90,16 @@ const router = createRouter({
       component: () => import('@/views/NotFoundView.vue'),
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const token = getCookie();
+  if (to.name !== 'login' && !token) {
+    next({ name: 'login' });
+    alert('로그인 정보가 유효하지 않습니다.\n다시 로그인해주세요.');
+  } else {
+    next();
+  }
 });
 
 export default router;
