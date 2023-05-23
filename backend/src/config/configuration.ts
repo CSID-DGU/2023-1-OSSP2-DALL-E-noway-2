@@ -31,4 +31,9 @@ export default () => ({
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_DATABASE,
   },
+  openai: {
+    host: process.env.OPENAI_HOST,
+    organizationID: process.env.OPENAI_ORGANIZATION_ID,
+    apiKey: process.env.OPENAI_API_KEY,
+  },
 });
