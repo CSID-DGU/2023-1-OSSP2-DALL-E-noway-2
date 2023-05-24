@@ -22,6 +22,11 @@ const router = createRouter({
       component: () => import('@/views/NewDreamDiaryView.vue'),
     },
     {
+      path: '/dream-diary/new/generate-image',
+      name: 'generate-image',
+      component: () => import('@/views/GenerateImageView.vue'),
+    },
+    {
       path: '/dream-diary/:diaryId',
       name: 'dream-diary',
       component: () => import('@/views/DreamDiaryView.vue'),
@@ -82,6 +87,11 @@ const router = createRouter({
       path: '/profile/like',
       name: 'like',
       component: () => import('@/views/LikeView.vue'),
+    },
+    {
+      path: '/profile/follow',
+      name: 'follow',
+      component: () => import('@/views/FollowView.vue'),
     },
     // miss match
     {
