@@ -1,12 +1,9 @@
-import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Configuration, OpenAIApi } from 'openai';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
-import { ImageRequests } from 'src/entities/image.requests.entity';
-import { User } from 'src/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 import { OpenAIService } from 'src/util/openai.service';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class DreamDiaryService {
@@ -14,26 +11,8 @@ export class DreamDiaryService {
 
   constructor(
     private readonly oepnAIService: OpenAIService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(ImageRequests)
-    private readonly imageRequestsRepository: Repository<ImageRequests>,
+    private readonly userService: UserService,
   ) {}
-
-  async getUserWithImageRequestsInfo(userId: number): Promise<User> {
-    this.logger.debug(`Called ${this.getUserWithImageRequestsInfo.name}`);
-
-    const result = await this.userRepository.findOne({
-      where: {
-        userId,
-      },
-      relations: ['imageRequests'],
-    });
-    console.log(result.imageRequests.curRequestCount);
-    console.log(result.imageRequests.maxRequestCount);
-    console.log(result.credits);
-    return result;
-  }
 
   async createDreamDiaryImages(
     title: string,
@@ -42,7 +21,7 @@ export class DreamDiaryService {
   ): Promise<GeneratedImagesResponseDto> {
     this.logger.debug(`Called ${this.createDreamDiaryImages.name}`);
 
-    const result = await this.getUserWithImageRequestsInfo(userId);
+    const result = await this.userService.getUserWithImageRequestsInfo(userId);
     const maxRequestCount = result.imageRequests.maxRequestCount;
     let curRequestCount = result.imageRequests.curRequestCount;
     let credits = result.credits;
@@ -54,24 +33,10 @@ export class DreamDiaryService {
         );
       }
       --credits;
-      await this.userRepository.update(
-        {
-          userId,
-        },
-        {
-          credits,
-        },
-      );
+      await this.userService.updateUserCredits(userId, credits);
     } else {
       ++curRequestCount;
-      await this.imageRequestsRepository.update(
-        {
-          userId,
-        },
-        {
-          curRequestCount,
-        },
-      );
+      await this.userService.updateUserCurRequestCount(userId, curRequestCount);
     }
 
     // TODO: prompt를 어떻게 만들어야 할지 고민해보기
@@ -90,7 +55,10 @@ export class DreamDiaryService {
     This photo could be used in a suspense or mystery-themed publication, a corporate thriller, or a psychological drama.
 `;
 
-    const images = await this.oepnAIService.createImage(prompt, 1, '512x512');
+    // const images = await this.oepnAIService.createImage(prompt, 1, '512x512');
+    const images = [
+      'https://images.unhttps://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
+    ];
 
     return {
       credits,

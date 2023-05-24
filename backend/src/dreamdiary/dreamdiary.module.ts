@@ -3,15 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DreamDiaryService } from './dreamdiary.service';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { DreamDiaryController } from './dreamdiary.controller';
-import { User } from 'src/entities/user.entity';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { UtilModule } from 'src/util/util.module';
-import { ImageRequests } from 'src/entities/image.requests.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([DreamDiary, User, DiaryCategory, ImageRequests]),
+    TypeOrmModule.forFeature([DreamDiary, DiaryCategory]),
     UtilModule,
+    UserModule,
   ],
   controllers: [DreamDiaryController],
   providers: [DreamDiaryService],
