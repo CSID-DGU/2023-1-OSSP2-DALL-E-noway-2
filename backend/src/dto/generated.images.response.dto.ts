@@ -20,7 +20,7 @@ export class GeneratedImagesResponseDto {
   maxFreeGenerateCount: number;
 
   @ApiProperty({
-    description: '생성된 이미지 Blob 배열',
+    description: '생성된 이미지 URL 배열',
   })
-  generatedImages: Blob[];
+  generatedImages: string[];
 }

@@ -10,6 +10,7 @@ import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
 import { ProfileModule } from './profile/profile.module';
 import { UtilModule } from './util/util.module';
+import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UtilModule } from './util/util.module';
     ProfileModule,
     CommentModule,
     UtilModule,
+    DreamDiaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
