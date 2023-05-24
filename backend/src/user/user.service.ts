@@ -76,7 +76,7 @@ export class UserService {
     );
 
     return {
-      userId: result.identifiers[0].id,
+      userId: result.identifiers[0].userId,
       nickname: user.nickname,
       imageUrl: user.imageUrl,
     };
