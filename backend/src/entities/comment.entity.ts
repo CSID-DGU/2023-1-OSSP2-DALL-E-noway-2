@@ -22,6 +22,12 @@ export class Comment {
   })
   id: number;
 
+  @Column({ // DB에도 content 필드명으로 테이블에 추가해서 내용 저장해야함!
+    type: 'text',
+    name: 'content',
+  })
+  content: string;
+  
   @Column({
     type: 'enum',
     name: 'filter_type',
