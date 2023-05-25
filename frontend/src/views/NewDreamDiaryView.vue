@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import StarRating from '@/components/dreamDiary/StarRating.vue';
 import { postDreamDiary } from '@/api/axios.custom';
@@ -9,24 +9,28 @@ import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
+import { useDiaryCreateStore } from '@/stores/diary.create.store';
+import router from '@/router';
 
-const router = useRouter();
+// const router = useRouter();
 
-const diary = ref({
-  title: '',
-  category: '',
-  dreamScore: 0,
-  image: '',
-  disclosureScope: '',
-  content: '',
-});
+const diary = useDiaryCreateStore().getDiary();
+
+// const diary = ref({
+//   title: '',
+//   category: '',
+//   dreamScore: 0,
+//   image: '',
+//   disclosureScope: '',
+//   content: '',
+// });
 
 const temporarySaveDiary = () => {
-  console.log(diary.value);
+  console.log(diary);
 };
 
 const submitDiary = async () => {
-  console.log(diary.value);
+  console.log(diary);
   // const formData = new FormData();
   // formData.append('title', diary.value.title);
   // formData.append('category', diary.value.category);
@@ -43,7 +47,7 @@ const submitDiary = async () => {
 };
 
 const onInputImage = (event: any) => {
-  diary.value.image = event.target.files[0];
+  diary.image = event.target.files[0];
 };
 
 const fileInput = ref<HTMLElement | null>(null);
@@ -118,8 +122,8 @@ const goToImageCreation = () => {
       </div>
 
       <div class="button-group">
-        <BlackBGButton @click="submitDiary" type="submit" :text="'게시'" />
         <BlackBGButton @click="temporarySaveDiary" :text="'임시저장'" />
+        <BlackBGButton @click="submitDiary" type="submit" :text="'게시'" />
       </div>
     </form>
   </div>
@@ -156,7 +160,14 @@ textarea.content {
 }
 
 .button-group {
-  @apply flex flex-row-reverse;
+  @apply flex flex-row bottom-0 right-0 fixed;
+}
+@media (min-width: 425px) {
+  .button-group {
+    max-width: 425px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 .row-group {
