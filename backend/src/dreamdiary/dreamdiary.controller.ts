@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   ForbiddenException,
   Get,
   InternalServerErrorException,
@@ -25,8 +26,11 @@ import {
 import { SearchType } from 'src/enum/search.type';
 import { SortType } from 'src/enum/sort.type';
 import { DreamDiaryCreateRequestDto } from 'src/dto/dreamdiary.create.request.dto';
-import { User } from 'src/decorator/user.decorator';
+import { GetUser } from 'src/decorator/user.decorator';
 import { UserDto } from 'src/dto/user.dto';
+import { DreamDiaryFeedsResponseDto } from 'src/dto/dreamdiary.feeds.response.dto';
+import { Favorite } from 'src/entities/favorite.entity';
+import { Bookmark } from 'src/entities/bookmark.entity';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
@@ -40,13 +44,13 @@ export class DreamDiaryController {
   @ApiCreatedResponse({ description: '꿈일기 피드 목록을 조회합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('dream-diary/feeds/:search-type/:sort-type/')
+  @Get('feeds/:searchType')
   async getDreamDiaryFeeds(
-    @Param('search-type') searchType: SearchType,
+    @Param('searchType') searchType: SearchType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('length', ParseIntPipe) length: number,
     @Query('search-keyword', new DefaultValuePipe(' ')) keyWord: string,
-  ) {
+  ): Promise<DreamDiaryFeedsResponseDto> {
     try {
       const dreamdiaryfeeds = await this.dreamdiaryService.getAllFeeds(
         searchType,
@@ -67,14 +71,14 @@ export class DreamDiaryController {
   }
 
   @ApiOperation({
-    summary: '꿈일기 피드 목록',
-    description: '꿈일기 피드 목록을 조회합니다.',
+    summary: '꿈일기 피드 조회',
+    description: '꿈일기 피드를 조회합니다.',
   })
   @ApiCreatedResponse({ description: '꿈일기 피드를 조회합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('dreamdiary/:diary-id')
-  async getFeedbyDiaryId(@Param('diary-id', ParseIntPipe) diaryId: number) {
+  @Get(':diaryId')
+  async getFeedbyDiaryId(@Param('diaryId', ParseIntPipe) diaryId: number) {
     try {
       const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
         diaryId,
@@ -102,13 +106,117 @@ export class DreamDiaryController {
   @Post()
   async createDreamDiary(
     @Body() dreamDiaryRequestDto: DreamDiaryCreateRequestDto,
-    @User() user: UserDto,
+    @GetUser() user: UserDto,
   ) {
     try {
       return this.dreamdiaryService.creatDreamDiary(
         dreamDiaryRequestDto,
         user.userId,
       );
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 삭제',
+    description: '꿈일기 삭제합니다.',
+  })
+  @ApiCreatedResponse({ description: '꿈일기 삭제합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':diaryId')
+  async deleteDreamDiary(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+    @GetUser() user: UserDto,
+  ) {
+    try {
+      return this.dreamdiaryService.deleteDreamDiary(diaryId, user.userId);
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 좋아요',
+    description: '꿈일기 좋아요 추가합니다.',
+  })
+  @ApiCreatedResponse({ description: '좋아요 추가합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':diaryId/like')
+  async addFavoriteDreamDiary(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+    @GetUser() user: UserDto,
+  ): Promise<Favorite> {
+    try {
+      return await this.dreamdiaryService.addFavoriteDreamDiary(
+        diaryId,
+        user.userId,
+      );
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 좋아요 삭제',
+    description: '꿈일기 좋아요 삭제합니다.',
+  })
+  @ApiCreatedResponse({ description: '좋아요 삭제합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':diaryId/like')
+  async deleteFavoriteDreamDiary(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+  ) {
+    try {
+      return this.dreamdiaryService.deleteFavoriteDreamDiary(diaryId);
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 즐겨찾기',
+    description: '꿈일기 즐겨찾기 추가합니다.',
+  })
+  @ApiCreatedResponse({ description: '즐겨찾기 추가합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':diaryId/bookmark')
+  async addBookmarkDreamDiary(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+    @GetUser() user: UserDto,
+  ): Promise<Bookmark> {
+    try {
+      return await this.dreamdiaryService.addBookmarkDreamDiary(
+        diaryId,
+        user.userId,
+      );
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '꿈일기 즐겨찾기 삭제',
+    description: '꿈일기 즐겨찾기 삭제합니다.',
+  })
+  @ApiCreatedResponse({ description: '즐겨찾기 삭제합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':diaryId/bookmark')
+  async deleteBookmarkDreamDiary(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+  ) {
+    try {
+      return this.dreamdiaryService.deleteBookmarkDreamDiary(diaryId);
     } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);

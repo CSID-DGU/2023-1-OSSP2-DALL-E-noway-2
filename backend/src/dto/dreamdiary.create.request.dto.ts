@@ -1,14 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-
-export class CategoryResponseDto {
-  categories: CategoryDto[];
-}
-
-export class CategoryDto {
-  categoryId: number;
-  categoryName: string;
-}
+import { CategoryDto } from './category.response.dto';
 
 export class DreamDiaryCreateRequestDto {
   @ApiProperty({
@@ -17,10 +9,10 @@ export class DreamDiaryCreateRequestDto {
   })
   title: string;
   @ApiProperty({
-    example: '악몽',
+    example: 1,
     description: '꿈일기 카테고리',
   })
-  category: CategoryDto;
+  category: CategoryDto['categoryId'];
   @ApiProperty({
     example: 3,
     description: '꿈 점수',
@@ -32,12 +24,12 @@ export class DreamDiaryCreateRequestDto {
   })
   imageUrl?: FormData;
   @ApiProperty({
-    example: 'disclosureScope',
+    example: DisclosureScopeType.PUBLIC,
     description: '제한범위',
   })
   disclosureScope: DisclosureScopeType;
   @ApiProperty({
-    example: 'content',
+    example: '꿈일기 내용입니다.',
     description: '꿈일기 내용',
   })
   content: string;

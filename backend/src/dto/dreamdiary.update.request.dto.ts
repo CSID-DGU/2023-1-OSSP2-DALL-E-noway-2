@@ -4,7 +4,7 @@ export class DreamDiaryUpdateRequestDto {
   title: string;
   category: string;
   dreamScore: number;
-  image?: FormData;
+  imageUrl?: FormData;
   disclosureScope: DisclosureScopeType;
   content: string;
 }
