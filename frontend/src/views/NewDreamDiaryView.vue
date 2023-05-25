@@ -5,6 +5,10 @@ import StarRating from '@/components/dreamDiary/StarRating.vue';
 import { postDreamDiary } from '@/api/axios.custom';
 import type { Category } from '@/types/index';
 import { DisclosureScopeType } from '@/types/enum/disclosure.scope';
+import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
+import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
+import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
+import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
 
 const router = useRouter();
 
@@ -69,45 +73,28 @@ const goToImageCreation = () => {
       </div>
       <div class="form-group">
         <div class="row-group">
-          <select
+          <CategorySelect class="row-item" v-model:category="diary.category" />
+          <WhiteBGButton
             class="row-item"
-            id="category"
-            v-model="diary.category"
-            aria-placeholder="카테고리 선택"
-            required
-          >
-            <option value="">카테고리 선택</option>
-            <option value="음식">음식</option>
-            <option value="여행">여행</option>
-            <option value="문화">문화</option>
-          </select>
-
-          <div class="image-style row-item" @click="goToImageCreation">
-            이미지 생성
-          </div>
+            @click="goToImageCreation"
+            :text="'이미지 생성'"
+          />
         </div>
       </div>
 
       <div class="form-group">
         <div class="row-group">
-          <select
+          <DisclosureScopeSelect
             class="row-item"
-            id="disclosure-scope"
-            v-model="diary.disclosureScope"
-            required
-          >
-            <option value="">공개범위 선택</option>
-            <option :value="DisclosureScopeType.PRIVATE">나만 보기</option>
-            <option :value="DisclosureScopeType.PUBLIC">전체 공개</option>
-            <option :value="DisclosureScopeType.LIMITED_PUBLIC">
-              팔로워만 보기
-            </option>
-          </select>
+            v-model:disclosureScope="diary.disclosureScope"
+          />
 
           <div class="row-item">
-            <div class="image-style" @click="handleUploadClick">
-              이미지 업로드
-            </div>
+            <WhiteBGButton
+              class="row-item"
+              @click="handleUploadClick"
+              :text="'이미지 업로드'"
+            />
             <input
               ref="fileInput"
               type="file"
@@ -131,10 +118,8 @@ const goToImageCreation = () => {
       </div>
 
       <div class="button-group">
-        <button class="form-bottom" @click="temporarySaveDiary()">
-          임시저장
-        </button>
-        <button class="form-bottom" type="submit">게시</button>
+        <BlackBGButton @click="submitDiary" type="submit" :text="'게시'" />
+        <BlackBGButton @click="temporarySaveDiary" :text="'임시저장'" />
       </div>
     </form>
   </div>
@@ -143,7 +128,15 @@ const goToImageCreation = () => {
 <style scoped>
 input.title,
 textarea {
-  @apply text-lg block w-full h-96 p-2 border border-gray-300;
+  @apply text-lg block w-full h-96 p-2 border border-gray-300 bg-[#E5E5E5] opacity-50 rounded-sm;
+}
+
+input.title {
+  @apply w-full h-8;
+}
+
+textarea.content {
+  @apply w-full;
 }
 
 .wrap {
@@ -158,37 +151,8 @@ textarea {
   @apply mb-4 justify-center;
 }
 
-input.title,
-textarea {
-  @apply bg-[#E5E5E5] opacity-50 rounded-sm p-2;
-}
-
-input.title {
-  @apply w-full h-8;
-}
-
-textarea.content {
-  @apply w-full;
-}
-
-select {
-  @apply bg-[#E5E5E5] opacity-50 rounded-sm p-2 w-full h-full border border-gray-300;
-}
-
-.image-style {
-  @apply py-1.5 px-4 transition-colors bg-gray-50 border active:bg-gray-200 font-medium border-gray-200 text-gray-900 rounded-lg hover:bg-gray-100 disabled:opacity-50 w-full text-center;
-}
-
-.image-upload {
-  @apply py-1.5 px-4 transition-colors bg-gray-50 border active:bg-gray-200 font-medium border-gray-200 text-gray-900 rounded-lg hover:bg-gray-100 disabled:opacity-50 w-full;
-}
-
 #chooseFile {
   visibility: hidden;
-}
-
-button.form-bottom {
-  @apply py-1.5 px-4 transition-colors font-medium text-white bg-black rounded-lg disabled:opacity-50 m-1;
 }
 
 .button-group {

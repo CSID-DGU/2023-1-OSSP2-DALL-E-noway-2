@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps(['dreamScore']);
+defineProps(['dreamScore']);
 defineEmits(['update:dreamScore']);
 </script>
 
