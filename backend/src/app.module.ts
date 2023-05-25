@@ -9,6 +9,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
 import { ProfileModule } from './profile/profile.module';
+import { DreamDiaryModule } from './dreamdiary/interpret.module';
+import { UtilModule } from './util/util.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ProfileModule } from './profile/profile.module';
     UserModule,
     ProfileModule,
     CommentModule,
+    DreamDiaryModule,
+    UtilModule,
   ],
   controllers: [AppController],
   providers: [AppService],
