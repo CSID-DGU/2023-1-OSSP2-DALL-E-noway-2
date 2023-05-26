@@ -103,7 +103,7 @@ const selectImage = (imageId: number) => {
       </div>
       <div class="image-list">
         <ul class="grid grid-cols-2 gap-4">
-          <li v-for="(image, i) in contents.generatedImages">
+          <li v-for="(image, i) in contents.generatedImages" v-bind:key="i">
             <img
               :src="image"
               :key="i"
