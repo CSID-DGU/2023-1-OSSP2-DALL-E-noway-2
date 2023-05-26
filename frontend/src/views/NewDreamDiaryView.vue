@@ -47,7 +47,9 @@ const submitDiary = async () => {
 };
 
 const onInputImage = (event: any) => {
-  diary.image = event.target.files[0];
+  for (let i = 0; i < event.target.files.length; i++) {
+    diary.image.push(event.target.files[i] as Blob);
+  }
 };
 
 const fileInput = ref<HTMLElement | null>(null);
@@ -57,7 +59,6 @@ const handleUploadClick = () => {
 };
 
 const goToImageCreation = () => {
-  // TODO: diary ref 내용을 전역으로 들고 있게 할까?
   router.push({ name: 'generate-image' });
 };
 </script>
