@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { postDreamImage } from '@/api/axios.custom';
+import { getCreditInfo, postDreamImage } from '@/api/axios.custom';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import router from '@/router';
@@ -22,6 +22,18 @@ const contents: Ref<Contents> = ref({
   maxFreeGenerateCount: 3,
   generatedImages: [],
   selectedImages: new Map<number, string>(),
+});
+
+onMounted(async () => {
+  try {
+    const response = await getCreditInfo();
+    const creditInfo = response.data.creditInfo;
+    contents.value.credits = creditInfo.credits;
+    contents.value.freeGenerateCount = creditInfo.freeGenerateCount;
+    contents.value.maxFreeGenerateCount = creditInfo.maxFreeGenerateCount;
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 const requestImage = async () => {

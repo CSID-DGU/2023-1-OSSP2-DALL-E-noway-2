@@ -17,3 +17,9 @@ export const postDreamImage = async (title: string, content: string) => {
   });
   return response;
 };
+
+const getCreditInfoUrl = '/api/users/credit-info';
+export const getCreditInfo = async () => {
+  const response = await axiosInstance.get(getCreditInfoUrl);
+  return response;
+};
