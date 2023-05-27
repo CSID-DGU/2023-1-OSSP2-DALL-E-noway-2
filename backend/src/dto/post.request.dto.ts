@@ -52,8 +52,4 @@ export class PostRequestDto {
     description: '공개 범위',
   })
   disclosureScope: DisclosureScopeType;
-
-  @ManyToOne(() => User, (user) => user.userId)
-  @JoinColumn({ name: 'user_id' })
-  author: User;
 }
