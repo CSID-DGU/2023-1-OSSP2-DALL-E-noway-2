@@ -68,6 +68,30 @@ export class BoardController {
     }
   }
 
+  // Like와 Bookmark의 Dto 값들을 설정하는 함수
+  setLikeBookmarkDto(
+    opt: string,
+    postId: number,
+    boardType: BoardType,
+    user: UserDto,
+  ) {
+    if (opt == 'Like') {
+      const postLikeDto = new PostLikeDto();
+      postLikeDto.id = postId;
+      postLikeDto.filterType = this.boardTypeMatch(boardType);
+      postLikeDto.userId = user.userId;
+      return postLikeDto;
+    }
+
+    if (opt == 'Bookmark') {
+      const postBookmarkDto = new PostBookmarkDto();
+      postBookmarkDto.id = postId;
+      postBookmarkDto.filterType = this.boardTypeMatch(boardType);
+      postBookmarkDto.userId = user.userId;
+      return postBookmarkDto;
+    }
+  }
+
   @ApiOperation({
     summary: '게시글 좋아요 설정',
     description:
@@ -80,11 +104,12 @@ export class BoardController {
     @Param('post_type') boardType: BoardType,
     @GetUser() user: UserDto,
   ): Promise<Favorite> {
-    const postLikeDto = new PostLikeDto();
-    postLikeDto.id = postId;
-    postLikeDto.filterType = this.boardTypeMatch(boardType);
-    postLikeDto.userId = user.userId;
-
+    const postLikeDto = this.setLikeBookmarkDto(
+      'Like',
+      postId,
+      boardType,
+      user,
+    );
     return await this.boardService.postLike(postLikeDto);
   }
 
@@ -99,10 +124,12 @@ export class BoardController {
     @Param('post_type') boardType: BoardType,
     @GetUser() user: UserDto,
   ) {
-    const postLikeDto = new PostLikeDto();
-    postLikeDto.id = postId;
-    postLikeDto.filterType = this.boardTypeMatch(boardType);
-    postLikeDto.userId = user.userId;
+    const postLikeDto = this.setLikeBookmarkDto(
+      'Like',
+      postId,
+      boardType,
+      user,
+    );
     return await this.boardService.postLikeCancel(postLikeDto);
   }
 
@@ -118,11 +145,12 @@ export class BoardController {
     @Param('post_type') boardType: BoardType,
     @GetUser() user: UserDto,
   ): Promise<Bookmark> {
-    const postBookmarkDto = new PostBookmarkDto();
-    postBookmarkDto.id = postId;
-    postBookmarkDto.filterType = this.boardTypeMatch(boardType);
-    postBookmarkDto.userId = user.userId;
-
+    const postBookmarkDto = this.setLikeBookmarkDto(
+      'Bookmark',
+      postId,
+      boardType,
+      user,
+    );
     return await this.boardService.postBookmark(postBookmarkDto);
   }
 
@@ -137,10 +165,12 @@ export class BoardController {
     @Param('post_type') boardType: BoardType,
     @GetUser() user: UserDto,
   ) {
-    const postBookmarkDto = new PostBookmarkDto();
-    postBookmarkDto.id = postId;
-    postBookmarkDto.filterType = this.boardTypeMatch(boardType);
-    postBookmarkDto.userId = user.userId;
+    const postBookmarkDto = this.setLikeBookmarkDto(
+      'Bookmark',
+      postId,
+      boardType,
+      user,
+    );
     return await this.boardService.postBookmarkCancel(postBookmarkDto);
   }
 }
