@@ -24,6 +24,10 @@ export class DreamDiaryService {
     const interpretation = await this.openAIService.createDreamInterpretation(
       dreamDiary.content,
     );
+
+    dreamDiary.interpretation = interpretation;
+
+    await this.dreamDiaryRepository.save(dreamDiary);
     return interpretation;
   }
 }

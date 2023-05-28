@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Put } from '@nestjs/common';
 import { DreamDiaryService } from './interpret.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -9,9 +9,9 @@ export class DreamDiaryController {
 
   @ApiOperation({
     summary: '해몽 생성',
-    description: '해당 다이어리 내용의 해몽을 반환합니다.',
+    description: '해당 다이어리 내용의 해몽을 저장합니다.',
   })
-  @Get(':id/interpretation')
+  @Put(':id/interpretation')
   async createDreamInterpretation(@Param('id') diaryId: number) {
     const interpretation =
       await this.dreamDiaryService.createDreamInterpretation(diaryId);
