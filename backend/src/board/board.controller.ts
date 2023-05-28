@@ -11,9 +11,11 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/user.decorator';
+import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
 import { UserDto } from 'src/dto/user.dto';
+import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
 import { FilterType } from 'src/enum/filter.type';
@@ -25,7 +27,7 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @ApiOperation({
-    summary: '기타 게시글 생성',
+    summary: '게시글 생성',
     description:
       'post_type에 해당하는 게시판에 PostRequestDto에서 받아온 정보를 바탕으로 새로운 게시글을 생성합니다.',
   })
@@ -42,18 +44,25 @@ export class BoardController {
     return result.postId;
   }
 
-  // 입력으로 받아온 boardType 자료형과 Favorite Entity의 filterType 자료형이 일치하지 않기에 자료형을 매칭시켜줄 함수.
-  boardTypeMatch(postLikeDto: PostLikeDto, boardType: BoardType) {
+  @ApiOperation({
+    summary: '게시글 삭제',
+    description: 'post_id에 해당하는 게시글을 삭제합니다.',
+  })
+  @Delete('/posts/:post_id')
+  @UseGuards(AuthGuard('jwt'))
+  async postDelete(@Param('post_id') postId: number) {
+    return await this.boardService.postDelete(postId);
+  }
+
+  //URL을 통해 받아오는 BoardType과 FilterType을 매칭시켜주는 함수
+  boardTypeMatch(boardType: BoardType) {
     switch (boardType) {
       case BoardType.FREE:
-        postLikeDto.filterType = FilterType.FREE;
-        break;
+        return FilterType.FREE;
       case BoardType.TIP:
-        postLikeDto.filterType = FilterType.TIP;
-        break;
+        return FilterType.TIP;
       case BoardType.REQUEST:
-        postLikeDto.filterType = FilterType.REQUEST;
-        break;
+        return FilterType.REQUEST;
       default:
         throw new HttpException('Invalid board type', HttpStatus.BAD_REQUEST);
     }
@@ -73,7 +82,7 @@ export class BoardController {
   ): Promise<Favorite> {
     const postLikeDto = new PostLikeDto();
     postLikeDto.id = postId;
-    this.boardTypeMatch(postLikeDto, boardType);
+    postLikeDto.filterType = this.boardTypeMatch(boardType);
     postLikeDto.userId = user.userId;
 
     return await this.boardService.postLike(postLikeDto);
@@ -92,18 +101,46 @@ export class BoardController {
   ) {
     const postLikeDto = new PostLikeDto();
     postLikeDto.id = postId;
-    this.boardTypeMatch(postLikeDto, boardType);
+    postLikeDto.filterType = this.boardTypeMatch(boardType);
     postLikeDto.userId = user.userId;
     return await this.boardService.postLikeCancel(postLikeDto);
   }
 
   @ApiOperation({
-    summary: '게시글 삭제',
-    description: 'post_id에 해당하는 게시글을 삭제합니다.',
+    summary: '게시글 즐겨찾기 설정',
+    description:
+      'post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 즐겨찾기를 설정합니다.',
   })
-  @Delete('/posts/:post_id')
+  @Post('/posts/:post_id/:post_type/bookmark')
   @UseGuards(AuthGuard('jwt'))
-  async postDelete(@Param('post_id') postId: number) {
-    return await this.boardService.postDelete(postId);
+  async postBookmark(
+    @Param('post_id') postId: number,
+    @Param('post_type') boardType: BoardType,
+    @GetUser() user: UserDto,
+  ): Promise<Bookmark> {
+    const postBookmarkDto = new PostBookmarkDto();
+    postBookmarkDto.id = postId;
+    postBookmarkDto.filterType = this.boardTypeMatch(boardType);
+    postBookmarkDto.userId = user.userId;
+
+    return await this.boardService.postBookmark(postBookmarkDto);
+  }
+
+  @ApiOperation({
+    summary: '게시글 즐겨찾기 취소',
+    description: 'post_id에 해당하는 게시글 즐겨찾기를 취소합니다.',
+  })
+  @Delete('/posts/:post_id/:post_type/bookmark')
+  @UseGuards(AuthGuard('jwt'))
+  async postBookmarkCancel(
+    @Param('post_id') postId: number,
+    @Param('post_type') boardType: BoardType,
+    @GetUser() user: UserDto,
+  ) {
+    const postBookmarkDto = new PostBookmarkDto();
+    postBookmarkDto.id = postId;
+    postBookmarkDto.filterType = this.boardTypeMatch(boardType);
+    postBookmarkDto.userId = user.userId;
+    return await this.boardService.postBookmarkCancel(postBookmarkDto);
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
 import { Board } from 'src/entities/board.entity';
@@ -27,6 +28,16 @@ export class BoardService {
     return await this.boardRepository.save(board);
   }
 
+  // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제합니다.
+  async postDelete(postId: number) {
+    const result = await this.boardRepository.delete(postId);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Could not find post with ID ${postId}`);
+    }
+    return result;
+  }
+
   // 게시글 좋아요 설정 기능 / 게시글의 ID를 받아와 해당하는 게시글의 좋아요를 설정하는 API
   async postLike(postLikeDto: PostLikeDto): Promise<Favorite> {
     const board = await this.favoriteRepository.create(postLikeDto);
@@ -46,12 +57,21 @@ export class BoardService {
     return result;
   }
 
-  // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제합니다.
-  async postDelete(postId: number) {
-    const result = await this.boardRepository.delete(postId);
+  // 게시글 북마크 설정 기능 / post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 즐겨찾기를 설정합니다.
+  async postBookmark(postBookmarkDto: PostBookmarkDto): Promise<Bookmark> {
+    const board = await this.bookmarkRepository.create(postBookmarkDto);
+    board.createdAt = new Date();
+    return await this.bookmarkRepository.save(board);
+  }
+
+  // 게시글 북마크 취소 기능 // post_id에 해당하는 게시글 즐겨찾기를 취소합니다.
+  async postBookmarkCancel(postBookmarkDto: PostBookmarkDto) {
+    const result = await this.bookmarkRepository.delete(postBookmarkDto);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Could not find post with ID ${postId}`);
+      throw new NotFoundException(
+        `Could not find bookmark post with postID ${postBookmarkDto.id}`,
+      );
     }
     return result;
   }
