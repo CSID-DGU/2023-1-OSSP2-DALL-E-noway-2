@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
@@ -36,6 +36,23 @@ export class BoardService {
 
   // 게시글 좋아요 취소 기능 // post_id, post_type, userId를 바탕으로 해당 게시글의 좋아요를 취소합니다.
   async postLikeCancel(postLikeDto: PostLikeDto) {
-    return await this.favoriteRepository.delete(postLikeDto);
+    const result = await this.favoriteRepository.delete(postLikeDto);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Could not find like post with postID ${postLikeDto.id}`,
+      );
+    }
+    return result;
+  }
+
+  // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제합니다.
+  async postDelete(postId: number) {
+    const result = await this.boardRepository.delete(postId);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Could not find post with ID ${postId}`);
+    }
+    return result;
   }
 }

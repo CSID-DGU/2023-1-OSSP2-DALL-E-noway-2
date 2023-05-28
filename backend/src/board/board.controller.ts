@@ -96,4 +96,14 @@ export class BoardController {
     postLikeDto.userId = user.userId;
     return await this.boardService.postLikeCancel(postLikeDto);
   }
+
+  @ApiOperation({
+    summary: '게시글 삭제',
+    description: 'post_id에 해당하는 게시글을 삭제합니다.',
+  })
+  @Delete('/posts/:post_id')
+  @UseGuards(AuthGuard('jwt'))
+  async postDelete(@Param('post_id') postId: number) {
+    return await this.boardService.postDelete(postId);
+  }
 }
