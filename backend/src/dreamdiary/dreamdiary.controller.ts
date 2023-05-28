@@ -7,6 +7,7 @@ import {
   ForbiddenException,
   Get,
   InternalServerErrorException,
+  Logger,
   Param,
   ParseEnumPipe,
   ParseIntPipe,
@@ -38,6 +39,7 @@ import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dt
 @ApiTags('dream-diary')
 @Controller('dream-diary')
 export class DreamDiaryController {
+  private logger = new Logger(DreamDiaryController.name);
   constructor(private readonly dreamdiaryService: DreamDiaryService) {}
 
   @ApiOperation({
@@ -63,6 +65,7 @@ export class DreamDiaryController {
       );
       return dreamdiaryfeeds;
     } catch (err) {
+      this.logger.error(err);
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
       }
@@ -107,9 +110,9 @@ export class DreamDiaryController {
   async createDreamDiary(
     @Body() dreamDiaryCreateRequestDto: DreamDiaryCreateRequestDto,
     @GetUser() user: UserDto,
-  ): Promise<CategoryResponseDto> {
+  ): Promise<number> {
     try {
-      return this.dreamdiaryService.creatDreamDiary(
+      return await this.dreamdiaryService.creatDreamDiary(
         dreamDiaryCreateRequestDto,
         user.userId,
       );
@@ -172,7 +175,7 @@ export class DreamDiaryController {
   async addFavoriteDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
     @GetUser() user: UserDto,
-  ): Promise<Favorite> {
+  ): Promise<void> {
     try {
       return await this.dreamdiaryService.addFavoriteDreamDiary(
         diaryId,

@@ -70,11 +70,12 @@ export class DreamDiaryService {
         'author.nickname',
         'dream_diary.viewCount',
         'dream_diary.imageUrl',
+        'dream_diary.created_at',
       ])
       .where('dream_diary.disclosure_scope = :PUBLIC', {
         PUBLIC: DisclosureScopeType.PUBLIC,
       })
-      .orderBy('dream_diary.created_at', 'DESC');
+      .orderBy('dream_diary.createdAt', 'DESC');
 
     //추가: 현재 userId로 작성한 private 부분도 diary 보여주기
 
@@ -100,10 +101,9 @@ export class DreamDiaryService {
     }
 
     const totalLength = await feedQuery.getCount();
-
     const dreamDiaryFeeds = await feedQuery
-      .skip((currentPage - 1) * 12)
-      .take(length)
+    .skip((currentPage - 1) * length)
+    .take(length)
       .getMany();
 
     const dreamDiaryFeedDto: DreamDiaryFeedDto[] = dreamDiaryFeeds.map(
@@ -213,7 +213,7 @@ export class DreamDiaryService {
     }
     // 파일 이름 정보가 없는 경우 임의의 이름 저장
     else {
-      dreamDiary.imageUrl = uuidv4();
+      dreamDiary.imageUrl = 'default.jpg';
     }
 
     dreamDiary.userId = saveUserId;
@@ -336,16 +336,16 @@ export class DreamDiaryService {
   async addFavoriteDreamDiary(
     diaryId: number,
     userId: number,
-  ): Promise<Favorite> {
+  ): Promise<void> {
     const addFavoriteDiary = new Favorite();
-
-    const favoriteDiary = this.favoriteRepository.create(addFavoriteDiary);
     addFavoriteDiary.id = diaryId;
     addFavoriteDiary.filterType = FilterType.DIARY; //default값 오류
     addFavoriteDiary.userId = userId;
     addFavoriteDiary.createdAt = new Date();
 
-    return await this.favoriteRepository.save(favoriteDiary);
+    await this.favoriteRepository.save(addFavoriteDiary);
+
+    // return await this.favoriteRepository.save(favoriteDiary);
   }
 
   /**
