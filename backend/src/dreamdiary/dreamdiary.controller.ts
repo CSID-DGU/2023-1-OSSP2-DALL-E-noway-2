@@ -11,6 +11,7 @@ import {
   ParseEnumPipe,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UnauthorizedException,
   UseGuards,
@@ -31,6 +32,8 @@ import { UserDto } from 'src/dto/user.dto';
 import { DreamDiaryFeedsResponseDto } from 'src/dto/dreamdiary.feeds.response.dto';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
+import { CategoryResponseDto } from 'src/dto/category.response.dto';
+import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
@@ -90,9 +93,6 @@ export class DreamDiaryController {
       if (err instanceof ForbiddenException) {
         throw new ForbiddenException(err.message);
       }
-
-      //기타 에러 전체에서 처리
-      throw new InternalServerErrorException(err.message);
     }
   }
 
@@ -105,13 +105,35 @@ export class DreamDiaryController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async createDreamDiary(
-    @Body() dreamDiaryRequestDto: DreamDiaryCreateRequestDto,
+    @Body() dreamDiaryCreateRequestDto: DreamDiaryCreateRequestDto,
     @GetUser() user: UserDto,
-  ) {
+  ): Promise<CategoryResponseDto> {
     try {
       return this.dreamdiaryService.creatDreamDiary(
-        dreamDiaryRequestDto,
+        dreamDiaryCreateRequestDto,
         user.userId,
+      );
+    } catch (err) {
+      //기타 에러 전체에서 처리
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+  @ApiOperation({
+    summary: '꿈일기 수정',
+    description: '꿈일기 수정합니다.',
+  })
+  @ApiCreatedResponse({ description: '꿈일기 생성합니다.' })
+  @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Put(':diaryId')
+  async updateDreamDiary(
+    @Body() dreamDiaryUpdateRequestDto: DreamDiaryUpdateRequestDto,
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+  ): Promise<DreamDiaryUpdateRequestDto> {
+    try {
+      return this.dreamdiaryService.updateDreamDiary(
+        diaryId,
+        dreamDiaryUpdateRequestDto,
       );
     } catch (err) {
       //기타 에러 전체에서 처리

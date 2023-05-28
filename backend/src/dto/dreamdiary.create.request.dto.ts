@@ -9,10 +9,10 @@ export class DreamDiaryCreateRequestDto {
   })
   title: string;
   @ApiProperty({
-    example: 1,
-    description: '꿈일기 카테고리',
+    example: [1, 2, 3],
+    description: '꿈일기 카테고리 Ids',
   })
-  category: CategoryDto['categoryId'];
+  category: number[];
   @ApiProperty({
     example: 3,
     description: '꿈 점수',
