@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpException,
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -15,6 +17,7 @@ import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
 import { UserDto } from 'src/dto/user.dto';
+import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
@@ -42,6 +45,20 @@ export class BoardController {
     postRequestDto.userId = user.userId;
     const result = await this.boardService.createPost(postRequestDto);
     return result.postId;
+  }
+
+  @ApiOperation({
+    summary: '게시글 세부내용 수정',
+    description: 'post_id에 해당하는 게시글의 세부사항을 수정합니다.',
+  })
+  @Put('/posts/:post_id')
+  @UseGuards(AuthGuard('jwt'))
+  async postUpdate(
+    @Param('post_id') postId: number,
+    @Body() postRequestDto: PostRequestDto,
+  ) {
+    postRequestDto.postId = postId;
+    return await this.boardService.postUpdate(postRequestDto);
   }
 
   @ApiOperation({

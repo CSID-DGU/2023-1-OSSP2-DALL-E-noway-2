@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/entities/user.entity';
 import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-import { JoinColumn, ManyToOne } from 'typeorm';
 
 export class PostResponseDto {
   @ApiProperty({

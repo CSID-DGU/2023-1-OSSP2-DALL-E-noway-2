@@ -1,15 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/entities/user.entity';
 import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-import { JoinColumn, ManyToOne } from 'typeorm';
 
 export class PostRequestDto {
-  // @ApiProperty({
-  //   example: 1,
-  //   description: '게시글 ID',
-  // })
-  // postId: number;
+  postId: number;
 
   userId: number;
 
@@ -27,19 +21,7 @@ export class PostRequestDto {
 
   boardType: BoardType;
 
-  // @ApiProperty({
-  //   example: 15,
-  //   description: '조회수',
-  // })
-  // viewCount: number;
-
   createdAt: Date;
-
-  // @ApiProperty({
-  //   example: '2019-01-05',
-  //   description: '최종수정일',
-  // })
-  // updatedAt: Date;
 
   @ApiProperty({
     example: 'https://example.com',

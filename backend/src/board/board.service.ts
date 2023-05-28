@@ -28,7 +28,27 @@ export class BoardService {
     return await this.boardRepository.save(board);
   }
 
-  // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제합니다.
+  // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API
+  async postUpdate(postRequestDto: PostRequestDto) {
+    const result = await this.boardRepository.update(
+      { postId: postRequestDto.postId },
+      {
+        title: postRequestDto.title,
+        content: postRequestDto.content,
+        imageUrl: postRequestDto.imageUrl,
+        updatedAt: new Date(),
+        disclosureScope: postRequestDto.disclosureScope,
+      },
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Could not find post with ID ${postRequestDto.postId}`,
+      );
+    }
+  }
+
+  // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제하는 API
   async postDelete(postId: number) {
     const result = await this.boardRepository.delete(postId);
 
@@ -45,7 +65,7 @@ export class BoardService {
     return await this.favoriteRepository.save(board);
   }
 
-  // 게시글 좋아요 취소 기능 // post_id, post_type, userId를 바탕으로 해당 게시글의 좋아요를 취소합니다.
+  // 게시글 좋아요 취소 기능 // post_id, post_type, userId를 바탕으로 해당 게시글의 좋아요를 취소하는 API
   async postLikeCancel(postLikeDto: PostLikeDto) {
     const result = await this.favoriteRepository.delete(postLikeDto);
 
@@ -57,14 +77,14 @@ export class BoardService {
     return result;
   }
 
-  // 게시글 북마크 설정 기능 / post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 즐겨찾기를 설정합니다.
+  // 게시글 북마크 설정 기능 / post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 즐겨찾기를 설정하는 API
   async postBookmark(postBookmarkDto: PostBookmarkDto): Promise<Bookmark> {
     const board = await this.bookmarkRepository.create(postBookmarkDto);
     board.createdAt = new Date();
     return await this.bookmarkRepository.save(board);
   }
 
-  // 게시글 북마크 취소 기능 // post_id에 해당하는 게시글 즐겨찾기를 취소합니다.
+  // 게시글 북마크 취소 기능 // post_id에 해당하는 게시글 즐겨찾기를 취소하는 API
   async postBookmarkCancel(postBookmarkDto: PostBookmarkDto) {
     const result = await this.bookmarkRepository.delete(postBookmarkDto);
 
