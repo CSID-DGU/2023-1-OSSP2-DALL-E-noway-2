@@ -28,6 +28,16 @@ export class BoardService {
     return await this.boardRepository.save(board);
   }
 
+  // 게시글 세부내용 조회 기능 / post_id에 해당하는 게시글의 세부사항을 조회하는 API
+  async postShow(postId: number) {
+    const post = await this.boardRepository.findOne({ where: { postId } });
+
+    if (!post) {
+      throw new NotFoundException(`Could not find post with ID ${postId}`);
+    }
+    return post;
+  }
+
   // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API
   async postUpdate(postRequestDto: PostRequestDto) {
     const result = await this.boardRepository.update(
