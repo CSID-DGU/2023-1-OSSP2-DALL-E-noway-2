@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import StarRating from '@/components/dreamDiary/StarRating.vue';
 import { postDreamDiary } from '@/api/axios.custom';
 import type { Category } from '@/types/index';
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope';
+import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
@@ -101,6 +101,7 @@ const goToImageCreation = () => {
               :text="'이미지 업로드'"
             />
             <input
+              multiple
               ref="fileInput"
               type="file"
               style="display: none"
