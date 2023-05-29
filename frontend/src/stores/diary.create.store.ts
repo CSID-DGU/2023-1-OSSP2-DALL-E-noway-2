@@ -1,15 +1,7 @@
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope';
+import type { Diary } from '@/types';
+import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
-
-interface Diary {
-  title: string;
-  category: string;
-  dreamScore: number;
-  image: Blob[];
-  disclosureScope: DisclosureScopeType;
-  content: string;
-}
 
 export const useDiaryCreateStore = defineStore('diary-create', () => {
   const diary: Ref<Diary> = ref({
