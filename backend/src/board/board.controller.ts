@@ -51,7 +51,7 @@ export class BoardController {
     summary: '게시글 세부내용 조회',
     description: 'post_id에 해당하는 게시글의 세부사항을 조회합니다.',
   })
-  @Post('/posts/:post_id/show')
+  @Get('/posts/:post_id')
   @UseGuards(AuthGuard('jwt'))
   async postShow(@Param('post_id') postId: number) {
     return await this.boardService.postShow(postId);
