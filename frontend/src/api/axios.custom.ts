@@ -34,3 +34,8 @@ export const getProfile = async (userId: number) => {
   const response = await axiosInstance.get(`/api/users/${userId}/profile`);
   return response;
 };
+
+export const getMyInfo = async () => {
+  const response = await axiosInstance.get('/api/users/me');
+  return response;
+};
