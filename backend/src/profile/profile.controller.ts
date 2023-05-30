@@ -5,28 +5,40 @@ import {
   DefaultValuePipe,
   ForbiddenException,
   Get,
+  Inject,
   InternalServerErrorException,
   Param,
   ParseIntPipe,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
 import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/user.decorator';
 import { UserDto } from 'src/dto/user.dto';
 import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
 import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { existsSync, mkdirSync } from 'fs';
+import { User } from 'src/entities/user.entity';
+import { v4 as uuid } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import { diskStorage } from 'multer';
 
 @ApiTags('Profile')
 @Controller('users')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService,
+    @Inject(ConfigService) private configService: ConfigService,
+  ) {}
 
   @ApiOperation({
     summary: '해당 유저 프로필 조회',
@@ -86,21 +98,83 @@ export class ProfileController {
     }
   }
 
+  // @ApiOperation({
+  //   summary: '유저 프로필 수정',
+  //   description:
+  //     '유저의 프로필 정보(프로필 사진,닉네임,자기소개)를 수정합니다.',
+  // })
+  // @Put(':userId/profile')
+  // @UseGuards(AuthGuard('jwt'))
+  // async updateProfile(
+  //   @Body() profileUpdateDto: ProfileUpdateRequestDto,
+  //   @GetUser() user: UserDto,
+  // ): Promise<ProfileUpdateRequestDto> {
+  //   try {
+  //     const profile = await this.profileService.updateProfile(
+  //       profileUpdateDto,
+  //       user.userId,
+  //     );
+
+  //     return profile;
+  //   } catch (err) {
+  //     //요청 파라미터가 잘못된 경우
+  //     if (err instanceof TypeError || err instanceof Error) {
+  //       throw new BadRequestException(err.message);
+  //     }
+  //     //존재하지 않는 유저(탈퇴한 유저)
+  //     if (err instanceof ForbiddenException) {
+  //       throw new ForbiddenException(err.message);
+  //     }
+
+  //     //기타 에러 전체에서 처리
+  //     throw new InternalServerErrorException(err.message);
+  //   }
+  // }
+
   @ApiOperation({
     summary: '유저 프로필 수정',
     description:
-      '유저의 프로필 정보(프로필 사진,닉네임,자기소개)를 수정합니다.',
+      '유저의 프로필 정보(프로필 사진, 닉네임, 자기소개)를 수정합니다.',
   })
   @Put(':userId/profile')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const path = `uploads`;
+          if (!existsSync(path)) {
+            mkdirSync(path);
+          }
+          cb(null, path);
+        },
+        filename: (req, file, cb) => {
+          cb(null, `${uuid()}.${file.mimetype.split('/')[1]}`);
+        },
+      }),
+    }),
+  )
   @UseGuards(AuthGuard('jwt'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: ProfileUpdateRequestDto,
+  })
   async updateProfile(
-    @Body() profileUpdateDto: ProfileUpdateRequestDto,
     @GetUser() user: UserDto,
+    @Body() profileUpdateRequestDto: ProfileUpdateRequestDto,
+    @UploadedFile() image?: any,
   ): Promise<ProfileUpdateRequestDto> {
     try {
+      let imageUrl: string;
+
+      if (image) {
+        imageUrl = `${this.configService.get<string>('be_host')}/${image.path}`;
+      }
+
       const profile = await this.profileService.updateProfile(
-        profileUpdateDto,
         user.userId,
+        profileUpdateRequestDto.nickname,
+        profileUpdateRequestDto.presentation,
+        imageUrl,
       );
 
       return profile;

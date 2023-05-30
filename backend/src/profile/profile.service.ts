@@ -128,37 +128,31 @@ export class ProfileService {
    * @returns
    */
   async updateProfile(
-    profileUpdateDto: ProfileUpdateRequestDto,
     authorizedUserId: number,
-  ): Promise<ProfileUpdateRequestDto> {
+    nickname?: string,
+    presentation?: string,
+    imageUrl?: string,
+  ): Promise<User> {
     const user = await this.profileRepository.findOne({
       where: { userId: authorizedUserId },
     });
-    if (profileUpdateDto.image) {
-      const formData = profileUpdateDto.image;
-      const entries = Object.fromEntries(formData.entries());
-      const imageFile = entries['image'];
-      // FormDataEntryValue -> Blob 변환
-      const file: Blob = imageFile as any;
+    if (imageUrl) {
+      user.imageUrl = imageUrl;
+    }
+    if (nickname) {
+      user.nickname = nickname;
+    }
+    if (presentation) {
+      user.presentation = presentation;
+    }
 
-      // File 객체로 변환 된 경우 파일 이름 저장
-      if (file instanceof File) {
-        user.imageUrl = file.name;
-      }
-      // 파일 이름 정보가 없는 경우 임의의 이름 저장
-      else {
-        user.imageUrl = uuid();
-      }
-    }
-    if (profileUpdateDto.nickname) {
-      user.nickname = profileUpdateDto.nickname;
-    }
-    if (profileUpdateDto.presentation) {
-      user.presentation = profileUpdateDto.presentation;
-    }
+    const profileUpdateDto = new ProfileUpdateRequestDto();
+    profileUpdateDto.nickname = user.nickname;
+    profileUpdateDto.presentation = user.presentation;
+    profileUpdateDto.imageUrl = user.imageUrl;
 
     await this.profileRepository.save(user);
-    return profileUpdateDto;
+    return user;
   }
 
   /**
