@@ -166,4 +166,20 @@ export class UserService {
       })
       .execute();
   }
+
+  async getUserInfo(userId: number): Promise<UserDto> {
+    this.logger.debug(`Called ${this.getUserInfo.name}`);
+
+    const user = await this.userRepository.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    return {
+      userId: user.userId,
+      nickname: user.nickname,
+      imageUrl: user.imageUrl,
+    };
+  }
 }
