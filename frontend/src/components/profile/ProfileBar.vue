@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, computed, type Ref } from 'vue';
 import { getProfile } from '@/api/axios.custom';
 import type { Profile } from '@/types';
 import { useProfileStore } from '@/stores/profile.store';
+import { useMyInfoStore } from '@/stores/my.info.store';
 
 const profile: Ref<Profile> = ref({
   user: {
@@ -15,10 +16,16 @@ const profile: Ref<Profile> = ref({
   dreamDiaryCount: 0,
 });
 
+const { getUser, apiGetUser } = useMyInfoStore();
+
+const user = computed(() => getUser());
+
 onMounted(async () => {
   try {
-    // FIXME: 실제로는 로그인한 사용자의 id를 넣어야 함
-    const response = await getProfile(9);
+    if (user.value.userId === 0) {
+      await apiGetUser();
+    }
+    const response = await getProfile(user.value.userId);
     if (response.status === 200) {
       profile.value = response.data;
       useProfileStore().setProfile(profile.value);
