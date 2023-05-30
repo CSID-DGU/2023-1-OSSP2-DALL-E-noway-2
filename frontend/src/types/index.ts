@@ -22,3 +22,15 @@ export interface Post {
   boardType: BoardType;
   content: string;
 }
+
+export interface User {
+  userId: number;
+  nickname: string;
+  imageUrl: string;
+}
+
+export interface Profile {
+  user: User;
+  followerCount: number;
+  followingCount: number;
+}

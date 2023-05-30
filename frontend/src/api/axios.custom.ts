@@ -29,3 +29,8 @@ export const postNewPost = async (newPostRequest: FormData) => {
   const response = await axiosInstance.postForm(postNewPostUrl, newPostRequest);
   return response;
 };
+
+export const getProfile = async (userId: number) => {
+  const response = await axiosInstance.get(`/api/users/${userId}/profile`);
+  return response;
+};
