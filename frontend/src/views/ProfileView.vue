@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import ProfileBar from '@/components/profile/ProfileBar.vue';
+import { useRoute } from 'vue-router';
+
+const { params } = useRoute();
+const userId = Number(params.userId);
 </script>
 
 <template>
   <div class="wrap">
-    <ProfileBar />
+    <ProfileBar :userId="userId" />
   </div>
 </template>
 
