@@ -66,7 +66,7 @@ onMounted(async () => {
 
 <style scoped>
 .wrap {
-  @apply w-full flex flex-col justify-center h-full z-[1];
+  @apply w-full flex flex-col justify-center h-full z-[1] bg-black;
 }
 
 .nickname-bar {
