@@ -34,4 +34,15 @@ export class UserController {
       },
     } as CreditInfoResponseDto;
   }
+
+  @ApiOperation({
+    summary: '자기 자신의 정보 조회',
+    description: '사용자의 정보를 반환합니다.',
+  })
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  async getMe(@GetUser() user: UserDto): Promise<UserDto> {
+    this.logger.debug(`Called ${this.getMe.name}`);
+    return await this.userService.getUserInfo(user.userId);
+  }
 }
