@@ -160,20 +160,21 @@ export class ProfileController {
   })
   async updateProfile(
     @GetUser() user: UserDto,
-    @Body() profileUpdateRequestDto: ProfileUpdateRequestDto,
     @UploadedFile() image?: any,
+    @Body('nickname') nickname?: string,
+    @Body('presentation') presentation?: string,
   ): Promise<ProfileUpdateRequestDto> {
     try {
       let imageUrl: string;
 
       if (image) {
-        imageUrl = `${this.configService.get<string>('be_host')}/${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }
 
       const profile = await this.profileService.updateProfile(
         user.userId,
-        profileUpdateRequestDto.nickname,
-        profileUpdateRequestDto.presentation,
+        nickname,
+        presentation,
         imageUrl,
       );
 

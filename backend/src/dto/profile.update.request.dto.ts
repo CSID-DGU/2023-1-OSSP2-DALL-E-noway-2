@@ -12,7 +12,7 @@ export class ProfileUpdateRequestDto {
     format: 'binary',
   })
   @Optional()
-  imageUrl?: string;
+  image?: string;
 
   @ApiProperty({
     example: '닉네임1',

@@ -146,11 +146,6 @@ export class ProfileService {
       user.presentation = presentation;
     }
 
-    const profileUpdateDto = new ProfileUpdateRequestDto();
-    profileUpdateDto.nickname = user.nickname;
-    profileUpdateDto.presentation = user.presentation;
-    profileUpdateDto.imageUrl = user.imageUrl;
-
     await this.profileRepository.save(user);
     return user;
   }
