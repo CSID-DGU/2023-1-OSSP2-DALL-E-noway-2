@@ -10,7 +10,9 @@ import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
 import { ProfileModule } from './profile/profile.module';
 import { UtilModule } from './util/util.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -21,6 +23,10 @@ import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     AuthModule,
     UserModule,
