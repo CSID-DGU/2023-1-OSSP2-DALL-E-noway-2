@@ -102,8 +102,8 @@ export class DreamDiaryService {
 
     const totalLength = await feedQuery.getCount();
     const dreamDiaryFeeds = await feedQuery
-    .skip((currentPage - 1) * length)
-    .take(length)
+      .skip((currentPage - 1) * length)
+      .take(length)
       .getMany();
 
     const dreamDiaryFeedDto: DreamDiaryFeedDto[] = dreamDiaryFeeds.map(
@@ -174,55 +174,50 @@ export class DreamDiaryService {
   }
 
   /**
-   * 꿈일기 생성(카테고리 목록 가지고 오는 기능(ID,Name) + 크레딧 제한생성부분)
-   * @param dreamDiaryCreateRequestDto
+   * 꿈일기 생성 각 Body 내용을 받아서 dreamDiary에 저장
+   * @param title
+   * @param category
+   * @param dreamScore
+   * @param disclosureScope
+   * @param content
    * @param saveUserId
+   * @param imageUrl
+   * @returns
    */
 
   async creatDreamDiary(
-    dreamDiaryCreateRequestDto: DreamDiaryCreateRequestDto,
+    title: string,
+    category: number[],
+    dreamScore: number,
+    disclosureScope: DisclosureScopeType,
+    content: string,
     saveUserId: number,
-  ): Promise<CategoryResponseDto> {
-    const categories = await this.categoryRepository.find();
+    imageUrl?: string,
+  ): Promise<number> {
+    // const categories = await this.categoryRepository.find();
 
-    const categoryList: CategoryDto[] = categories.map((category) => {
-      const categoryDto: CategoryDto = {
-        categoryId: category.categoryId,
-        categoryName: category.categoryName,
-      };
-      return categoryDto;
-    });
+    // const categoryList: CategoryDto[] = categories.map((category) => {
+    //   const categoryDto: CategoryDto = {
+    //     categoryId: category.categoryId,
+    //     categoryName: category.categoryName,
+    //   };
+    //   return categoryDto;
+    // });
 
-    const categoryResponseDto: CategoryResponseDto = {
-      categories: categoryList,
-    }; //카테고리 목록 반환
-
-    const { title, category, dreamScore, imageUrl, disclosureScope, content } =
-      dreamDiaryCreateRequestDto;
+    // const categoryResponseDto: CategoryResponseDto = {
+    //   categories: categoryList,
+    // }; //카테고리 목록 반환
 
     const dreamDiary = new DreamDiary();
     const categoryRequests: DiaryCategory[] = [];
-
-    const formData = imageUrl;
-    const entries = Object.fromEntries(formData.entries());
-    const imageFile = entries['image'];
-
-    const file: Blob = imageFile as any;
-    if (file instanceof File) {
-      dreamDiary.imageUrl = file.name;
-    }
-    // 파일 이름 정보가 없는 경우 임의의 이름 저장
-    else {
-      dreamDiary.imageUrl = 'default.jpg';
-    }
 
     dreamDiary.userId = saveUserId;
     dreamDiary.title = title;
     dreamDiary.dreamScore = dreamScore;
     dreamDiary.disclosureScope = disclosureScope;
+    dreamDiary.createdAt = new Date();
     dreamDiary.content = content;
-    //크레딧 제한 생성 기능 추가(쿼리문 만들어서 createdAt부분.. 처리해야하는데..  )
-    //scheduler 사용? 현재 올라와 있는 이미지 구현 참고해야할듯?
+    dreamDiary.imageUrl = imageUrl;
 
     const result = await this.dreamDiaryRepository.insert(dreamDiary);
     const diaryId = result.identifiers[0].id as number;
@@ -238,7 +233,7 @@ export class DreamDiaryService {
 
     await this.diaryCategoryRepository.save(categoryRequests);
 
-    return categoryResponseDto;
+    return diaryId;
   }
   /**
    * 꿈일기 수정
@@ -248,11 +243,13 @@ export class DreamDiaryService {
    */
   async updateDreamDiary(
     diaryId: number,
-    dreamDiaryUpdateDto: DreamDiaryUpdateRequestDto,
-  ): Promise<DreamDiaryUpdateRequestDto> {
-    const { title, category, dreamScore, imageUrl, disclosureScope, content } =
-      dreamDiaryUpdateDto;
-
+    title: string,
+    category: number[],
+    dreamScore: number,
+    disclosureScope: DisclosureScopeType,
+    content: string,
+    imageUrl?: string,
+  ): Promise<void> {
     const dreamDiary = await this.dreamDiaryRepository.findOne({
       where: { diaryId: diaryId },
     });
@@ -264,29 +261,11 @@ export class DreamDiaryService {
 
     dreamDiary.title = title;
 
-    const updateCategories = category.map((categoryId) => {
-      const diaryCategory = new DiaryCategory();
-      diaryCategory.diaryId = diaryId;
-      diaryCategory.categoryId = categoryId;
-      return diaryCategory;
-    });
-
     dreamDiary.dreamScore = dreamScore;
     dreamDiary.disclosureScope = disclosureScope;
     dreamDiary.content = content;
-
-    const formData = imageUrl;
-    const entries = Object.fromEntries(formData.entries());
-    const imageFile = entries['image'];
-
-    const file: Blob = imageFile as any;
-    if (file instanceof File) {
-      dreamDiary.imageUrl = file.name;
-    }
-    // 파일 이름 정보가 없는 경우 임의의 이름 저장
-    else {
-      dreamDiary.imageUrl = uuidv4();
-    }
+    dreamDiary.updatedAt = new Date();
+    dreamDiary.imageUrl = imageUrl;
 
     // 카테고리 업데이트
     const categoryIds = category;
@@ -303,8 +282,6 @@ export class DreamDiaryService {
     }
 
     await this.dreamDiaryRepository.save(dreamDiary);
-
-    return dreamDiaryUpdateDto;
   }
 
   /**
@@ -329,14 +306,20 @@ export class DreamDiaryService {
   }
 
   /**
-   * 꿈일기좋아요 추가
+   * 꿈일기좋아요 추가 (완료)
    * @param diaryId
    * @param userId
    */
-  async addFavoriteDreamDiary(
-    diaryId: number,
-    userId: number,
-  ): Promise<void> {
+  async addFavoriteDreamDiary(diaryId: number, userId: number): Promise<void> {
+    const dreamDiary = await this.dreamDiaryRepository.findOne({
+      where: { diaryId: diaryId },
+    });
+
+    if (!dreamDiary) {
+      // 꿈일기를 찾지 못한 경우 예외 처리
+      throw new NotFoundException('존재하지 않는 꿈일기 입니다.');
+    }
+
     const addFavoriteDiary = new Favorite();
     addFavoriteDiary.id = diaryId;
     addFavoriteDiary.filterType = FilterType.DIARY; //default값 오류
@@ -361,7 +344,7 @@ export class DreamDiaryService {
   }
 
   /**
-   * 꿈일기 즐겨찾기 추가
+   * 꿈일기 즐겨찾기 추가(완료)
    * @param diaryId
    * @param userId
    */
@@ -369,6 +352,14 @@ export class DreamDiaryService {
     diaryId: number,
     userId: number,
   ): Promise<Bookmark> {
+    const dreamDiary = await this.dreamDiaryRepository.findOne({
+      where: { diaryId: diaryId },
+    });
+
+    if (!dreamDiary) {
+      // 꿈일기를 찾지 못한 경우 예외 처리
+      throw new NotFoundException('존재하지 않는 꿈일기 입니다.');
+    }
     const addBookmarkDiary = new Bookmark();
 
     addBookmarkDiary.id = diaryId;

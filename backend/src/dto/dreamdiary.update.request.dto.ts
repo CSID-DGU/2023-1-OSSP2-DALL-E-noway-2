@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 
@@ -18,10 +19,13 @@ export class DreamDiaryUpdateRequestDto {
   })
   dreamScore: number;
   @ApiProperty({
-    example: 'formData',
     description: '꿈일기 이미지',
+    required: false,
+    type: 'string',
+    format: 'binary',
   })
-  imageUrl?: FormData;
+  @Optional()
+  image?: string;
   @ApiProperty({
     example: DisclosureScopeType.PUBLIC,
     description: '제한범위',
