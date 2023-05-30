@@ -134,11 +134,8 @@ export class ProfileController {
     try {
       let imageUrl: string;
 
-      // if (image) {
-      //   imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
-      // }
       if (image) {
-        imageUrl = `${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }
 
       const profile = await this.profileService.updateProfile(
