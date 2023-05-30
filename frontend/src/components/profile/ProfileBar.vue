@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, type Ref } from 'vue';
+import { onMounted, ref, computed, type Ref, watch } from 'vue';
 import { getProfile } from '@/api/axios.custom';
 import type { Profile } from '@/types';
 import { useProfileStore } from '@/stores/profile.store';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import router from '@/router';
+
+const props = defineProps<{ userId: number }>();
 
 const profile: Ref<Profile> = ref({
   user: {
@@ -18,14 +21,19 @@ const profile: Ref<Profile> = ref({
 
 const { getUser, apiGetUser } = useMyInfoStore();
 
-const user = computed(() => getUser());
+const user = ref(getUser());
+
+const goProfileDetail = () => {
+  router.push({ name: 'profile-detail' });
+};
 
 onMounted(async () => {
   try {
     if (user.value.userId === 0) {
       await apiGetUser();
     }
-    const response = await getProfile(user.value.userId);
+    user.value = getUser();
+    const response = await getProfile(props.userId);
     if (response.status === 200) {
       profile.value = response.data;
       useProfileStore().setProfile(profile.value);
@@ -34,6 +42,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.log(error);
+    router.push({ name: 'not-found' });
   }
 });
 </script>
@@ -51,6 +60,12 @@ onMounted(async () => {
             :src="profile.user.imageUrl"
             alt="profile image"
           />
+        </div>
+      </div>
+
+      <div class="row-item" style="flex: 1" v-if="user.userId === props.userId">
+        <div class="col-group" @click="goProfileDetail()">
+          <div class="col-item"><h1>프로필 상세</h1></div>
         </div>
       </div>
 
