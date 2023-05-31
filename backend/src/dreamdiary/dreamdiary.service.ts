@@ -158,7 +158,7 @@ export class DreamDiaryService {
     responseDto.diaryId = dreamDiary.diaryId;
     responseDto.title = dreamDiary.title;
     responseDto.content = dreamDiary.content;
-    responseDto.category = getCategory; //category값 가지고
+    responseDto.category = getCategory;
     responseDto.dreamScore = dreamDiary.dreamScore;
     responseDto.viewCount = dreamDiary.viewCount;
     responseDto.user = {
@@ -194,22 +194,11 @@ export class DreamDiaryService {
     saveUserId: number,
     imageUrl?: string,
   ): Promise<number> {
-    // const categories = await this.categoryRepository.find();
-
-    // const categoryList: CategoryDto[] = categories.map((category) => {
-    //   const categoryDto: CategoryDto = {
-    //     categoryId: category.categoryId,
-    //     categoryName: category.categoryName,
-    //   };
-    //   return categoryDto;
-    // });
-
-    // const categoryResponseDto: CategoryResponseDto = {
-    //   categories: categoryList,
-    // }; //카테고리 목록 반환
+    const user = await this.userRepository.findOne({
+      where: { userId: saveUserId },
+    });
 
     const dreamDiary = new DreamDiary();
-    const categoryRequests: DiaryCategory[] = [];
 
     dreamDiary.userId = saveUserId;
     dreamDiary.title = title;
@@ -217,29 +206,50 @@ export class DreamDiaryService {
     dreamDiary.disclosureScope = disclosureScope;
     dreamDiary.createdAt = new Date();
     dreamDiary.content = content;
-    dreamDiary.imageUrl = imageUrl;
+    if (imageUrl) {
+      dreamDiary.imageUrl = imageUrl;
+    } else {
+      dreamDiary.imageUrl = 'default@.com';
+    }
 
-    const result = await this.dreamDiaryRepository.insert(dreamDiary);
-    const diaryId = result.identifiers[0].id as number;
+    const result = await this.dreamDiaryRepository.save(dreamDiary);
+    const diaryId = result.diaryId;
 
-    const categoryIds = category;
+    const categoryArray = Array.isArray(category) ? category : [category];
+    const categories = categoryArray.map((value) =>
+      parseInt(String(value).replace(',', ' '), 10),
+    );
 
-    for (const categoryId of categoryIds) {
+    for (const categoryId of categories) {
+      const category = await this.categoryRepository.findOne({
+        where: { categoryId: categoryId },
+      });
+      if (!category) {
+        throw new Error(`Category 목록을 찾을 수 없습니다: ${categoryId}`);
+      }
       const diaryCategory = new DiaryCategory();
       diaryCategory.diaryId = diaryId;
       diaryCategory.categoryId = categoryId;
-      categoryRequests.push(diaryCategory);
+      console.log(categoryId);
+      await this.diaryCategoryRepository.save(diaryCategory);
     }
 
-    await this.diaryCategoryRepository.save(categoryRequests);
+    user.credits += 1;
 
+    await this.userRepository.save(user);
+    console.log(category);
     return diaryId;
   }
+
   /**
    * 꿈일기 수정
    * @param diaryId
-   * @param dreamDiaryUpdateDto
-   * @returns
+   * @param title
+   * @param category
+   * @param dreamScore
+   * @param disclosureScope
+   * @param content
+   * @param imageUrl
    */
   async updateDreamDiary(
     diaryId: number,
@@ -260,21 +270,28 @@ export class DreamDiaryService {
     }
 
     dreamDiary.title = title;
-
     dreamDiary.dreamScore = dreamScore;
     dreamDiary.disclosureScope = disclosureScope;
     dreamDiary.content = content;
     dreamDiary.updatedAt = new Date();
     dreamDiary.imageUrl = imageUrl;
 
-    // 카테고리 업데이트
-    const categoryIds = category;
-
     // 기존의 diary_category 레코드 삭제
     await this.diaryCategoryRepository.delete({ diaryId });
 
     // 새로운 diary_category 레코드 생성
-    for (const categoryId of categoryIds) {
+    const categoryArray = Array.isArray(category) ? category : [category]; //
+    const categories = categoryArray.map((value) =>
+      parseInt(String(value).replace(',', ' '), 10),
+    );
+
+    for (const categoryId of categories) {
+      const category = await this.categoryRepository.findOne({
+        where: { categoryId: categoryId },
+      });
+      if (!category) {
+        throw new Error(`Category 목록을 찾을 수 없습니다: ${categoryId}`);
+      }
       const diaryCategory = new DiaryCategory();
       diaryCategory.diaryId = diaryId;
       diaryCategory.categoryId = categoryId;
@@ -322,13 +339,11 @@ export class DreamDiaryService {
 
     const addFavoriteDiary = new Favorite();
     addFavoriteDiary.id = diaryId;
-    addFavoriteDiary.filterType = FilterType.DIARY; //default값 오류
+    addFavoriteDiary.filterType = FilterType.DIARY;
     addFavoriteDiary.userId = userId;
     addFavoriteDiary.createdAt = new Date();
 
     await this.favoriteRepository.save(addFavoriteDiary);
-
-    // return await this.favoriteRepository.save(favoriteDiary);
   }
 
   /**
@@ -348,10 +363,7 @@ export class DreamDiaryService {
    * @param diaryId
    * @param userId
    */
-  async addBookmarkDreamDiary(
-    diaryId: number,
-    userId: number,
-  ): Promise<Bookmark> {
+  async addBookmarkDreamDiary(diaryId: number, userId: number): Promise<void> {
     const dreamDiary = await this.dreamDiaryRepository.findOne({
       where: { diaryId: diaryId },
     });
@@ -367,9 +379,7 @@ export class DreamDiaryService {
     addBookmarkDiary.createdAt = new Date();
     addBookmarkDiary.userId = userId;
 
-    const bookMarkDiary = this.bookMarkRepository.create(addBookmarkDiary);
-
-    return await this.bookMarkRepository.save(bookMarkDiary);
+    await this.bookMarkRepository.save(addBookmarkDiary);
   }
 
   /**

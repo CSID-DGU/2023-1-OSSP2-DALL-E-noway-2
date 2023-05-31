@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   Logger,
   Param,
+  ParseArrayPipe,
   ParseEnumPipe,
   ParseIntPipe,
   Post,
@@ -144,7 +145,7 @@ export class DreamDiaryController {
   async createDreamDiary(
     @GetUser() user: UserDto,
     @Body('title') title: string,
-    @Body('category') category: number[],
+    @Body('category', ParseArrayPipe) category: number[],
     @Body('dreamScore') dreamScore: number,
     @Body('disclosureScope') disclosureScope: DisclosureScopeType,
     @Body('content') content: string,
@@ -152,7 +153,8 @@ export class DreamDiaryController {
   ): Promise<number> {
     try {
       let imageUrl: string;
-
+      console.log(category);
+      console.log(typeof category);
       if (image) {
         imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }
@@ -203,7 +205,7 @@ export class DreamDiaryController {
   async updateDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
     @Body('title') title: string,
-    @Body('category') category: number[],
+    @Body('category', ParseArrayPipe) category: number[],
     @Body('dreamScore') dreamScore: number,
     @Body('disclosureScope') disclosureScope: DisclosureScopeType,
     @Body('content') content: string,
@@ -304,7 +306,7 @@ export class DreamDiaryController {
   async addBookmarkDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
     @GetUser() user: UserDto,
-  ): Promise<Bookmark> {
+  ): Promise<void> {
     try {
       return await this.dreamdiaryService.addBookmarkDreamDiary(
         diaryId,
