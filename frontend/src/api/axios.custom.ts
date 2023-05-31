@@ -39,3 +39,25 @@ export const getMyInfo = async () => {
   const response = await axiosInstance.get('/api/users/me');
   return response;
 };
+
+export const getFollowers = async (
+  userId: number,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/followers/?page=${page}&length=${length}`,
+  );
+  return response;
+};
+
+export const getFollowings = async (
+  userId: number,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/followings?page=${page}&length=${length}`,
+  );
+  return response;
+};
