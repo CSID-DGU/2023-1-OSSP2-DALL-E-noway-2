@@ -29,6 +29,11 @@ export interface User {
   imageUrl: string;
 }
 
+export interface FollowUser {
+  user: User;
+  isFollowed: boolean;
+}
+
 export interface Profile {
   user: User;
   followerCount: number;

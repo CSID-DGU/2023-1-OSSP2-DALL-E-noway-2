@@ -3,18 +3,22 @@ import { RouterLink, useRoute } from 'vue-router';
 import { FollowType } from '@/types/enum/follow.type';
 import { onMounted, ref, type Ref } from 'vue';
 import { getFollowers, getFollowings } from '@/api/axios.custom';
-import type { User } from '@/types';
+import type { User, FollowUser } from '@/types';
 // @ts-ignore
 import InfiniteLoading from 'v3-infinite-loading';
 import 'v3-infinite-loading/lib/style.css';
+import { useMyInfoStore } from '@/stores/my.info.store';
 
 const { params } = useRoute();
 const userId = Number(params.userId);
 
+const { getUser } = useMyInfoStore();
+const mine = ref(getUser());
+
 const followType = ref(params.followType as FollowType);
 
 interface FollowList {
-  follows: User[];
+  follows: FollowUser[];
   totalLength: number;
 }
 const followList: Ref<FollowList> = ref({
@@ -26,14 +30,14 @@ const changeToFollower = async () => {
   if (followType.value === FollowType.FOLLOWER) return;
   followType.value = FollowType.FOLLOWER;
   await fetchFollows(1);
-  console.log(followList.value);
+  // console.log(followList.value);
 };
 
 const changeToFollowing = async () => {
   if (followType.value === FollowType.FOLLOWING) return;
   followType.value = FollowType.FOLLOWING;
   await fetchFollows(1);
-  console.log(followList.value);
+  // console.log(followList.value);
 };
 
 const fetchFollows = async (page: number) => {
@@ -57,24 +61,37 @@ const fetchFollows = async (page: number) => {
   }
   for (let i = 1; i < 12; i++) {
     followList.value.follows.push({
-      userId: i,
-      nickname: 'test',
-      imageUrl: 'https://avatars.githubusercontent.com/u/31301280?s=200&v=4',
+      user: {
+        userId: i,
+        nickname: 'test',
+        imageUrl: 'https://avatars.githubusercontent.com/u/31301280?s=200&v=4',
+      },
+      isFollowed: true ? i % 2 === 0 : false,
     });
   }
+  console.log('followList', followList.value);
+  console.log('mine', mine);
 };
 
 const loadMore = async () => {
-  console.log('loadMore');
-  console.log(followList.value.follows.length / 10 + 1);
+  // console.log('loadMore');
+  // console.log(followList.value.follows.length / 10 + 1);
   await fetchFollows(followList.value.follows.length / 10 + 1);
 };
 
 // 해당 뷰로 진입할 때마다 params의 followType을 가져와서, followType이 FOLLOWING이면
 // getFollowings API를 호출하고, FOLLOWER이면 getFollowers API를 호출한다.
 onMounted(async () => {
+  try {
+    if (mine.value.userId === 0) {
+      await useMyInfoStore().apiGetUser();
+      mine.value = getUser();
+    }
+  } catch (error) {
+    console.log(error);
+  }
   await fetchFollows(1);
-  console.log(followList.value);
+  // console.log(followList.value);
 });
 </script>
 
@@ -108,20 +125,48 @@ onMounted(async () => {
     <div class="follow-list">
       <div
         v-for="follow in followList.follows"
-        :key="follow.userId"
+        :key="follow.user.userId"
         class="follow-card"
       >
         <!-- 1행: 이미지 -->
         <div class="follow-image">
-          <img :src="follow.imageUrl" alt="Profile Image" />
+          <img :src="follow.user.imageUrl" alt="Profile Image" />
         </div>
         <!-- 2행: 닉네임 -->
         <div class="follow-info">
-          <div class="name">{{ follow.nickname }}</div>
+          <div class="name">{{ follow.user.nickname }}</div>
         </div>
         <!-- 3행: 팔로우 버튼 -->
         <div class="follow-button">
-          <button class="follow-button-label">팔로우</button>
+          <button
+            class="follow-button-label"
+            v-if="mine.userId === userId && followType === FollowType.FOLLOWER"
+          >
+            삭제
+          </button>
+          <button
+            v-else-if="mine.userId !== userId && !follow.isFollowed"
+            class="follow-button-label"
+            :class="{
+              'other-not-followed': !follow.isFollowed,
+            }"
+          >
+            팔로우
+          </button>
+          <button
+            v-else-if="mine.userId !== userId && follow.isFollowed"
+            class="follow-button-label"
+          >
+            팔로잉
+          </button>
+          <button
+            v-else-if="
+              mine.userId === userId && followType === FollowType.FOLLOWING
+            "
+            class="follow-button-label"
+          >
+            팔로잉
+          </button>
         </div>
       </div>
       <InfiniteLoading @infinite="loadMore"></InfiniteLoading>
@@ -186,5 +231,9 @@ div {
   border-radius: 4px;
   cursor: pointer;
   @apply rounded-full;
+}
+
+.follow-button-label.other-not-followed {
+  @apply bg-[#0098FD];
 }
 </style>
