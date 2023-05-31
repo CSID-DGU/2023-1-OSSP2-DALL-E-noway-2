@@ -71,11 +71,31 @@ export class BoardService {
       throw new NotFoundException(
         `Could not find post with postId, userId / ${postRequestDto.postId}, ${postRequestDto.userId}`,
       );
+    } else {
+      // 삭제가 성공했다는 말은 해당 게시글이 삭제되었다는 말이므로 해당 게시글의 좋아요, 북마크도 삭제함.
+      // 게시글 삭제시 해당 게시글의 좋아요 삭제
+      await this.favoriteRepository
+        .createQueryBuilder('favorite')
+        .delete()
+        .where('id = :postId', { postId: postRequestDto.postId })
+        .andWhere('userId = :userId', { userId: postRequestDto.userId })
+        .execute();
+
+      // 게시글 삭제시 해당 게시글의 좋아요 삭제
+      await this.bookmarkRepository
+        .createQueryBuilder('bookmark')
+        .delete()
+        .where('id = :postId', { postId: postRequestDto.postId })
+        .andWhere('userId = :userId', { userId: postRequestDto.userId })
+        .execute();
     }
+
     return result;
   }
 
   // 게시글 좋아요 설정 기능 / 게시글의 ID를 받아와 해당하는 게시글의 좋아요를 설정하는 API
+  // 좋아요, 북마크 시 request로 넘어오는 게시글의 id와 type이 옳은지(id에 해당하는 게시글과 id가 일치하지 않을때)는
+  // 확인하는 코드는 따로 추가 안해도 괜찮겠죠? 코드라인이 길어지는 것에 비해 불필요한 코드라고 생각해서 생략했습니다.
   async postLike(postLikeDto: PostLikeDto): Promise<Favorite> {
     const board = await this.favoriteRepository.create(postLikeDto);
     board.createdAt = new Date();
@@ -88,7 +108,7 @@ export class BoardService {
 
     if (result.affected === 0) {
       throw new NotFoundException(
-        `Could not find like post with postID ${postLikeDto.id}`,
+        `Could not find like post with postID, post_type / ${postLikeDto.id},${postLikeDto.filterType}`,
       );
     }
     return result;
@@ -107,7 +127,7 @@ export class BoardService {
 
     if (result.affected === 0) {
       throw new NotFoundException(
-        `Could not find bookmark post with postID ${postBookmarkDto.id}`,
+        `Could not find bookmark post with postID, post_type / ${postBookmarkDto.id},${postBookmarkDto.filterType}`,
       );
     }
     return result;
