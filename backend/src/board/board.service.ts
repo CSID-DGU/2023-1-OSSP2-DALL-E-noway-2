@@ -59,11 +59,18 @@ export class BoardService {
   }
 
   // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제하는 API
-  async postDelete(postId: number) {
-    const result = await this.boardRepository.delete(postId);
+  async postDelete(postRequestDto: PostRequestDto) {
+    const result = await this.boardRepository
+      .createQueryBuilder('board')
+      .delete()
+      .where('postId = :postId', { postId: postRequestDto.postId })
+      .andWhere('userId = :userId', { userId: postRequestDto.userId })
+      .execute();
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Could not find post with ID ${postId}`);
+      throw new NotFoundException(
+        `Could not find post with postId, userId / ${postRequestDto.postId}, ${postRequestDto.userId}`,
+      );
     }
     return result;
   }

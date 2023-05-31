@@ -5,29 +5,39 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Inject,
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { existsSync, mkdir, mkdirSync } from 'fs';
+import { diskStorage } from 'multer';
 import { GetUser } from 'src/decorator/user.decorator';
 import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
 import { UserDto } from 'src/dto/user.dto';
-import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
 import { FilterType } from 'src/enum/filter.type';
 import { BoardService } from './board.service';
+import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Board')
 @Controller('boards')
 export class BoardController {
-  constructor(private readonly boardService: BoardService) {}
+  constructor(
+    private readonly boardService: BoardService,
+    @Inject(ConfigService) private configService: ConfigService,
+  ) {}
 
   @ApiOperation({
     summary: '게시글 생성',
@@ -35,18 +45,40 @@ export class BoardController {
       'post_type에 해당하는 게시판에 PostRequestDto에서 받아온 정보를 바탕으로 새로운 게시글을 생성합니다.',
   })
   @Post('/posts/:post_type')
+  @UseInterceptors(
+    FileInterceptor(`Image`, {
+      storage: diskStorage({
+        destination(req, file, callback) {
+          const path = 'uploads';
+          if (!existsSync(path)) {
+            mkdirSync(path);
+          }
+          callback(null, path);
+        },
+        filename(req, file, callback) {
+          callback(null, `${uuidv4()}.${file.mimetype.split('/')[1]}`);
+        },
+      }),
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
   @UseGuards(AuthGuard('jwt'))
   async createPost(
     @Body() postRequestDto: PostRequestDto,
-    @Param('post_type') boardType: BoardType,
     @GetUser() user: UserDto,
+    @Param('post_type') boardType: BoardType,
+    @UploadedFile() Image?: any,
   ) {
     postRequestDto.boardType = boardType;
     postRequestDto.userId = user.userId;
+    if (Image) {
+      postRequestDto.imageUrl = `${this.configService.get<string>('be_host')}/${
+        Image.path
+      }`;
+    }
     const result = await this.boardService.createPost(postRequestDto);
     return result.postId;
   }
-
   @ApiOperation({
     summary: '게시글 세부내용 조회',
     description: 'post_id에 해당하는 게시글의 세부사항을 조회합니다.',
@@ -71,14 +103,23 @@ export class BoardController {
     return await this.boardService.postUpdate(postRequestDto);
   }
 
+  // @ApiOperation({
+  //   summary: '게시글 목록 조회',
+  //   description: 'post_type에 해당하는 게시판의 게시글 목록을 조회합니다.',
+  // })
+  // @Get('/posts/:post_type')
+
   @ApiOperation({
     summary: '게시글 삭제',
     description: 'post_id에 해당하는 게시글을 삭제합니다.',
   })
   @Delete('/posts/:post_id')
   @UseGuards(AuthGuard('jwt'))
-  async postDelete(@Param('post_id') postId: number) {
-    return await this.boardService.postDelete(postId);
+  async postDelete(@Param('post_id') postId: number, @GetUser() user: UserDto) {
+    const postRequestDto = new PostRequestDto();
+    postRequestDto.postId = postId;
+    postRequestDto.userId = user.userId;
+    return await this.boardService.postDelete(postRequestDto);
   }
 
   //URL을 통해 받아오는 BoardType과 FilterType을 매칭시켜주는 함수
