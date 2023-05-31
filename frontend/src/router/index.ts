@@ -94,7 +94,7 @@ const router = createRouter({
       component: () => import('@/views/LikeView.vue'),
     },
     {
-      path: '/profile/follow',
+      path: '/profile/follow/:userId/:followType',
       name: 'follow',
       component: () => import('@/views/FollowView.vue'),
     },

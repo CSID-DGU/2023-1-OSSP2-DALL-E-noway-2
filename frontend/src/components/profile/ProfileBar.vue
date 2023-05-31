@@ -5,6 +5,7 @@ import type { Profile } from '@/types';
 import { useProfileStore } from '@/stores/profile.store';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import router from '@/router';
+import { FollowType } from '@/types/enum/follow.type';
 
 const props = defineProps<{ userId: number }>();
 
@@ -25,6 +26,10 @@ const user = ref(getUser());
 
 const goProfileDetail = () => {
   router.push({ name: 'profile-detail' });
+};
+
+const goFollowView = (followType: FollowType) => {
+  router.push({ name: 'follow', params: { userId: props.userId, followType } });
 };
 
 onMounted(async () => {
@@ -70,14 +75,14 @@ onMounted(async () => {
       </div>
 
       <div class="row-item">
-        <div class="col-group">
+        <div class="col-group" @click="goFollowView(FollowType.FOLLOWER)">
           <div class="col-item">{{ profile.followerCount }}</div>
           <div class="col-item">Followers</div>
         </div>
       </div>
 
       <div class="row-item">
-        <div class="col-group">
+        <div class="col-group" @click="goFollowView(FollowType.FOLLOWING)">
           <div class="col-item">{{ profile.followingCount }}</div>
           <div class="col-item">Followings</div>
         </div>
