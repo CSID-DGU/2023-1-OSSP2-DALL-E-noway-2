@@ -1,5 +1,5 @@
 import type { Category } from '..';
-import type { DisclosureScopeType } from '../enum/disclosure.scope';
+import type { DisclosureScopeType } from '../enum/disclosure.scope.type';
 
 export interface CategoryResponseDto {
   categories: Category[];

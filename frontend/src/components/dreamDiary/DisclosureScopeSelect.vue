@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope';
+import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 
 defineProps(['disclosureScope']);
 defineEmits(['update:disclosureScope']);

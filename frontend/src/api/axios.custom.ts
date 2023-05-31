@@ -23,3 +23,9 @@ export const getCreditInfo = async () => {
   const response = await axiosInstance.get(getCreditInfoUrl);
   return response;
 };
+
+const postNewPostUrl = '/api/boards/posts';
+export const postNewPost = async (newPostRequest: FormData) => {
+  const response = await axiosInstance.postForm(postNewPostUrl, newPostRequest);
+  return response;
+};

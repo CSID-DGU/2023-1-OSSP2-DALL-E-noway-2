@@ -2,45 +2,35 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import StarRating from '@/components/dreamDiary/StarRating.vue';
-import { postDreamDiary } from '@/api/axios.custom';
-import type { Category } from '@/types/index';
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
+import { postDreamDiary, postNewPost } from '@/api/axios.custom';
+import type { Category, Post } from '@/types/index';
 import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
 import router from '@/router';
+import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
+import { usePostCreateStore } from '@/stores/post.create.store';
 
-// const router = useRouter();
+const post = usePostCreateStore().getPost();
 
-const diary = useDiaryCreateStore().getDiary();
-
-// const diary = ref({
-//   title: '',
-//   category: '',
-//   dreamScore: 0,
-//   image: '',
-//   disclosureScope: '',
-//   content: '',
-// });
-
-const temporarySaveDiary = () => {
-  console.log(diary);
+const temporarySavPost = () => {
+  console.log(post);
 };
 
-const submitDiary = async () => {
-  console.log(diary);
+const submitPost = async () => {
+  console.log(post);
   // const formData = new FormData();
-  // formData.append('title', diary.value.title);
-  // formData.append('category', diary.value.category);
-  // formData.append('dreamScore', diary.value.dreamScore.toString());
-  // formData.append('image', diary.value.image);
-  // formData.append('disclosureScope', diary.value.disclosureScope);
-  // formData.append('content', diary.value.content);
-  // const response = await postDreamDiary(formData as FormData);
+  // formData.append('title', post.value.title);
+  // // post.value.image.forEach((image) => {
+  // //   formData.append('image', image);
+  // // });
+  // formData.append('disclosureScope', post.value.disclosureScope);
+  // formData.append('content', post.value.content);
+  // const response = await postNewPost(formData as FormData);
   // if (response.status === 201) {
-  //   router.push({ name: 'dream-diary' });
+  //   router.push({ name: 'post' });
   // } else {
   //   console.log(response);
   // }
@@ -48,7 +38,7 @@ const submitDiary = async () => {
 
 const onInputImage = (event: any) => {
   for (let i = 0; i < event.target.files.length; i++) {
-    diary.image.push(event.target.files[i] as Blob);
+    post.image.push(event.target.files[i] as Blob);
   }
 };
 
@@ -57,41 +47,27 @@ const fileInput = ref<HTMLElement | null>(null);
 const handleUploadClick = () => {
   fileInput.value?.click();
 };
-
-const goToImageCreation = () => {
-  router.push({ name: 'generate-image' });
-};
 </script>
 
 <template>
   <div class="wrap">
-    <form @submit.prevent="submitDiary" class="form">
+    <form @submit.prevent="submitPost" class="form">
       <div class="form-group">
         <input
           class="title"
           type="text"
           id="title"
-          v-model="diary.title"
+          v-model="post.title"
           placeholder="제목을 입력해주세요."
           required
         />
-      </div>
-      <div class="form-group">
-        <div class="row-group">
-          <CategorySelect class="row-item" v-model:category="diary.category" />
-          <WhiteBGButton
-            class="row-item"
-            @click="goToImageCreation"
-            :text="'이미지 생성'"
-          />
-        </div>
       </div>
 
       <div class="form-group">
         <div class="row-group">
           <DisclosureScopeSelect
             class="row-item"
-            v-model:disclosureScope="diary.disclosureScope"
+            v-model:disclosureScope="post.disclosureScope"
           />
 
           <div class="row-item">
@@ -111,21 +87,19 @@ const goToImageCreation = () => {
         </div>
       </div>
 
-      <StarRating v-model:dreamScore="diary.dreamScore" />
-
       <div class="form-group">
         <textarea
           id="content"
           class="content"
-          v-model="diary.content"
+          v-model="post.content"
           placeholder="내용을 입력하세요."
           required
         ></textarea>
       </div>
 
       <div class="button-group">
-        <BlackBGButton @click="temporarySaveDiary" :text="'임시저장'" />
-        <BlackBGButton @click="submitDiary" type="submit" :text="'게시'" />
+        <BlackBGButton @click="temporarySavPost" :text="'임시저장'" />
+        <BlackBGButton @click="submitPost" type="submit" :text="'게시'" />
       </div>
     </form>
   </div>

@@ -45,14 +45,14 @@ const router = createRouter({
       component: () => import('@/views/BoardListView.vue'),
     },
     {
-      path: '/board/new',
-      name: 'new-board',
-      component: () => import('@/views/NewBoardView.vue'),
+      path: '/post/new',
+      name: 'new-post',
+      component: () => import('@/views/NewPostView.vue'),
     },
     {
-      path: '/board/:boardId',
-      name: 'board',
-      component: () => import('@/views/BoardView.vue'),
+      path: '/post/:postId',
+      name: 'post',
+      component: () => import('@/views/PostView.vue'),
       children: [
         {
           path: 'comment',
