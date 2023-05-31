@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
@@ -21,13 +22,14 @@ export class PostRequestDto {
 
   boardType: BoardType;
 
-  createdAt: Date;
-
   @ApiProperty({
     example: 'https://example.com',
     description: '유저 프로필 이미지 URL',
+    required: false,
+    format: 'binary',
   })
-  imageUrl: string;
+  @Optional()
+  image: string;
 
   @ApiProperty({
     example: 'PRIVATE',

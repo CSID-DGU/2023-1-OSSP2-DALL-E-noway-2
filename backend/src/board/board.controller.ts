@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { existsSync, mkdir, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { GetUser } from 'src/decorator/user.decorator';
@@ -30,6 +30,7 @@ import { FilterType } from 'src/enum/filter.type';
 import { BoardService } from './board.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
+import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 
 @ApiTags('Board')
 @Controller('boards')
@@ -46,7 +47,7 @@ export class BoardController {
   })
   @Post('/posts/:post_type')
   @UseInterceptors(
-    FileInterceptor(`Image`, {
+    FileInterceptor(`image`, {
       storage: diskStorage({
         destination(req, file, callback) {
           const path = 'uploads';
@@ -62,18 +63,27 @@ export class BoardController {
     }),
   )
   @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: PostRequestDto,
+  })
   @UseGuards(AuthGuard('jwt'))
   async createPost(
     @Body() postRequestDto: PostRequestDto,
-    @GetUser() user: UserDto,
+    @Body('title') title: string,
+    @Body('content') content: string,
+    @Body('disclosureScope') disclosureScope: DisclosureScopeType,
     @Param('post_type') boardType: BoardType,
-    @UploadedFile() Image?: any,
+    @GetUser() user: UserDto,
+    @UploadedFile() image?: any,
   ) {
+    postRequestDto.title = title;
+    postRequestDto.content = content;
+    postRequestDto.disclosureScope = disclosureScope;
     postRequestDto.boardType = boardType;
     postRequestDto.userId = user.userId;
-    if (Image) {
-      postRequestDto.imageUrl = `${this.configService.get<string>('be_host')}/${
-        Image.path
+    if (image) {
+      postRequestDto.image = `${this.configService.get<string>('beHost')}/${
+        image.path
       }`;
     }
     const result = await this.boardService.createPost(postRequestDto);

@@ -55,7 +55,7 @@ export class PostResponseDto {
     example: 'https://example.com',
     description: '유저 프로필 이미지 URL',
   })
-  imageUrl: string;
+  image: string;
 
   @ApiProperty({
     example: 'PRIVATE',
