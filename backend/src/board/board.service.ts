@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
+import { PostResponseDto } from 'src/dto/post.response.dto';
 import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
@@ -29,13 +30,14 @@ export class BoardService {
   }
 
   // 게시글 세부내용 조회 기능 / post_id에 해당하는 게시글의 세부사항을 조회하는 API
-  async postShow(postId: number) {
+  async postShow(postId: number): Promise<PostResponseDto> {
     const post = await this.boardRepository.findOne({ where: { postId } });
-
     if (!post) {
       throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
-    return post;
+    const postResponseDto = new PostResponseDto();
+    Object.assign(postResponseDto, post);
+    return postResponseDto;
   }
 
   // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API
