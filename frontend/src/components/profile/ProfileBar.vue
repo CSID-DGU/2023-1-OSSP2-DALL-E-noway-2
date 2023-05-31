@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, type Ref, watch } from 'vue';
+import { onMounted, ref, type Ref } from 'vue';
 import { getProfile } from '@/api/axios.custom';
 import type { Profile } from '@/types';
 import { useProfileStore } from '@/stores/profile.store';

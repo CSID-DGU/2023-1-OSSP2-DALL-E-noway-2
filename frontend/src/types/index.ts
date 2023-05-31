@@ -29,6 +29,7 @@ export interface User {
   imageUrl: string;
 }
 
+// FIXME: 응답 DTO에도 적용
 export interface FollowUser {
   user: User;
   isFollowed: boolean;

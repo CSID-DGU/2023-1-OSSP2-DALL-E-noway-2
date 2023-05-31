@@ -30,14 +30,12 @@ const changeToFollower = async () => {
   if (followType.value === FollowType.FOLLOWER) return;
   followType.value = FollowType.FOLLOWER;
   await fetchFollows(1);
-  // console.log(followList.value);
 };
 
 const changeToFollowing = async () => {
   if (followType.value === FollowType.FOLLOWING) return;
   followType.value = FollowType.FOLLOWING;
   await fetchFollows(1);
-  // console.log(followList.value);
 };
 
 const fetchFollows = async (page: number) => {
@@ -66,16 +64,14 @@ const fetchFollows = async (page: number) => {
         nickname: 'test',
         imageUrl: 'https://avatars.githubusercontent.com/u/31301280?s=200&v=4',
       },
-      isFollowed: true ? i % 2 === 0 : false,
+      // FIXME: 임시로 isFollowed를 true, false로 설정
+      // eslint-disable-next-line no-unneeded-ternary
+      isFollowed: i % 2 === 0 ? true : false,
     });
   }
-  console.log('followList', followList.value);
-  console.log('mine', mine);
 };
 
 const loadMore = async () => {
-  // console.log('loadMore');
-  // console.log(followList.value.follows.length / 10 + 1);
   await fetchFollows(followList.value.follows.length / 10 + 1);
 };
 
@@ -91,7 +87,6 @@ onMounted(async () => {
     console.log(error);
   }
   await fetchFollows(1);
-  // console.log(followList.value);
 });
 </script>
 
