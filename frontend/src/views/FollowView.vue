@@ -47,37 +47,22 @@ const fetchFollows = async (page: number) => {
     } else {
       response = await getFollowings(userId, page, 10);
     }
-    // response.data.follows.map((follow: User) => {
-    //   follow.imageUrl = follow.imageUrl =
-    //     'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080';
-    // });
-    // followList.value = {
-    //   follows: response.data.follows,
-    //   totalLength: response.data.totalLength,
-    // };
+    followList.value.follows.push(...response.data.follows);
+    followList.value.totalLength = response.data.totalLength;
   } catch (error) {
     console.log(error);
   }
-  for (let i = 1; i < 10; i++) {
-    followList.value.follows.push({
-      user: {
-        userId: i,
-        nickname: 'test',
-        imageUrl: 'https://avatars.githubusercontent.com/u/31301280?s=200&v=4',
-      },
-      // FIXME: 임시로 isFollowed를 true, false로 설정
-      // eslint-disable-next-line no-unneeded-ternary
-      isFollowed: i % 2 === 0 ? true : false,
-    });
-  }
-  console.log(followList);
 };
 
-const loadMore = async () => {
-  console.log('loadMore');
-  ++curPage.value;
-  console.log(curPage.value);
+// @ts-ignore
+const loadMore = async ($state) => {
   await fetchFollows(curPage.value + 1);
+  if (followList.value.follows.length >= followList.value.totalLength) {
+    $state.complete();
+  } else {
+    $state.loaded();
+  }
+  ++curPage.value;
 };
 
 // 해당 뷰로 진입할 때마다 params의 followType을 가져와서, followType이 FOLLOWING이면
@@ -125,16 +110,16 @@ onMounted(async () => {
     <div class="follow-list">
       <div
         v-for="follow in followList.follows"
-        :key="follow.user.userId"
+        :key="follow.userId"
         class="follow-card"
       >
         <!-- 1행: 이미지 -->
         <div class="follow-image">
-          <img :src="follow.user.imageUrl" alt="Profile Image" />
+          <img :src="follow.imageUrl" alt="Profile Image" />
         </div>
         <!-- 2행: 닉네임 -->
         <div class="follow-info">
-          <div class="name">{{ follow.user.nickname }}</div>
+          <div class="name">{{ follow.nickname }}</div>
         </div>
         <!-- 3행: 팔로우 버튼 -->
         <div class="follow-button">
@@ -181,6 +166,7 @@ div {
 
 .wrap {
   @apply w-full flex flex-col justify-center h-full z-[1];
+  @apply text-white;
 }
 
 .follow-bar {
