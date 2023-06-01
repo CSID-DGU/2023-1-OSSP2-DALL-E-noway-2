@@ -32,6 +32,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
+import { FollowUserDto } from 'src/dto/follow.user.dto';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -346,5 +347,41 @@ export class ProfileController {
       }
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로잉 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로우 목록에서 로그인한 유저의 팔로우 여부를 조회해서 해당 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/following')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowingInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserDto[]> {
+    const responseDto = await this.profileService.getFollowingInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로워 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로워 목록에서 로그인한 유저의 해당 유저 팔로우 여부를 조회해서 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/follower')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowerInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserDto[]> {
+    const responseDto = await this.profileService.getFollowerInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
   }
 }
