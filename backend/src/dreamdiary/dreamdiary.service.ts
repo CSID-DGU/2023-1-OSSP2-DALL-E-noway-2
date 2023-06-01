@@ -70,7 +70,7 @@ export class DreamDiaryService {
         'author.nickname',
         'dream_diary.viewCount',
         'dream_diary.imageUrl',
-        'dream_diary.created_at',
+        'dream_diary.createdAt',
       ])
       .where('dream_diary.disclosure_scope = :PUBLIC', {
         PUBLIC: DisclosureScopeType.PUBLIC,
@@ -81,22 +81,22 @@ export class DreamDiaryService {
 
     if (searchType === SearchType.NONE) {
       feedQuery.andWhere(
-        'dream_diary.title =:keyWord Or dream_diary.nikname =:keyWord Or dream_diary.content =:keyWord',
+        'dream_diary.title LIKE :keyWord OR author.nickname LIKE :keyWord OR dream_diary.content LIKE :keyWord',
         {
-          keyWord: keyWord,
+          keyWord: `%${keyWord}%`,
         },
       );
     } else if (searchType === SearchType.TITLE) {
-      feedQuery.andWhere('dream_diary.title =:keyWord', {
-        keyWord: keyWord,
+      feedQuery.andWhere('dream_diary.title LIKE :keyWord', {
+        keyWord: `%${keyWord}%`,
       });
     } else if (searchType === SearchType.CONTENT) {
-      feedQuery.andWhere('dream_diary.content =:keyWord', {
-        keyWord: keyWord,
+      feedQuery.andWhere('dream_diary.content LIKE :keyWord', {
+        keyWord: `%${keyWord}%`,
       });
     } else if (searchType === SearchType.NICKNAME) {
-      feedQuery.andWhere('author.nickname =:keyWord', {
-        keyWord: keyWord,
+      feedQuery.andWhere('author.nickname LIKE :keyWord', {
+        keyWord: `%${keyWord}%`,
       });
     }
 
@@ -138,27 +138,26 @@ export class DreamDiaryService {
       relations: ['author'],
     });
 
-    const getCategory = await this.diaryCategoryRepository
-      .createQueryBuilder('diary_category')
-      .leftJoinAndSelect('diary_category.category', 'category')
-      .where('diary_category.diary_id = :diaryId', { diaryId })
-      .select('category.category_name', 'categoryName')
-      .getRawMany();
-
     if (!dreamDiary) {
       throw new NotFoundException('삭제된 일기입니다.');
     }
 
-    dreamDiary.viewCount += 1;
+    const getCategory = await this.diaryCategoryRepository
+      .createQueryBuilder('diary_category')
+      .leftJoinAndSelect('diary_category.category', 'category')
+      .where('diary_category.diaryId = :diaryId', { diaryId })
+      .select('category.categoryName', 'categoryName')
+      .getRawMany();
 
-    await this.dreamDiaryRepository.save(dreamDiary); //조회수 저장
-
+    const categoryNames = getCategory.map((category) => category.categoryName);
     const responseDto = new DreamDiaryResponseDto();
+
+    console.log(categoryNames);
 
     responseDto.diaryId = dreamDiary.diaryId;
     responseDto.title = dreamDiary.title;
     responseDto.content = dreamDiary.content;
-    responseDto.category = getCategory;
+    responseDto.category = categoryNames;
     responseDto.dreamScore = dreamDiary.dreamScore;
     responseDto.viewCount = dreamDiary.viewCount;
     responseDto.user = {
@@ -169,6 +168,10 @@ export class DreamDiaryService {
     responseDto.createdAt = dreamDiary.createdAt;
     responseDto.diaryImageUrl = dreamDiary.imageUrl;
     responseDto.disclosureScope = dreamDiary.disclosureScope;
+
+    dreamDiary.viewCount += 1;
+
+    await this.dreamDiaryRepository.save(dreamDiary); //조회수 저장
 
     return responseDto;
   }
@@ -230,14 +233,12 @@ export class DreamDiaryService {
       const diaryCategory = new DiaryCategory();
       diaryCategory.diaryId = diaryId;
       diaryCategory.categoryId = categoryId;
-      console.log(categoryId);
       await this.diaryCategoryRepository.save(diaryCategory);
     }
 
     user.credits += 1;
 
     await this.userRepository.save(user);
-    console.log(category);
     return diaryId;
   }
 
@@ -319,6 +320,16 @@ export class DreamDiaryService {
       throw new Error('해당 사용자는 이 일기를 삭제할 권한이 없습니다.');
     }
 
+    const deleteFavoriteCascade = await this.favoriteRepository.findOne({
+      where: { id: diaryId },
+    });
+
+    const deleteBookmarkCascade = await this.bookMarkRepository.findOne({
+      where: { id: diaryId },
+    });
+
+    await this.favoriteRepository.remove(deleteFavoriteCascade);
+    await this.bookMarkRepository.remove(deleteBookmarkCascade);
     await this.dreamDiaryRepository.remove(diary); //일기 삭제
   }
 

@@ -28,6 +28,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiFoundResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -47,6 +48,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
+import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
@@ -95,11 +97,15 @@ export class DreamDiaryController {
     summary: '꿈일기 피드 조회',
     description: '꿈일기 피드를 조회합니다.',
   })
-  @ApiCreatedResponse({ description: '꿈일기 피드를 조회합니다.' })
+  @ApiCreatedResponse({
+    description: '꿈일기 피드를 조회합니다.',
+  })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
   @UseGuards(AuthGuard('jwt'))
   @Get(':diaryId')
-  async getFeedbyDiaryId(@Param('diaryId', ParseIntPipe) diaryId: number) {
+  async getFeedbyDiaryId(
+    @Param('diaryId', ParseIntPipe) diaryId: number,
+  ): Promise<DreamDiaryResponseDto> {
     try {
       const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
         diaryId,

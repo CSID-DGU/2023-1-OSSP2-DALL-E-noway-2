@@ -22,7 +22,7 @@ export class DreamDiaryResponseDto {
     example: '악몽',
     description: '꿈일기 카테고리',
   })
-  category: string[];
+  category: any[];
   @ApiProperty({
     example: 4,
     description: '꿈일기 점수',
@@ -45,12 +45,12 @@ export class DreamDiaryResponseDto {
   createdAt: Date;
   @ApiProperty({
     example: 'https://example.com',
-    description: '꿈일기 아이디',
+    description: '꿈일기 이미지',
   })
   diaryImageUrl: string;
   @ApiProperty({
     example: DisclosureScopeType.PUBLIC,
-    description: '꿈일기 아이디',
+    description: '꿈일기 제한범위',
   })
   disclosureScope: DisclosureScopeType;
 }
