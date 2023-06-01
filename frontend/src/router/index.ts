@@ -79,11 +79,6 @@ const router = createRouter({
       component: () => import('@/views/ProfileDetailView.vue'),
     },
     {
-      path: '/profile/edit',
-      name: 'profile-edit',
-      component: () => import('@/views/ProfileEditView.vue'),
-    },
-    {
       path: '/profile/bookmark',
       name: 'bookmark',
       component: () => import('@/views/BookmarkView.vue'),

@@ -68,3 +68,30 @@ export const getProfileDetail = async (userId: number) => {
   );
   return response;
 };
+
+export const updateProfileRequest = async (
+  image?: Blob,
+  nickname?: string,
+  presentation?: string,
+) => {
+  let response;
+  const url = '/api/users/profile';
+  if (image) {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (nickname) formData.append('nickname', nickname);
+    if (presentation) formData.append('presentation', presentation);
+    response = await axiosInstance.putForm(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } else {
+    response = await axiosInstance.put(url, {
+      nickname,
+      presentation,
+    });
+  }
+  return response;
+};
