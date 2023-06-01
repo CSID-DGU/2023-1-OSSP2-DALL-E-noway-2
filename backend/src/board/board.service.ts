@@ -39,6 +39,9 @@ export class BoardService {
     if (!post) {
       throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
+    post.viewCount += 1;
+    await this.boardRepository.save(post);
+
     const postResponseDto = new PostResponseDto();
     Object.assign(postResponseDto, post);
     return postResponseDto;
