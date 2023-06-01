@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpException,
@@ -9,13 +10,20 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { existsSync, mkdir, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { GetUser } from 'src/decorator/user.decorator';
@@ -31,6 +39,8 @@ import { BoardService } from './board.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
+import { PostResponseDto } from 'src/dto/post.response.dto';
+import { PostsResponseDto } from 'src/dto/posts.response.dto';
 
 @ApiTags('Board')
 @Controller('boards')
@@ -95,7 +105,7 @@ export class BoardController {
   })
   @Get('/posts/:post_id')
   @UseGuards(AuthGuard('jwt'))
-  async postShow(@Param('post_id') postId: number) {
+  async postShow(@Param('post_id') postId: number): Promise<PostResponseDto> {
     return await this.boardService.postShow(postId);
   }
 
@@ -113,11 +123,37 @@ export class BoardController {
     return await this.boardService.postUpdate(postRequestDto);
   }
 
-  // @ApiOperation({
-  //   summary: '게시글 목록 조회',
-  //   description: 'post_type에 해당하는 게시판의 게시글 목록을 조회합니다.',
-  // })
-  // @Get('/posts/:post_type')
+  @ApiOperation({
+    summary: '게시글 목록 조회',
+    description: 'post_type에 해당하는 게시판의 게시글 목록을 조회합니다.',
+  })
+  @Get('/posts/:post_type/:search_type/:search_keyword/list')
+  @ApiParam({
+    name: 'search_keyword',
+    type: String,
+    required: false,
+  })
+  @ApiParam({
+    name: 'search_type',
+    type: String,
+    required: false,
+  })
+  async postList(
+    @Param('post_type') boardType: BoardType,
+    @Query('page') page: number,
+    @Query('length') length: number,
+    @Param('search_keyword') searchKeyword?: string,
+    @Param('search_type') searchType?: string,
+  ): Promise<PostsResponseDto> {
+    const filterType = this.boardTypeMatch(boardType);
+    return await this.boardService.postList(
+      filterType,
+      searchType,
+      page,
+      length,
+      searchKeyword,
+    );
+  }
 
   @ApiOperation({
     summary: '게시글 삭제',

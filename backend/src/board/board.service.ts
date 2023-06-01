@@ -4,9 +4,13 @@ import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
 import { PostRequestDto } from 'src/dto/post.request.dto';
 import { PostResponseDto } from 'src/dto/post.response.dto';
+import { PostsResponseDto } from 'src/dto/posts.response.dto';
 import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
+import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
+import { FilterType } from 'src/enum/filter.type';
+import { SearchType } from 'src/enum/search.type';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -58,6 +62,63 @@ export class BoardService {
         `Could not find post with ID ${postRequestDto.postId}`,
       );
     }
+  }
+
+  // 게시글 목록 조회 기능 / 게시글의 종류와 페이지를 받아와 해당하는 게시판의 게시글 목록을 조회하는 API
+  async postList(
+    filterType: FilterType,
+    searchType: string,
+    page: number,
+    length: number,
+    searchKeyword: string,
+  ): Promise<PostsResponseDto> {
+    const boardQuery = this.boardRepository
+      .createQueryBuilder('board')
+      .leftJoinAndSelect('board.author', 'author')
+      .select([
+        'board.postId',
+        'board.title',
+        'author.nickname',
+        'board.image',
+        'board.viewCount',
+        'board.createdAt',
+      ])
+      .where('board.boardType = :filterType', { filterType })
+      .andWhere('board.disclosureScope = :PUBLIC', {
+        PUBLIC: DisclosureScopeType.PUBLIC,
+      })
+      .orderBy('board.createdAt', 'DESC');
+
+    if (searchType === SearchType.TITLE) {
+      boardQuery.andWhere('title LIKE :searchKeyword', {
+        searchKeyword: `%${searchKeyword}%`,
+      });
+    } else if (searchType === SearchType.NICKNAME) {
+      boardQuery.andWhere('author.nickname LIKE :searchKeyword', {
+        searchKeyword: `%${searchKeyword}%`,
+      });
+    } else if (searchType === SearchType.CONTENT) {
+      boardQuery.andWhere('content LIKE :searchKeyword', {
+        searchKeyword: `%${searchKeyword}%`,
+      });
+    }
+
+    const totalLength = await boardQuery.getCount();
+    const posts = await boardQuery
+      .skip((page - 1) * length)
+      .take(length)
+      .getMany();
+
+    const postResponseDto: PostResponseDto[] = posts.map((post) => {
+      const postResponseDto = new PostResponseDto();
+      Object.assign(postResponseDto, post);
+      return postResponseDto;
+    });
+
+    const postsResponseDto = new PostsResponseDto();
+    postsResponseDto.totalLength = totalLength;
+    postsResponseDto.posts = postResponseDto;
+    return postsResponseDto;
   }
 
   // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제하는 API
