@@ -103,7 +103,7 @@ export class ProfileController {
     description:
       '유저의 프로필 정보(프로필 사진, 닉네임, 자기소개)를 수정합니다.',
   })
-  @Put(':userId/profile')
+  @Put('profile')
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
