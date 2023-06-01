@@ -4,7 +4,6 @@ import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { UserDto } from 'src/dto/user.dto';
 import { User } from '../entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
-import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { Follow } from 'src/entities/follow.entity';
@@ -14,7 +13,6 @@ import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
 import { FollowResponseDto } from 'src/dto/profile.follow.response.dto';
 import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
-import { v1 as uuid } from 'uuid';
 
 /**
  * 프로필 정보와 팔로워, 팔로잉 수를 가져와 dto를 반환하는 service
@@ -414,5 +412,53 @@ export class ProfileService {
       boardList,
       totalLength: totalCount,
     };
+  }
+
+  /**
+   * 유저를 팔로우하는 메소드
+   * @param authorizedUserId
+   * @param followingId
+   * @returns
+   */
+  async followUser(
+    authorizedUserId: number,
+    followingId: number,
+  ): Promise<void> {
+    const existingFollow = await this.followRepository.findOne({
+      where: {
+        followerId: authorizedUserId,
+        followingId: followingId,
+      },
+    });
+
+    if (!existingFollow) {
+      const newFollow = new Follow();
+      newFollow.followerId = authorizedUserId;
+      newFollow.followingId = followingId;
+      newFollow.createdAt = new Date();
+      await this.followRepository.save(newFollow);
+    }
+  }
+
+  /**
+   * 유저를 팔로우 취소하는 메소드
+   * @param authorizedUserId
+   * @param followingId
+   * @returns
+   */
+  async unFollowUser(
+    authorizedUserId: number,
+    followingId: number,
+  ): Promise<void> {
+    const existingFollow = await this.followRepository.findOne({
+      where: {
+        followerId: authorizedUserId,
+        followingId: followingId,
+      },
+    });
+
+    if (existingFollow) {
+      await this.followRepository.delete(existingFollow);
+    }
   }
 }

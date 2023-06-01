@@ -3,12 +3,14 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   ForbiddenException,
   Get,
   Inject,
   InternalServerErrorException,
   Param,
   ParseIntPipe,
+  Post,
   Put,
   Query,
   UploadedFile,
@@ -27,7 +29,6 @@ import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { existsSync, mkdirSync } from 'fs';
-import { User } from 'src/entities/user.entity';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
@@ -284,6 +285,58 @@ export class ProfileController {
       );
 
       return responseDto;
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우',
+    description: '유저를 팔로우합니다.',
+  })
+  @Post(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async followUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+    try {
+      const followerId = user.userId;
+
+      this.profileService.followUser(followerId, userId);
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우 취소',
+    description: '유저 팔로우를 취소합니다.',
+  })
+  @Delete(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async unFollowUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    try {
+      // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+      const followerId = user.userId;
+
+      this.profileService.unFollowUser(followerId, userId);
     } catch (err) {
       if (err instanceof TypeError || err instanceof Error) {
         throw new BadRequestException(err.message);
