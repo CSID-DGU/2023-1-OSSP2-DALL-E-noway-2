@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   HttpException,
@@ -24,7 +23,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { existsSync, mkdir, mkdirSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { GetUser } from 'src/decorator/user.decorator';
 import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
