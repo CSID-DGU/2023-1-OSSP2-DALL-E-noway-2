@@ -4,6 +4,7 @@ import { getCookie, removeCookie } from '@/api/cookie';
 import router from '@/router';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { onMounted, ref, type Ref } from 'vue';
+import IconCoin from '@/components/icons/IconCoin.vue';
 
 const { getUser } = useMyInfoStore();
 const mine = ref(getUser());
@@ -89,7 +90,7 @@ onMounted(async () => {
       <div class="user-credits">
         <div class="flex flex-row">
           <div class="m-0.5">
-            <h1>크레딧</h1>
+            <IconCoin />
           </div>
           <div class="m-0.5">
             <h1>{{ profileDetail.credits }}</h1>
