@@ -61,3 +61,10 @@ export const getFollowings = async (
   );
   return response;
 };
+
+export const getProfileDetail = async (userId: number) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/profile-detail`,
+  );
+  return response;
+};
