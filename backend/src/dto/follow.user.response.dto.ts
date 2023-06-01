@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserDto } from './user.dto';
 /**
  * 팔로우 유저 정보와 팔로우 여부를 담는 DTO입니다.
  */
-export class FollowUserDto {
+export class FollowUserResponseDto {
   @ApiProperty({
     example: 1,
     description: '유저 아이디',

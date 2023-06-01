@@ -32,7 +32,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
-import { FollowUserDto } from 'src/dto/follow.user.dto';
+import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -359,7 +359,7 @@ export class ProfileController {
   async getFollowingInfo(
     @Param('userId', ParseIntPipe) userId: number,
     @GetUser() user: UserDto,
-  ): Promise<FollowUserDto[]> {
+  ): Promise<FollowUserResponseDto[]> {
     const responseDto = await this.profileService.getFollowingInfo(
       userId,
       user.userId,
@@ -377,7 +377,7 @@ export class ProfileController {
   async getFollowerInfo(
     @Param('userId', ParseIntPipe) userId: number,
     @GetUser() user: UserDto,
-  ): Promise<FollowUserDto[]> {
+  ): Promise<FollowUserResponseDto[]> {
     const responseDto = await this.profileService.getFollowerInfo(
       userId,
       user.userId,

@@ -13,7 +13,7 @@ import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
 import { FollowResponseDto } from 'src/dto/profile.follow.response.dto';
 import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
-import { FollowUserDto } from 'src/dto/follow.user.dto';
+import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 /**
  * 프로필 정보와 팔로워, 팔로잉 수를 가져와 dto를 반환하는 service
@@ -473,7 +473,7 @@ export class ProfileService {
   async getFollowingInfo(
     userId: number,
     authorizedUserId: number,
-  ): Promise<FollowUserDto[]> {
+  ): Promise<FollowUserResponseDto[]> {
     const select = [
       'follower.userId',
       'follower.nickname',
@@ -497,7 +497,7 @@ export class ProfileService {
     }));
 
     //각 팔로잉 목록 유저에 대해 로그인한 유저가 팔로우 중인지 여부 확인
-    const responseDtoPromises: Promise<FollowUserDto>[] = followersDto
+    const responseDtoPromises: Promise<FollowUserResponseDto>[] = followersDto
       .filter((follower) => follower.userId !== authorizedUserId) //본인 제외
       .map(async (follower) => {
         // 로그인한 유저의 팔로우 여부 확인
@@ -516,7 +516,9 @@ export class ProfileService {
         };
       });
 
-    const responseDto: FollowUserDto[] = await Promise.all(responseDtoPromises);
+    const responseDto: FollowUserResponseDto[] = await Promise.all(
+      responseDtoPromises,
+    );
 
     return responseDto;
   }
@@ -531,7 +533,7 @@ export class ProfileService {
   async getFollowerInfo(
     userId: number,
     authorizedUserId: number,
-  ): Promise<FollowUserDto[]> {
+  ): Promise<FollowUserResponseDto[]> {
     const select = [
       'following.userId',
       'following.nickname',
@@ -555,7 +557,7 @@ export class ProfileService {
     }));
 
     //각 팔로워에 대해 로그인한 유저가 팔로우 중인지 여부 확인
-    const responseDtoPromises: Promise<FollowUserDto>[] = followingsDto
+    const responseDtoPromises: Promise<FollowUserResponseDto>[] = followingsDto
       .filter((following) => following.userId !== authorizedUserId) //본인 제외
       .map(async (following) => {
         // 로그인한 유저의 팔로우 여부 확인
@@ -574,7 +576,9 @@ export class ProfileService {
         };
       });
 
-    const responseDto: FollowUserDto[] = await Promise.all(responseDtoPromises);
+    const responseDto: FollowUserResponseDto[] = await Promise.all(
+      responseDtoPromises,
+    );
 
     return responseDto;
   }
