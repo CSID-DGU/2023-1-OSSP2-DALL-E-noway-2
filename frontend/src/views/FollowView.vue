@@ -16,6 +16,7 @@ const { getUser } = useMyInfoStore();
 const mine = ref(getUser());
 
 const followType = ref(params.followType as FollowType);
+const curPage = ref(1);
 
 interface FollowList {
   follows: FollowUser[];
@@ -57,7 +58,7 @@ const fetchFollows = async (page: number) => {
   } catch (error) {
     console.log(error);
   }
-  for (let i = 1; i < 12; i++) {
+  for (let i = 1; i < 10; i++) {
     followList.value.follows.push({
       user: {
         userId: i,
@@ -69,10 +70,14 @@ const fetchFollows = async (page: number) => {
       isFollowed: i % 2 === 0 ? true : false,
     });
   }
+  console.log(followList);
 };
 
 const loadMore = async () => {
-  await fetchFollows(followList.value.follows.length / 10 + 1);
+  console.log('loadMore');
+  ++curPage.value;
+  console.log(curPage.value);
+  await fetchFollows(curPage.value + 1);
 };
 
 // 해당 뷰로 진입할 때마다 params의 followType을 가져와서, followType이 FOLLOWING이면
@@ -191,7 +196,7 @@ div {
 }
 
 .follow-list {
-  @apply mt-4 top-24 ml-8 mr-8 overflow-auto h-[calc(100vh-100px)];
+  @apply mt-4 top-24 ml-8 mr-8 overflow-auto h-96;
 }
 
 .follow-card {
