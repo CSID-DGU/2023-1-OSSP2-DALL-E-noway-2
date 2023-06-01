@@ -11,6 +11,7 @@ import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { join } from 'path';
     UserModule,
     CommentModule,
     DreamDiaryModule,
+    CategoryModule,
   ],
 
   controllers: [AppController],
