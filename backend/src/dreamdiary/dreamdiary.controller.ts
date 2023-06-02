@@ -20,6 +20,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { DreamDiaryService } from './dreamdiary.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,6 +29,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiFoundResponse,
   ApiOperation,
   ApiTags,
@@ -49,13 +51,15 @@ import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
+import { GenerateDreamDiaryImagesRequestDto } from 'src/dto/generate.dreamdiary.images.request.dto';
+import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
 export class DreamDiaryController {
   private logger = new Logger(DreamDiaryController.name);
   constructor(
-    private readonly dreamdiaryService: DreamDiaryService,
+    private readonly dreamDiaryService: DreamDiaryService,
     @Inject(ConfigService) private configService: ConfigService,
   ) {}
 
@@ -74,7 +78,7 @@ export class DreamDiaryController {
     @Query('search-keyword', new DefaultValuePipe(' ')) keyWord: string,
   ): Promise<DreamDiaryFeedsResponseDto> {
     try {
-      const dreamdiaryfeeds = await this.dreamdiaryService.getAllFeeds(
+      const dreamdiaryfeeds = await this.dreamDiaryService.getAllFeeds(
         searchType,
         page,
         length,
@@ -107,7 +111,7 @@ export class DreamDiaryController {
     @Param('diaryId', ParseIntPipe) diaryId: number,
   ): Promise<DreamDiaryResponseDto> {
     try {
-      const dreamDiaryfeed = await this.dreamdiaryService.getFeedbyDiaryId(
+      const dreamDiaryfeed = await this.dreamDiaryService.getFeedbyDiaryId(
         diaryId,
       );
 
@@ -165,7 +169,7 @@ export class DreamDiaryController {
         imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }
 
-      return await this.dreamdiaryService.creatDreamDiary(
+      return await this.dreamDiaryService.creatDreamDiary(
         title,
         category,
         dreamScore,
@@ -224,7 +228,7 @@ export class DreamDiaryController {
         imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }
 
-      return this.dreamdiaryService.updateDreamDiary(
+      return this.dreamDiaryService.updateDreamDiary(
         diaryId,
         title,
         category,
@@ -252,7 +256,7 @@ export class DreamDiaryController {
     @GetUser() user: UserDto,
   ) {
     try {
-      return this.dreamdiaryService.deleteDreamDiary(diaryId, user.userId);
+      return this.dreamDiaryService.deleteDreamDiary(diaryId, user.userId);
     } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);
@@ -272,7 +276,7 @@ export class DreamDiaryController {
     @GetUser() user: UserDto,
   ): Promise<void> {
     try {
-      return await this.dreamdiaryService.addFavoriteDreamDiary(
+      return await this.dreamDiaryService.addFavoriteDreamDiary(
         diaryId,
         user.userId,
       );
@@ -294,7 +298,7 @@ export class DreamDiaryController {
     @Param('diaryId', ParseIntPipe) diaryId: number,
   ) {
     try {
-      return this.dreamdiaryService.deleteFavoriteDreamDiary(diaryId);
+      return this.dreamDiaryService.deleteFavoriteDreamDiary(diaryId);
     } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);
@@ -314,7 +318,7 @@ export class DreamDiaryController {
     @GetUser() user: UserDto,
   ): Promise<void> {
     try {
-      return await this.dreamdiaryService.addBookmarkDreamDiary(
+      return await this.dreamDiaryService.addBookmarkDreamDiary(
         diaryId,
         user.userId,
       );
@@ -336,7 +340,7 @@ export class DreamDiaryController {
     @Param('diaryId', ParseIntPipe) diaryId: number,
   ) {
     try {
-      return this.dreamdiaryService.deleteBookmarkDreamDiary(diaryId);
+      return this.dreamDiaryService.deleteBookmarkDreamDiary(diaryId);
     } catch (err) {
       //기타 에러 전체에서 처리
     }
