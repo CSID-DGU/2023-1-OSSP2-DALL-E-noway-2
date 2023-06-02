@@ -22,6 +22,11 @@ const router = createRouter({
       component: () => import('@/views/NewDreamDiaryView.vue'),
     },
     {
+      path: '/dream-diary/new/generate-image',
+      name: 'generate-image',
+      component: () => import('@/views/GenerateImageView.vue'),
+    },
+    {
       path: '/dream-diary/:diaryId',
       name: 'dream-diary',
       component: () => import('@/views/DreamDiaryView.vue'),
@@ -40,14 +45,14 @@ const router = createRouter({
       component: () => import('@/views/BoardListView.vue'),
     },
     {
-      path: '/board/new',
-      name: 'new-board',
-      component: () => import('@/views/NewBoardView.vue'),
+      path: '/post/new',
+      name: 'new-post',
+      component: () => import('@/views/NewPostView.vue'),
     },
     {
-      path: '/board/:boardId',
-      name: 'board',
-      component: () => import('@/views/BoardView.vue'),
+      path: '/post/:postId',
+      name: 'post',
+      component: () => import('@/views/PostView.vue'),
       children: [
         {
           path: 'comment',
@@ -64,14 +69,14 @@ const router = createRouter({
     },
     // Route for profile
     {
-      path: '/profile',
+      path: '/profile/:userId',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
     },
     {
-      path: '/profile/edit',
-      name: 'profile-edit',
-      component: () => import('@/views/ProfileEditView.vue'),
+      path: '/profile/detail',
+      name: 'profile-detail',
+      component: () => import('@/views/ProfileDetailView.vue'),
     },
     {
       path: '/profile/bookmark',
@@ -82,6 +87,11 @@ const router = createRouter({
       path: '/profile/like',
       name: 'like',
       component: () => import('@/views/LikeView.vue'),
+    },
+    {
+      path: '/profile/follow/:userId/:followType',
+      name: 'follow',
+      component: () => import('@/views/FollowView.vue'),
     },
     // miss match
     {

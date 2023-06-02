@@ -3,30 +3,44 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   ForbiddenException,
   Get,
+  Inject,
   InternalServerErrorException,
   Param,
   ParseIntPipe,
+  Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { ProfileService } from './profile.service';
 import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/user.decorator';
 import { UserDto } from 'src/dto/user.dto';
 import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
 import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { existsSync, mkdirSync } from 'fs';
+import { v4 as uuid } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import { diskStorage } from 'multer';
+import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 @ApiTags('Profile')
 @Controller('users')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService,
+    @Inject(ConfigService) private configService: ConfigService,
+  ) {}
 
   @ApiOperation({
     summary: '해당 유저 프로필 조회',
@@ -89,18 +103,48 @@ export class ProfileController {
   @ApiOperation({
     summary: '유저 프로필 수정',
     description:
-      '유저의 프로필 정보(프로필 사진,닉네임,자기소개)를 수정합니다.',
+      '유저의 프로필 정보(프로필 사진, 닉네임, 자기소개)를 수정합니다.',
   })
-  @Put(':userId/profile')
+  @Put('profile')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const path = `uploads`;
+          if (!existsSync(path)) {
+            mkdirSync(path);
+          }
+          cb(null, path);
+        },
+        filename: (req, file, cb) => {
+          cb(null, `${uuid()}.${file.mimetype.split('/')[1]}`);
+        },
+      }),
+    }),
+  )
   @UseGuards(AuthGuard('jwt'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: ProfileUpdateRequestDto,
+  })
   async updateProfile(
-    @Body() profileUpdateDto: ProfileUpdateRequestDto,
     @GetUser() user: UserDto,
+    @UploadedFile() image?: any,
+    @Body('nickname') nickname?: string,
+    @Body('presentation') presentation?: string,
   ): Promise<ProfileUpdateRequestDto> {
     try {
+      let imageUrl: string;
+
+      if (image) {
+        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+      }
+
       const profile = await this.profileService.updateProfile(
-        profileUpdateDto,
         user.userId,
+        nickname,
+        presentation,
+        imageUrl,
       );
 
       return profile;
@@ -251,5 +295,93 @@ export class ProfileController {
       }
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우',
+    description: '유저를 팔로우합니다.',
+  })
+  @Post(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async followUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+    try {
+      const followerId = user.userId;
+
+      this.profileService.followUser(followerId, userId);
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우 취소',
+    description: '유저 팔로우를 취소합니다.',
+  })
+  @Delete(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async unFollowUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    try {
+      // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+      const followerId = user.userId;
+
+      this.profileService.unFollowUser(followerId, userId);
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로잉 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로우 목록에서 로그인한 유저의 팔로우 여부를 조회해서 해당 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/following')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowingInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserResponseDto[]> {
+    const responseDto = await this.profileService.getFollowingInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로워 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로워 목록에서 로그인한 유저의 해당 유저 팔로우 여부를 조회해서 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/follower')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowerInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserResponseDto[]> {
+    const responseDto = await this.profileService.getFollowerInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
   }
 }
