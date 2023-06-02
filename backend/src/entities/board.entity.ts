@@ -69,7 +69,7 @@ export class Board {
     length: 255,
     nullable: true,
   })
-  image: string;
+  imageUrl: string;
 
   @Column({
     type: 'enum',

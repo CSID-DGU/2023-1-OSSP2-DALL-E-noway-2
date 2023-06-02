@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { ImageRequests } from './image.requests.entity';
 
 @Entity('user')
 export class User {
@@ -52,4 +59,8 @@ export class User {
     default: 3,
   })
   credits: number;
+
+  @OneToOne(() => ImageRequests, (imageRequests) => imageRequests.userId)
+  @JoinColumn({ name: 'user_id' })
+  imageRequests: ImageRequests;
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from 'src/dto/user.dto';
+import { ImageRequests } from 'src/entities/image.requests.entity';
 import { OAuth } from 'src/entities/oauth.entity';
 import { User } from 'src/entities/user.entity';
 import { ProviderType } from 'src/enum/provider.type';
@@ -15,6 +16,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(ImageRequests)
+    private readonly imageRequestsRepository: Repository<ImageRequests>,
   ) {}
   /**
    * SocialProfile을 받아서 유저를 생성하거나, 유저가 존재하면 유저 정보를 반환합니다.
@@ -94,5 +97,89 @@ export class UserService {
       },
     });
     return user ? true : false;
+  }
+
+  async getUserWithImageRequestsInfo(userId: number): Promise<User> {
+    this.logger.debug(`Called ${this.getUserWithImageRequestsInfo.name}`);
+
+    const result = await this.userRepository.findOne({
+      where: {
+        userId,
+      },
+      relations: ['imageRequests'],
+    });
+    return result;
+  }
+
+  /**
+   * 유저의 현재 이미지 요청 횟수를 업데이트합니다.
+   * @param userId
+   * @param curRequestCount
+   */
+  async updateUserCurRequestCount(
+    userId: number,
+    curRequestCount: number,
+  ): Promise<void> {
+    this.logger.debug(`Called ${this.updateUserCurRequestCount.name}`);
+    await this.imageRequestsRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        curRequestCount,
+      })
+      .where({
+        userId,
+      })
+      .execute();
+  }
+
+  /**
+   * 유저의 크레딧 수를 업데이트합니다.
+   * @param userId
+   * @param credits
+   */
+  async updateUserCredits(userId: number, credits: number): Promise<void> {
+    this.logger.debug(`Called ${this.updateUserCredits.name}`);
+    await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        credits,
+      })
+      .where({
+        userId,
+      })
+      .execute();
+  }
+
+  /**
+   * 모든 유저의 이미지 요청 횟수를 초기화합니다.
+   */
+  async resetAllUserImageRequests(): Promise<void> {
+    this.logger.debug(`Called ${this.resetAllUserImageRequests.name}`);
+
+    await this.imageRequestsRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        curRequestCount: 0,
+      })
+      .execute();
+  }
+
+  async getUserInfo(userId: number): Promise<UserDto> {
+    this.logger.debug(`Called ${this.getUserInfo.name}`);
+
+    const user = await this.userRepository.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    return {
+      userId: user.userId,
+      nickname: user.nickname,
+      imageUrl: user.imageUrl,
+    };
   }
 }

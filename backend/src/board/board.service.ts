@@ -54,7 +54,7 @@ export class BoardService {
       {
         title: postRequestDto.title,
         content: postRequestDto.content,
-        image: postRequestDto.image,
+        imageUrl: postRequestDto.imageUrl,
         updatedAt: new Date(),
         disclosureScope: postRequestDto.disclosureScope,
       },

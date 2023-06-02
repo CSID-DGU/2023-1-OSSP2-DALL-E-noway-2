@@ -29,7 +29,7 @@ export class PostRequestDto {
     format: 'binary',
   })
   @Optional()
-  image: string;
+  imageUrl: string;
 
   @ApiProperty({
     example: 'PRIVATE',

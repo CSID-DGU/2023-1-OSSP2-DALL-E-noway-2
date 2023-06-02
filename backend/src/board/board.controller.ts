@@ -91,7 +91,7 @@ export class BoardController {
     postRequestDto.boardType = boardType;
     postRequestDto.userId = user.userId;
     if (image) {
-      postRequestDto.image = `${this.configService.get<string>('beHost')}/${
+      postRequestDto.imageUrl = `${this.configService.get<string>('beHost')}/${
         image.path
       }`;
     }
