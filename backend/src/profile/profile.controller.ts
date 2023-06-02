@@ -3,12 +3,14 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   ForbiddenException,
   Get,
   Inject,
   InternalServerErrorException,
   Param,
   ParseIntPipe,
+  Post,
   Put,
   Query,
   UploadedFile,
@@ -27,10 +29,10 @@ import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { existsSync, mkdirSync } from 'fs';
-import { User } from 'src/entities/user.entity';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
+import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 @ApiTags('Profile')
 @Controller('users')
@@ -293,5 +295,93 @@ export class ProfileController {
       }
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우',
+    description: '유저를 팔로우합니다.',
+  })
+  @Post(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async followUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+    try {
+      const followerId = user.userId;
+
+      this.profileService.followUser(followerId, userId);
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로우 취소',
+    description: '유저 팔로우를 취소합니다.',
+  })
+  @Delete(':userId/follow')
+  @UseGuards(AuthGuard('jwt'))
+  async unFollowUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<void> {
+    try {
+      // 로그인된 유저의 ID를 가져와서 팔로우하는 로직 수행
+      const followerId = user.userId;
+
+      this.profileService.unFollowUser(followerId, userId);
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로잉 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로우 목록에서 로그인한 유저의 팔로우 여부를 조회해서 해당 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/following')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowingInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserResponseDto[]> {
+    const responseDto = await this.profileService.getFollowingInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
+  }
+
+  @ApiOperation({
+    summary: '유저 팔로워 목록에서 팔로우 여부 조회',
+    description:
+      '유저 팔로워 목록에서 로그인한 유저의 해당 유저 팔로우 여부를 조회해서 유저의 정보와 팔로우 여부를 반환합니다.',
+  })
+  @Get(':userId/follower')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowerInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: UserDto,
+  ): Promise<FollowUserResponseDto[]> {
+    const responseDto = await this.profileService.getFollowerInfo(
+      userId,
+      user.userId,
+    );
+    return responseDto;
   }
 }

@@ -69,14 +69,14 @@ const router = createRouter({
     },
     // Route for profile
     {
-      path: '/profile',
+      path: '/profile/:userId',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
     },
     {
-      path: '/profile/edit',
-      name: 'profile-edit',
-      component: () => import('@/views/ProfileEditView.vue'),
+      path: '/profile/detail',
+      name: 'profile-detail',
+      component: () => import('@/views/ProfileDetailView.vue'),
     },
     {
       path: '/profile/bookmark',
@@ -89,7 +89,7 @@ const router = createRouter({
       component: () => import('@/views/LikeView.vue'),
     },
     {
-      path: '/profile/follow',
+      path: '/profile/follow/:userId/:followType',
       name: 'follow',
       component: () => import('@/views/FollowView.vue'),
     },
