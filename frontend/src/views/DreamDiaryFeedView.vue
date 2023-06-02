@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { ref } from 'vue';
+import { onMounted } from 'vue';
+import { useMyInfoStore } from '@/stores/my.info.store';
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
@@ -65,6 +67,10 @@ const truncateContent = (content: string, maxLength: number) => {
     return content.slice(0, maxLength) + '...';
   }
 };
+
+onMounted(async () => {
+  await useMyInfoStore().apiGetUser();
+});
 </script>
 
 <template>
