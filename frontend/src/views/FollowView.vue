@@ -8,11 +8,11 @@ import {
   postFollow,
   deleteFollow,
 } from '@/api/axios.custom';
-import type { FollowUser } from '@/types';
 // @ts-ignore
 import InfiniteLoading from 'v3-infinite-loading';
 import 'v3-infinite-loading/lib/style.css';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import router from '@/router';
 
 const { params } = useRoute();
 const userId = Number(params.userId);
@@ -24,7 +24,6 @@ const followType = ref(params.followType as FollowType);
 const curPage = ref(1);
 
 interface FollowList {
-  // follows: FollowUser[];
   userId: number;
   nickname: string;
   imageUrl: string;
@@ -60,8 +59,6 @@ const fetchFollows = async (page: number) => {
     } else {
       response = await getFollowings(userId, page, 10);
     }
-    // followList.value.follows.push(...response.data.follows);
-    // followList.value.totalLength = response.data.totalLength;
     followList.value.push(...response.data);
   } catch (error) {
     console.log(error);
@@ -76,8 +73,6 @@ const initFollows = async (followType: FollowType) => {
     response = await getFollowings(userId, 1, 10);
   }
   if (response.status === 200) {
-    // followList.value.follows = response.data.follows;
-    // followList.value.totalLength = response.data.totalLength;
     followList.value = response.data;
   }
 };
@@ -86,12 +81,6 @@ const addFollow = async (userId: number) => {
   try {
     const response = await postFollow(userId);
     if (response.status === 201) {
-      // followList.value.follows = followList.value.follows.map((follow) => {
-      //   if (follow.userId === userId) {
-      //     follow.isFollowed = true;
-      //   }
-      //   return follow;
-      // });
       followList.value = followList.value.map((follow) => {
         if (follow.userId === userId) {
           follow.isFollowed = true;
@@ -108,9 +97,6 @@ const removeFollow = async (userId: number) => {
   try {
     const response = await deleteFollow(userId);
     if (response.status === 200) {
-      // followList.value.follows = followList.value.follows.filter(
-      //   (follow) => follow.userId !== userId,
-      // );
       followList.value = followList.value.filter(
         (follow) => follow.userId !== userId,
       );
@@ -129,6 +115,10 @@ const loadMore = async ($state) => {
     $state.loaded();
   }
   ++curPage.value;
+};
+
+const goProfile = (userId: number) => {
+  router.push(`/profile/${userId}`);
 };
 
 // 해당 뷰로 진입할 때마다 params의 followType을 가져와서, followType이 FOLLOWING이면
@@ -180,7 +170,7 @@ onMounted(async () => {
         class="follow-card"
       >
         <!-- 1행: 이미지 -->
-        <div class="follow-image">
+        <div class="follow-image" @click="goProfile(follow.userId)">
           <img :src="follow.imageUrl" alt="Profile Image" />
         </div>
         <!-- 2행: 닉네임 -->
