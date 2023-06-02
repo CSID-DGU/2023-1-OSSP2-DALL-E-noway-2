@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
-import { ref } from 'vue';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 
 const posts = ref([
@@ -33,7 +32,7 @@ const posts = ref([
     user: '사용자3',
     content: '내용이긴글3달리노웨이이거작동하나요제발',
     image: '/path/to/image3.jpg',
-    views: 2,
+    views: 18,
   },
   {
     id: 4,
@@ -53,12 +52,6 @@ const posts = ref([
   },
 ]);
 
-// 스크롤 이벤트 핸들러
-const handleScroll = () => {
-  // 스크롤 이벤트 핸들러
-  // 스크롤이 끝에 도달하면 추가적인 데이터 로드 등의 작업을 수행할 수 있음
-};
-
 // 내용을 제한된 길이로 자르고 생략 부호를 추가하는 함수
 const truncateContent = (content: string, maxLength: number) => {
   if (content.length <= maxLength) {
@@ -77,18 +70,21 @@ onMounted(async () => {
   <main>
     <h1>Home</h1>
     <div class="search-bar"></div>
-    <div>
-      <div class="feed-container" @scroll="handleScroll">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <div class="text-color">
-            <RouterLink to="/dream-diary/1">
-              <h2 class="feed-title">{{ post.title }}</h2>
-              <p class="feed-user">{{ post.user }}</p>
-              <p class="feed-content">
-                {{ truncateContent(post.content, 10) }}
-              </p>
-              <img :src="post.image" alt="Post Image" />
-              <p>{{ post.views }}</p>
+    <div class="scroll-container">
+      <div>
+        <DreamDiaryView :posts="posts" />
+        <div class="feed-container">
+          <div v-for="post in posts" :key="post.id" class="post">
+            <RouterLink :to="`/dream-diary/${post.id}`">
+              <div class="text-color">
+                <h2 class="feed-title">{{ post.title }}</h2>
+                <p class="feed-user">{{ post.user }}</p>
+                <p class="feed-content">
+                  {{ truncateContent(post.content, 10) }}
+                </p>
+                <img :src="post.image" alt="Post Image" />
+                <p>{{ post.views }}</p>
+              </div>
             </RouterLink>
           </div>
         </div>
@@ -106,14 +102,21 @@ onMounted(async () => {
   padding: 8px;
   border-radius: 28px;
 }
-.feed-list {
-  height: 80vh;
-  overflow-y: scroll;
+.scroll-container {
+  max-height: 570px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.scroll-container::-webkit-scrollbar {
+  width: 8px; /* 스크롤바 너비 설정 */
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 4px;
 }
 .feed-container {
   width: 100%;
   padding: 32px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: transparent;
 }
 .text-color {
@@ -122,8 +125,9 @@ onMounted(async () => {
 .post {
   margin-bottom: 0px;
   padding: 12px;
-  border: 1px solid white;
-  background-color: transparent;
+  border-style: solid;
+  border-color: white;
+  border-width: 1px 0;
 }
 .feed-title {
   font-size: 16px;

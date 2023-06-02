@@ -61,21 +61,17 @@ const posts = ref([
     views: 2,
   },
 ]);
-const handleScroll = () => {
-  // 스크롤 이벤트 핸들러
-  // 스크롤이 끝에 도달하면 추가적인 데이터 로드 등의 작업을 수행할 수 있음
-};
 </script>
 
 <template>
   <main>
     <h1>Board</h1>
     <div class="search-bar"></div>
-    <div class="feed-list">
-      <div class="feed-container" @scroll="handleScroll">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <div class="text-color">
-            <RouterLink to="/post/1">
+    <div class="scroll-container">
+      <RouterLink to="/post/1">
+        <div class="post-container">
+          <div v-for="post in posts" :key="post.id" class="post">
+            <div class="text-color">
               <h2 class="post-title">{{ post.title }}</h2>
               <p class="post-user">{{ post.user }}</p>
               <div class="post-content">
@@ -86,10 +82,10 @@ const handleScroll = () => {
                   <img :src="post.image" alt="Post Image" />
                 </div>
               </div>
-            </RouterLink>
+            </div>
           </div>
         </div>
-      </div>
+      </RouterLink>
     </div>
   </main>
 </template>
@@ -103,15 +99,23 @@ const handleScroll = () => {
   padding: 8px;
   border-radius: 28px;
 }
-.feed-list {
-  height: 80vh;
-  overflow-y: scroll;
+.scroll-container {
+  max-height: 570px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
-.feed-container {
+.scroll-container::-webkit-scrollbar {
+  width: 8px; /* 스크롤바 너비 설정 */
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 4px;
+}
+.post-container {
   width: 100%;
   padding: 32px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: transparent;
+  max-height: 100%;
 }
 .text-color {
   color: white;
@@ -119,8 +123,9 @@ const handleScroll = () => {
 .post {
   margin-bottom: 0px;
   padding: 12px;
-  border: 1px solid white;
-  background-color: transparent;
+  border-style: solid;
+  border-color: white;
+  border-width: 1px 0;
 }
 .post-content {
   display: flex;
