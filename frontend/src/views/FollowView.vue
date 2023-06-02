@@ -2,8 +2,13 @@
 import { RouterLink, useRoute } from 'vue-router';
 import { FollowType } from '@/types/enum/follow.type';
 import { onMounted, ref, type Ref } from 'vue';
-import { getFollowers, getFollowings } from '@/api/axios.custom';
-import type { User, FollowUser } from '@/types';
+import {
+  getFollowers,
+  getFollowings,
+  postFollow,
+  deleteFollow,
+} from '@/api/axios.custom';
+import type { FollowUser } from '@/types';
 // @ts-ignore
 import InfiniteLoading from 'v3-infinite-loading';
 import 'v3-infinite-loading/lib/style.css';
@@ -19,24 +24,32 @@ const followType = ref(params.followType as FollowType);
 const curPage = ref(1);
 
 interface FollowList {
-  follows: FollowUser[];
-  totalLength: number;
+  // follows: FollowUser[];
+  userId: number;
+  nickname: string;
+  imageUrl: string;
+  isFollowed: boolean;
 }
-const followList: Ref<FollowList> = ref({
-  follows: [],
-  totalLength: 0,
-});
+
+const followList: Ref<FollowList[]> = ref([
+  {
+    userId: 0,
+    nickname: '',
+    imageUrl: '',
+    isFollowed: false,
+  },
+]);
 
 const changeToFollower = async () => {
   if (followType.value === FollowType.FOLLOWER) return;
   followType.value = FollowType.FOLLOWER;
-  await fetchFollows(1);
+  await initFollows(FollowType.FOLLOWER);
 };
 
 const changeToFollowing = async () => {
   if (followType.value === FollowType.FOLLOWING) return;
   followType.value = FollowType.FOLLOWING;
-  await fetchFollows(1);
+  await initFollows(FollowType.FOLLOWING);
 };
 
 const fetchFollows = async (page: number) => {
@@ -47,8 +60,61 @@ const fetchFollows = async (page: number) => {
     } else {
       response = await getFollowings(userId, page, 10);
     }
-    followList.value.follows.push(...response.data.follows);
-    followList.value.totalLength = response.data.totalLength;
+    // followList.value.follows.push(...response.data.follows);
+    // followList.value.totalLength = response.data.totalLength;
+    followList.value.push(...response.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const initFollows = async (followType: FollowType) => {
+  let response;
+  if (followType === FollowType.FOLLOWER) {
+    response = await getFollowers(userId, 1, 10);
+  } else {
+    response = await getFollowings(userId, 1, 10);
+  }
+  if (response.status === 200) {
+    // followList.value.follows = response.data.follows;
+    // followList.value.totalLength = response.data.totalLength;
+    followList.value = response.data;
+  }
+};
+
+const addFollow = async (userId: number) => {
+  try {
+    const response = await postFollow(userId);
+    if (response.status === 201) {
+      // followList.value.follows = followList.value.follows.map((follow) => {
+      //   if (follow.userId === userId) {
+      //     follow.isFollowed = true;
+      //   }
+      //   return follow;
+      // });
+      followList.value = followList.value.map((follow) => {
+        if (follow.userId === userId) {
+          follow.isFollowed = true;
+        }
+        return follow;
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const removeFollow = async (userId: number) => {
+  try {
+    const response = await deleteFollow(userId);
+    if (response.status === 200) {
+      // followList.value.follows = followList.value.follows.filter(
+      //   (follow) => follow.userId !== userId,
+      // );
+      followList.value = followList.value.filter(
+        (follow) => follow.userId !== userId,
+      );
+    }
   } catch (error) {
     console.log(error);
   }
@@ -57,7 +123,7 @@ const fetchFollows = async (page: number) => {
 // @ts-ignore
 const loadMore = async ($state) => {
   await fetchFollows(curPage.value + 1);
-  if (followList.value.follows.length >= followList.value.totalLength) {
+  if (followList.value.length < 10) {
     $state.complete();
   } else {
     $state.loaded();
@@ -73,10 +139,10 @@ onMounted(async () => {
       await useMyInfoStore().apiGetUser();
       mine.value = getUser();
     }
+    await initFollows(followType.value);
   } catch (error) {
     console.log(error);
   }
-  await fetchFollows(1);
 });
 </script>
 
@@ -109,7 +175,7 @@ onMounted(async () => {
 
     <div class="follow-list">
       <div
-        v-for="follow in followList.follows"
+        v-for="follow in followList"
         :key="follow.userId"
         class="follow-card"
       >
@@ -124,6 +190,7 @@ onMounted(async () => {
         <!-- 3행: 팔로우 버튼 -->
         <div class="follow-button">
           <button
+            @click="removeFollow(follow.userId)"
             class="follow-button-label"
             v-if="mine.userId === userId && followType === FollowType.FOLLOWER"
           >
@@ -131,6 +198,7 @@ onMounted(async () => {
           </button>
           <button
             v-else-if="mine.userId !== userId && !follow.isFollowed"
+            @click="addFollow(follow.userId)"
             class="follow-button-label"
             :class="{
               'other-not-followed': !follow.isFollowed,
