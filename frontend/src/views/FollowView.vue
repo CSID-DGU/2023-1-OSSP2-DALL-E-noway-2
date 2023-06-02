@@ -125,10 +125,8 @@ const goProfile = (userId: number) => {
 // getFollowings API를 호출하고, FOLLOWER이면 getFollowers API를 호출한다.
 onMounted(async () => {
   try {
-    if (mine.value.userId === 0) {
-      await useMyInfoStore().apiGetUser();
-      mine.value = getUser();
-    }
+    await useMyInfoStore().apiGetUser();
+    mine.value = getUser();
     await initFollows(followType.value);
   } catch (error) {
     console.log(error);
