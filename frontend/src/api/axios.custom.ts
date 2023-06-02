@@ -105,3 +105,22 @@ export const updateProfileRequest = async (
   }
   return response;
 };
+
+export const getAllComments = async (filterType: string, id: number) => {
+  const response = await axiosInstance.get(`/api/comments/${filterType}/${id}`);
+  return response;
+};
+
+export const postComment = async (
+  filterType: string,
+  id: number,
+  content: string,
+) => {
+  const response = await axiosInstance.post(
+    `/api/comments/${filterType}/${id}`,
+    {
+      content,
+    },
+  );
+  return response;
+};
