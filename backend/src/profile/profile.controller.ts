@@ -198,36 +198,36 @@ export class ProfileController {
     }
   }
 
-  @ApiOperation({
-    summary: '유저 팔로워 조회',
-    description: '유저의 팔로워 리스트를 조회합니다.',
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Get(':userId/followers')
-  async getFollowers(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('length', ParseIntPipe) length: number,
-  ) {
-    try {
-      const followers = await this.profileService.getFollowers(
-        userId,
-        page,
-        length,
-      );
+  // @ApiOperation({
+  //   summary: '유저 팔로워 조회',
+  //   description: '유저의 팔로워 리스트를 조회합니다.',
+  // })
+  // @UseGuards(AuthGuard('jwt'))
+  // @Get(':userId/followers')
+  // async getFollowers(
+  //   @Param('userId', ParseIntPipe) userId: number,
+  //   @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  //   @Query('length', ParseIntPipe) length: number,
+  // ) {
+  //   try {
+  //     const followers = await this.profileService.getFollowers(
+  //       userId,
+  //       page,
+  //       length,
+  //     );
 
-      return followers;
-    } catch (err) {
-      if (err instanceof TypeError || err instanceof Error) {
-        throw new BadRequestException(err.message);
-      }
-      if (err instanceof ForbiddenException) {
-        throw new ForbiddenException(err.message);
-      }
+  //     return followers;
+  //   } catch (err) {
+  //     if (err instanceof TypeError || err instanceof Error) {
+  //       throw new BadRequestException(err.message);
+  //     }
+  //     if (err instanceof ForbiddenException) {
+  //       throw new ForbiddenException(err.message);
+  //     }
 
-      throw new InternalServerErrorException(err.message);
-    }
-  }
+  //     throw new InternalServerErrorException(err.message);
+  //   }
+  // }
 
   @ApiOperation({
     summary: '유저 프로필에서 꿈일기 피드 조회',

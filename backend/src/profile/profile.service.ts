@@ -427,15 +427,15 @@ export class ProfileService {
   ): Promise<void> {
     const existingFollow = await this.followRepository.findOne({
       where: {
-        followerId: authorizedUserId,
-        followingId: followingId,
+        followerId: followingId,
+        followingId: authorizedUserId,
       },
     });
 
     if (!existingFollow) {
       const newFollow = new Follow();
-      newFollow.followerId = authorizedUserId;
-      newFollow.followingId = followingId;
+      newFollow.followerId = followingId;
+      newFollow.followingId = authorizedUserId;
       newFollow.createdAt = new Date();
       await this.followRepository.save(newFollow);
     }
@@ -453,8 +453,8 @@ export class ProfileService {
   ): Promise<void> {
     const existingFollow = await this.followRepository.findOne({
       where: {
-        followerId: authorizedUserId,
-        followingId: followingId,
+        followerId: followingId,
+        followingId: authorizedUserId,
       },
     });
 
