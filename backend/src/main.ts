@@ -20,6 +20,12 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
+
+  app.enableCors({
+    origin: process.env.FE_HOST,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
   await app.listen(port);
 }
 bootstrap();

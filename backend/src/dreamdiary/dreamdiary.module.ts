@@ -9,6 +9,8 @@ import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
+import { UtilModule } from 'src/util/util.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { Bookmark } from 'src/entities/bookmark.entity';
       Bookmark,
     ]),
     AuthModule,
+    UtilModule,
+    UserModule,
   ],
   controllers: [DreamDiaryController],
   providers: [DreamDiaryService],

@@ -3,6 +3,24 @@ import IconHome from '@/components/icons/IconHome.vue';
 import IconGlobal from '@/components/icons/IconGlobal.vue';
 import IconCalendar from '@/components/icons/IconCalendar.vue';
 import IconProfile from '@/components/icons/IconProfile.vue';
+import { onMounted, ref } from 'vue';
+import { useMyInfoStore } from '@/stores/my.info.store';
+import router from '@/router';
+
+const { getUser } = useMyInfoStore();
+const user = ref(getUser());
+
+onMounted(async () => {
+  try {
+    if (user.value.userId === 0) {
+      await useMyInfoStore().apiGetUser();
+      user.value = getUser();
+    }
+  } catch (error) {
+    console.log(error);
+    router.push({ name: 'not-found' });
+  }
+});
 </script>
 
 <template>
@@ -17,7 +35,8 @@ import IconProfile from '@/components/icons/IconProfile.vue';
       <RouterLink to="/calendar">
         <IconCalendar :opacity="$route.name === 'calendar' ? 1 : 0.5" />
       </RouterLink>
-      <RouterLink to="/profile">
+      <!-- userId -->
+      <RouterLink :to="`/profile/${user.userId}`">
         <IconProfile :opacity="$route.name === 'profile' ? 1 : 0.5" />
       </RouterLink>
     </nav>

@@ -9,6 +9,8 @@ import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
+import { ProfileModule } from './profile/profile.module';
+import { UtilModule } from './util/util.module';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
 
@@ -29,7 +31,9 @@ import { join } from 'path';
     AuthModule,
     UserModule,
     CommentModule,
+    UtilModule,
     DreamDiaryModule,
+    ProfileModule,
   ],
 
   controllers: [AppController],

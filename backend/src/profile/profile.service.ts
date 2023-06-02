@@ -4,7 +4,6 @@ import { ProfileResponseDto } from 'src/dto/profile.response.dto';
 import { UserDto } from 'src/dto/user.dto';
 import { User } from '../entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
-import { ProfileUpdateRequestDto } from 'src/dto/profile.update.request.dto';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { Follow } from 'src/entities/follow.entity';
@@ -14,7 +13,7 @@ import { ProfileDetailResponseDto } from 'src/dto/profile.detail.response.dto';
 import { FollowResponseDto } from 'src/dto/profile.follow.response.dto';
 import { DreamDiaryFeedResponseDto } from 'src/dto/profile.feed.response.dto';
 import { BoardListResponseDto } from 'src/dto/profile.boardlist.response.dto';
-import { v1 as uuid } from 'uuid';
+import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 /**
  * 프로필 정보와 팔로워, 팔로잉 수를 가져와 dto를 반환하는 service
@@ -128,37 +127,26 @@ export class ProfileService {
    * @returns
    */
   async updateProfile(
-    profileUpdateDto: ProfileUpdateRequestDto,
     authorizedUserId: number,
-  ): Promise<ProfileUpdateRequestDto> {
+    nickname?: string,
+    presentation?: string,
+    imageUrl?: string,
+  ): Promise<User> {
     const user = await this.profileRepository.findOne({
       where: { userId: authorizedUserId },
     });
-    if (profileUpdateDto.image) {
-      const formData = profileUpdateDto.image;
-      const entries = Object.fromEntries(formData.entries());
-      const imageFile = entries['image'];
-      // FormDataEntryValue -> Blob 변환
-      const file: Blob = imageFile as any;
-
-      // File 객체로 변환 된 경우 파일 이름 저장
-      if (file instanceof File) {
-        user.imageUrl = file.name;
-      }
-      // 파일 이름 정보가 없는 경우 임의의 이름 저장
-      else {
-        user.imageUrl = uuid();
-      }
+    if (imageUrl) {
+      user.imageUrl = imageUrl;
     }
-    if (profileUpdateDto.nickname) {
-      user.nickname = profileUpdateDto.nickname;
+    if (nickname) {
+      user.nickname = nickname;
     }
-    if (profileUpdateDto.presentation) {
-      user.presentation = profileUpdateDto.presentation;
+    if (presentation) {
+      user.presentation = presentation;
     }
 
     await this.profileRepository.save(user);
-    return profileUpdateDto;
+    return user;
   }
 
   /**
@@ -425,5 +413,173 @@ export class ProfileService {
       boardList,
       totalLength: totalCount,
     };
+  }
+
+  /**
+   * 유저를 팔로우하는 메소드
+   * @param authorizedUserId
+   * @param userId
+   * @returns
+   */
+  async followUser(
+    authorizedUserId: number,
+    followingId: number,
+  ): Promise<void> {
+    const existingFollow = await this.followRepository.findOne({
+      where: {
+        followerId: authorizedUserId,
+        followingId: followingId,
+      },
+    });
+
+    if (!existingFollow) {
+      const newFollow = new Follow();
+      newFollow.followerId = authorizedUserId;
+      newFollow.followingId = followingId;
+      newFollow.createdAt = new Date();
+      await this.followRepository.save(newFollow);
+    }
+  }
+
+  /**
+   * 유저를 팔로우 취소하는 메소드
+   * @param authorizedUserId
+   * @param followingId
+   * @returns
+   */
+  async unFollowUser(
+    authorizedUserId: number,
+    followingId: number,
+  ): Promise<void> {
+    const existingFollow = await this.followRepository.findOne({
+      where: {
+        followerId: authorizedUserId,
+        followingId: followingId,
+      },
+    });
+
+    if (existingFollow) {
+      await this.followRepository.delete(existingFollow);
+    }
+  }
+
+  /**
+   * 다른 유저 팔로잉 목록에서
+   * 유저를 팔로우하는지 여부와
+   * 유저 정보를 반환하는 메소드
+   * @param userId
+   * @param authorizedUserId
+   */
+  async getFollowingInfo(
+    userId: number,
+    authorizedUserId: number,
+  ): Promise<FollowUserResponseDto[]> {
+    const select = [
+      'follower.userId',
+      'follower.nickname',
+      'follower.imageUrl',
+    ];
+
+    //팔로잉 목록 쿼리
+    const followersQuery = this.followRepository
+      .createQueryBuilder('follow')
+      .innerJoin('follow.follower', 'follower')
+      .innerJoin('follow.following', 'following')
+      .where('following.userId = :userId', { userId: userId })
+      .addSelect(select);
+
+    const followers = await followersQuery.getMany();
+
+    const followersDto = followers.map((follow) => ({
+      userId: follow.follower.userId,
+      nickname: follow.follower.nickname,
+      imageUrl: follow.follower.imageUrl,
+    }));
+
+    //각 팔로잉 목록 유저에 대해 로그인한 유저가 팔로우 중인지 여부 확인
+    const responseDtoPromises: Promise<FollowUserResponseDto>[] = followersDto
+      .filter((follower) => follower.userId !== authorizedUserId) //본인 제외
+      .map(async (follower) => {
+        // 로그인한 유저의 팔로우 여부 확인
+        const existingFollow = await this.followRepository.findOne({
+          where: {
+            followerId: follower.userId,
+            followingId: authorizedUserId,
+          },
+        });
+        const isFollowed = existingFollow ? true : false;
+        return {
+          userId: follower.userId,
+          nickname: follower.nickname,
+          imageUrl: follower.imageUrl,
+          isFollowed: isFollowed,
+        };
+      });
+
+    const responseDto: FollowUserResponseDto[] = await Promise.all(
+      responseDtoPromises,
+    );
+
+    return responseDto;
+  }
+
+  /**
+   * 다른 유저 팔로워 목록에서
+   * 유저를 팔로우하는지 여부와
+   * 유저 정보를 반환하는 메소드
+   * @param userId
+   * @param authorizedUserId
+   */
+  async getFollowerInfo(
+    userId: number,
+    authorizedUserId: number,
+  ): Promise<FollowUserResponseDto[]> {
+    const select = [
+      'following.userId',
+      'following.nickname',
+      'following.imageUrl',
+    ];
+
+    //팔로워 목록 쿼리
+    const followingsQuery = this.followRepository
+      .createQueryBuilder('follow')
+      .innerJoin('follow.follower', 'follower')
+      .innerJoin('follow.following', 'following')
+      .where('follower.userId = :userId', { userId: userId })
+      .addSelect(select);
+
+    const followings = await followingsQuery.getMany();
+
+    const followingsDto = followings.map((follow) => ({
+      userId: follow.following.userId,
+      nickname: follow.following.nickname,
+      imageUrl: follow.following.imageUrl,
+    }));
+
+    //각 팔로워에 대해 로그인한 유저가 팔로우 중인지 여부 확인
+    const responseDtoPromises: Promise<FollowUserResponseDto>[] = followingsDto
+      .filter((following) => following.userId !== authorizedUserId) //본인 제외
+      .map(async (following) => {
+        // 로그인한 유저의 팔로우 여부 확인
+        const existingFollow = await this.followRepository.findOne({
+          where: {
+            followerId: following.userId,
+            followingId: authorizedUserId,
+          },
+        });
+        const isFollowed = existingFollow ? true : false;
+        return {
+          userId: following.userId,
+          nickname: following.nickname,
+          imageUrl: following.imageUrl,
+          isFollowed: isFollowed,
+        };
+      });
+
+    const responseDto: FollowUserResponseDto[] = await Promise.all(
+      responseDtoPromises,
+    );
+
+    return responseDto;
   }
 }
