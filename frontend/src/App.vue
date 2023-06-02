@@ -55,7 +55,7 @@ onMounted(() => {
 
 <style scoped>
 .moon {
-  @apply absolute inset-0 object-cover z-0;
+  @apply absolute inset-x-5 object-cover z-0;
 }
 
 .cloud {
