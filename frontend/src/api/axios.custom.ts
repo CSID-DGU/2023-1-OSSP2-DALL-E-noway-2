@@ -124,3 +124,18 @@ export const postComment = async (
   );
   return response;
 };
+
+export const postReply = async (
+  filterType: string,
+  id: number,
+  commentId: number,
+  content: string,
+) => {
+  const response = await axiosInstance.post(
+    `/api/comments/${filterType}/${id}/${commentId}`,
+    {
+      content,
+    },
+  );
+  return response;
+};

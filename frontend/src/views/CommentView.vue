@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { getAllComments, getProfile, postComment } from '@/api/axios.custom';
+import {
+  getAllComments,
+  getProfile,
+  postComment,
+  postReply,
+} from '@/api/axios.custom';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import type { User } from '@/types';
 import { computed, onMounted, ref, type Ref } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import IconSend from '@/components/icons/IconSend.vue';
+import IconThreeDots from '@/components/icons/IconThreeDots.vue';
 
 const { params } = useRoute();
 const filterType = ref(params.filterType as string);
@@ -25,6 +31,8 @@ interface Comment {
 const commentList: Ref<Comment[]> = ref([]);
 const commentInput = ref('');
 const commentListRef = ref<HTMLDivElement | null>(null);
+const replyInputs: Record<number, string> = {};
+const openReplyInputs: Ref<Set<number>> = ref(new Set());
 
 const arrayLength = computed(() => commentList.value.length);
 
@@ -76,6 +84,41 @@ const sendComment = async () => {
   }
 };
 
+const sendReply = async (commentId: number) => {
+  const replyInput = replyInputs[commentId];
+  if (replyInput) {
+    try {
+      const response = await postReply(
+        filterType.value,
+        id.value,
+        commentId,
+        replyInput,
+      );
+      if (response.status === 201) {
+        await initComments();
+        replyInputs[commentId] = ''; // clear reply input
+        // @ts-ignore
+        commentListRef.value.scrollTop = commentListRef.value.scrollHeight; // scroll to bottom
+        openReplyInputs.value.delete(commentId); // close reply input
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
+const isReplyInputVisible = (commentId: number): boolean => {
+  return openReplyInputs.value.has(commentId);
+};
+
+const toggleReplyInput = (commentId: number): void => {
+  if (isReplyInputVisible(commentId)) {
+    openReplyInputs.value.delete(commentId);
+  } else {
+    openReplyInputs.value.add(commentId);
+  }
+};
+
 onMounted(async () => {
   try {
     await useMyInfoStore().apiGetUser();
@@ -93,10 +136,12 @@ onMounted(async () => {
       <h1>댓글({{ arrayLength }})</h1>
     </div>
     <div class="comment-list" ref="commentListRef">
+      <!-- comment.parentCommentId !== 0이라면 reply-card 클래스 적용 -->
       <div
         v-for="comment in commentList"
         :key="comment.commentId"
         class="comment-card"
+        :class="{ 'reply-card': comment.parentCommentId !== null }"
       >
         <RouterLink :to="`/profile/${comment.user.userId}`">
           <div class="comment-user">
@@ -113,6 +158,26 @@ onMounted(async () => {
         </div>
         <div class="comment-date">
           <h1>{{ comment.createdAt }}</h1>
+        </div>
+
+        <!-- 답글 입력 활성화 토글 -->
+        <div
+          class="toggle-reply-button"
+          @click="toggleReplyInput(comment.commentId)"
+        >
+          <IconThreeDots />
+        </div>
+
+        <!-- 답글 입력 칸 -->
+        <div v-if="isReplyInputVisible(comment.commentId)" class="reply-input">
+          <input
+            v-model="replyInputs[comment.commentId]"
+            type="text"
+            placeholder="답글을 입력하세요"
+          />
+          <div class="reply-send" @click="sendReply(comment.commentId)">
+            <IconSend />
+          </div>
         </div>
       </div>
     </div>
@@ -234,5 +299,41 @@ onMounted(async () => {
 
 .comment-input-send {
   @apply ml-4;
+}
+
+.reply-input {
+  @apply flex flex-row items-center mt-4;
+}
+
+.reply-input input {
+  @apply w-full h-12 rounded-lg bg-gray-800;
+  @apply text-white;
+  @apply pl-4;
+}
+
+.reply-send {
+  @apply ml-4;
+}
+
+.toggle-reply-button {
+  @apply ml-auto mr-2;
+  cursor: pointer;
+}
+
+.reply-input {
+  @apply flex flex-row items-center mt-4 opacity-80;
+}
+
+.replies {
+  @apply ml-8 mt-4;
+}
+
+.reply-card {
+  @apply bg-gray-800 p-4 rounded-lg shadow grid;
+  @apply opacity-75;
+}
+
+.reply-content {
+  @apply mt-2;
 }
 </style>
