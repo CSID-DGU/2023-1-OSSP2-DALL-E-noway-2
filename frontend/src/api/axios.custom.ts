@@ -139,3 +139,11 @@ export const postReply = async (
   );
   return response;
 };
+
+export const deleteComment = async (commentId: number) => {
+  const response = await axiosInstance.delete(
+    // FIXME: API 엔드포인트 수정 필요
+    `/api/comments/test/1/${commentId}`,
+  );
+  return response;
+};

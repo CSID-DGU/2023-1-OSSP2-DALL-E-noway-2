@@ -4,6 +4,7 @@ import {
   getProfile,
   postComment,
   postReply,
+  deleteComment,
 } from '@/api/axios.custom';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import type { User } from '@/types';
@@ -49,7 +50,6 @@ const initComments = async () => {
   //     user: await getProfile(data.userId),
   //   });
   // });
-  console.log(response.data.comments);
 
   commentList.value = [];
   for (let data of response.data.comments) {
@@ -63,7 +63,6 @@ const initComments = async () => {
       user: user,
     });
   }
-  console.log(commentList.value);
 };
 
 const sendComment = async () => {
@@ -95,6 +94,7 @@ const sendReply = async (commentId: number) => {
         replyInput,
       );
       if (response.status === 201) {
+        showReplyOptions(commentId);
         await initComments();
         replyInputs[commentId] = ''; // clear reply input
         // @ts-ignore
@@ -107,6 +107,18 @@ const sendReply = async (commentId: number) => {
   }
 };
 
+const removeComment = async (commentId: number) => {
+  try {
+    const response = await deleteComment(commentId);
+    if (response.status === 200) {
+      showReplyOptions(commentId);
+      await initComments();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const isReplyInputVisible = (commentId: number): boolean => {
   return openReplyInputs.value.has(commentId);
 };
@@ -116,6 +128,16 @@ const toggleReplyInput = (commentId: number): void => {
     openReplyInputs.value.delete(commentId);
   } else {
     openReplyInputs.value.add(commentId);
+  }
+};
+
+const showReplyOptionsFor = ref<number | null>(null);
+
+const showReplyOptions = (commentId: number) => {
+  if (showReplyOptionsFor.value === commentId) {
+    showReplyOptionsFor.value = null;
+  } else {
+    showReplyOptionsFor.value = commentId;
   }
 };
 
@@ -160,13 +182,42 @@ onMounted(async () => {
           <h1>{{ comment.createdAt }}</h1>
         </div>
 
-        <!-- 답글 입력 활성화 토글 -->
+        <!-- ... 토글 버튼 -->
         <div
+          class="toggle-reply-button"
+          @click="showReplyOptions(comment.commentId)"
+        >
+          <IconThreeDots />
+        </div>
+
+        <!-- 더보기 옵션 -->
+        <div
+          v-if="showReplyOptionsFor === comment.commentId"
+          class="reply-options"
+        >
+          <div
+            v-if="comment.user.userId === mine.userId"
+            class="reply-option"
+            @click="toggleReplyInput(comment.commentId)"
+          >
+            <IconReply /> 답글 달기
+          </div>
+          <div
+            v-if="comment.user.userId === mine.userId"
+            class="reply-option"
+            @click="removeComment(comment.commentId)"
+          >
+            <IconDelete /> 댓글 삭제
+          </div>
+        </div>
+
+        <!-- 답글 입력 활성화 토글 -->
+        <!-- <div
           class="toggle-reply-button"
           @click="toggleReplyInput(comment.commentId)"
         >
           <IconThreeDots />
-        </div>
+        </div> -->
 
         <!-- 답글 입력 칸 -->
         <div v-if="isReplyInputVisible(comment.commentId)" class="reply-input">
@@ -335,5 +386,23 @@ onMounted(async () => {
 
 .reply-content {
   @apply mt-2;
+}
+
+.toggle-reply-button {
+  @apply ml-auto;
+  @apply cursor-pointer;
+}
+
+.reply-options {
+  @apply mt-1 flex flex-col absolute bg-gray-900 p-2 rounded-lg;
+}
+
+.reply-option {
+  @apply flex flex-row items-center;
+  @apply cursor-pointer;
+}
+
+.reply-option:hover {
+  @apply text-blue-500;
 }
 </style>
