@@ -37,10 +37,12 @@ onMounted(() => {
           'dream-diary',
           'board-list',
           'board',
+          'post',
           'profile',
           'calendar',
           'bookmark',
           'like',
+          'comment',
         ])
       "
     />

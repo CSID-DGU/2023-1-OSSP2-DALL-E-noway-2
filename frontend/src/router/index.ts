@@ -33,7 +33,7 @@ const router = createRouter({
       children: [
         {
           path: 'comment',
-          // name: 'comment',
+          name: 'comment',
           component: () => import('@/views/CommentView.vue'),
         },
       ],
@@ -50,8 +50,8 @@ const router = createRouter({
       component: () => import('@/views/NewPostView.vue'),
     },
     {
-      path: '/post/:postId',
-      name: 'post',
+      path: '/board/:postId',
+      name: 'board',
       component: () => import('@/views/PostView.vue'),
       children: [
         {
