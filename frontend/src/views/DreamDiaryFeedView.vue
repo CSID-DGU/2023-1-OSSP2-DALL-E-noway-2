@@ -7,7 +7,7 @@ const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
   {
     id: 1,
-    image: '/path/to/image1.jpg',
+    image: 'http://localhost:81/uploads/test.jpg',
     score: '☆☆☆☆☆',
     title: '게시글 제목 1',
     user: '사용자1',
@@ -23,7 +23,8 @@ const posts = ref([
     title: '게시글 제목 2',
     user: '사용자2',
     content: '내용이긴글2',
-    image: '/path/to/image2.jpg',
+    image:
+      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
     views: 5,
   },
   {
@@ -136,6 +137,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+main {
+  @apply w-full flex flex-col justify-center h-full z-[1];
+}
 .search {
   display: flex;
   flex-direction: row;
@@ -201,12 +205,13 @@ onMounted(async () => {
   background-color: #444;
   border-radius: 4px;
 }
+
 .feed-container {
   width: 92%;
   padding: 20px;
   background-color: transparent;
-  height: 100%;
-  margin: 0 auto;
+
+.text-color {
   color: white;
 }
 .post {
