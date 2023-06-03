@@ -196,7 +196,6 @@ onMounted(async () => {
           class="reply-options"
         >
           <div
-            v-if="comment.user.userId === mine.userId"
             class="reply-option"
             @click="toggleReplyInput(comment.commentId)"
           >
@@ -210,14 +209,6 @@ onMounted(async () => {
             <IconDelete /> 댓글 삭제
           </div>
         </div>
-
-        <!-- 답글 입력 활성화 토글 -->
-        <!-- <div
-          class="toggle-reply-button"
-          @click="toggleReplyInput(comment.commentId)"
-        >
-          <IconThreeDots />
-        </div> -->
 
         <!-- 답글 입력 칸 -->
         <div v-if="isReplyInputVisible(comment.commentId)" class="reply-input">
