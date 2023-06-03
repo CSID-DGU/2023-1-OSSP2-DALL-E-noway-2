@@ -22,22 +22,20 @@ export default {
   <main>
     <h1>Dream Diary</h1>
     <div v-for="post in posts" :key="post.id" class="post">
-      <RouterLink :to="`/dream-diary/${post.id}/comment`"> Comment </RouterLink>
+      <RouterLink to="comment">
+        Comment
+        <p>
+          {{ post.title }}
+        </p>
+      </RouterLink>
     </div>
-    <RouterView>
-      뭐라고 써야 나올까
-      <div v-for="post in posts" :key="post.id" class="post">
-        {{ post.title }}
-      </div>
-      <div class="feed-post">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <h2 class="feed-title">{{ post.title }}</h2>
-          <p class="feed-user">{{ post.user }}</p>
-          <p class="feed-content">{{ post.content }}</p>
-        </div>
-      </div>
-    </RouterView>
   </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.post {
+  width: auto;
+  height: 600px;
+  color: white;
+}
+</style>

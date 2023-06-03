@@ -61,6 +61,22 @@ const truncateContent = (content: string, maxLength: number) => {
   }
 };
 
+const showCategoryOptions = ref(false);
+const selectedCategory = ref(' ');
+const textSpan = ref<HTMLElement | null>(null);
+
+const toggleCategoryOptions = () => {
+  showCategoryOptions.value = !showCategoryOptions.value;
+  if (selectedCategory.value && textSpan.value !== null) {
+    textSpan.value.style.display = 'none';
+  }
+};
+
+const selectCategory = (category: string) => {
+  selectedCategory.value = category;
+  showCategoryOptions.value = false; // 선택한 후 옵션 숨김
+};
+
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
 });
@@ -68,8 +84,32 @@ onMounted(async () => {
 
 <template>
   <main>
-    <h1>Home</h1>
-    <div class="search-bar"></div>
+    <div class="search">
+      <div>
+        <input
+          class="search-bar"
+          type="text"
+          placeholder="검색어를 입력해주세요."
+          required
+        />
+      </div>
+      <div class="search-left">
+        <div class="select-row">
+          <button @click="toggleCategoryOptions" class="dropdown-button">
+            <span ref="textSpan" class="selected-not-yet">검색어선택</span>
+            <div v-if="selectedCategory" class="selected-category">
+              {{ selectedCategory }}
+            </div>
+          </button>
+        </div>
+        <div v-if="showCategoryOptions" class="search-keyword">
+          <button @click="selectCategory('제목')">제목</button>
+          <button @click="selectCategory('유저')">유저</button>
+          <button @click="selectCategory('내용')">내용</button>
+          <button @click="selectCategory('전체')">전체</button>
+        </div>
+      </div>
+    </div>
     <div class="scroll-container">
       <div>
         <DreamDiaryView :posts="posts" />
@@ -80,10 +120,12 @@ onMounted(async () => {
                 <h2 class="feed-title">{{ post.title }}</h2>
                 <p class="feed-user">{{ post.user }}</p>
                 <p class="feed-content">
-                  {{ truncateContent(post.content, 10) }}
+                  {{ truncateContent(post.content, 25) }}
                 </p>
                 <img :src="post.image" alt="Post Image" />
-                <p>{{ post.views }}</p>
+                <div class="feed-view">
+                  <p>👀 {{ post.views }}</p>
+                </div>
               </div>
             </RouterLink>
           </div>
@@ -94,18 +136,63 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.search {
+  display: flex;
+  flex-direction: row;
+  position: fixed;
+  @apply z-[2];
+}
 .search-bar {
-  height: 40px;
-  width: 320px;
-  background-color: white;
+  height: 32px;
+  width: 280px;
+  top: 4px;
+  background-color: #444;
   @apply inset-x-8;
   padding: 8px;
   border-radius: 28px;
+  color: #aaa;
+  font-size: 12px;
+}
+.search-left {
+  margin-left: 40px;
+}
+.select-row {
+  display: flex;
+  flex-direction: row;
+}
+.search-keyword {
+  font-size: 16px;
+  color: white;
+  left: 2px;
+  @apply inset-y-2;
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+}
+.search-keyword button {
+  margin-bottom: 8px;
+}
+.selected-category {
+  color: white;
+  font-size: 16px;
+}
+.selected-not-yet {
+  color: #aaa;
+  font-size: 8px;
+}
+.dropdown-button {
+  background-color: #444;
+  color: black;
+  width: 60px;
+  height: 32px;
+  @apply inset-y-1;
+  border-radius: 28px;
 }
 .scroll-container {
-  max-height: 570px;
+  height: 600px;
   overflow-y: auto;
   scrollbar-width: thin;
+  @apply inset-y-9 z-[1];
 }
 .scroll-container::-webkit-scrollbar {
   width: 8px; /* 스크롤바 너비 설정 */
@@ -115,11 +202,11 @@ onMounted(async () => {
   border-radius: 4px;
 }
 .feed-container {
-  width: 100%;
-  padding: 32px;
+  width: 92%;
+  padding: 20px;
   background-color: transparent;
-}
-.text-color {
+  height: 100%;
+  margin: 0 auto;
   color: white;
 }
 .post {
@@ -132,11 +219,13 @@ onMounted(async () => {
 .feed-title {
   font-size: 16px;
 }
-
 .feed-user {
   font-size: 12px;
 }
 .feed-content {
+  font-size: 12px;
+}
+.feed-view {
   font-size: 12px;
 }
 </style>
