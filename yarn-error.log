@@ -1,0 +1,36 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\KimMinHwan\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add @nest/typeorm typeorm mysql2
+
+PATH: 
+  C:\app\DBLAB\product\19.0.0\client_1\bin;C:\Python311\Scripts\;C:\Python311\;C:\Program Files\Java\jdk-17.0.2\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;"C:\Program Files\Java\jdk-16.0.2\bin;";C:\Program Files\dotnet\;C:\Program Files\MySQL\MySQL Server 8.0\bin;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\KimMinHwan\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\KimMinHwan\AppData\Local\Programs\Python\Python39\;C:\Users\KimMinHwan\AppData\Local\Microsoft\WindowsApps;C:\Users\KimMinHwan\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\KimMinHwan\.dotnet\tools;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.3.3\bin;;C:\Users\KimMinHwan\AppData\Local\GitHubDesktop\bin;C:\Users\KimMinHwan\AppData\Roaming\npm;C:\Program Files (x86)\ESTsoft\ALSee\x64
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.15.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@nest%2ftypeorm: Not found
+      at params.callback [as _callback] (C:\Users\KimMinHwan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66145:18)
+      at self.callback (C:\Users\KimMinHwan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140890:22)
+      at Request.emit (node:events:513:28)
+      at Request.<anonymous> (C:\Users\KimMinHwan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141862:10)
+      at Request.emit (node:events:513:28)
+      at IncomingMessage.<anonymous> (C:\Users\KimMinHwan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141784:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

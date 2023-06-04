@@ -1,5 +1,12 @@
 import { FilterType } from 'src/enum/filter.type';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('favorite')
@@ -27,6 +34,7 @@ export class Favorite {
   @Column({
     type: 'datetime',
     name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
