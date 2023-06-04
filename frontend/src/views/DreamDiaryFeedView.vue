@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
-
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
   {
@@ -33,8 +32,7 @@ const posts = ref([
     title: '게시글 제목 3',
     user: '사용자3',
     content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
+    image: 'https://t1.daumcdn.net/cfile/tistory/99C6FD385D6CAD1206',
     views: 18,
   },
   {
@@ -79,6 +77,11 @@ const toggleCategoryOptions = () => {
 const selectCategory = (category: string) => {
   selectedCategory.value = category;
   showCategoryOptions.value = false; // 선택한 후 옵션 숨김
+};
+
+const route = useRouter();
+const newDiary = () => {
+  route.push('/dream-diary/new');
 };
 
 onMounted(async () => {
@@ -144,10 +147,27 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    <button @click="newDiary" class="newdiary-button">
+      <img
+        src="https://e7.pngegg.com/pngimages/852/911/png-clipart-pen-pencil-cases-coloring-book-drawing-crayon-pencil-drawing-pencil-monochrome-thumbnail.png"
+        alt="New Diary"
+        style="border-radius: 24px"
+      />
+    </button>
   </main>
 </template>
 
 <style scoped>
+.newdiary-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  @apply z-[4];
+  bottom: 28px;
+  left: 360px;
+  background-color: white;
+  transform: rotate(80deg);
+}
 .search {
   display: flex;
   flex-direction: row;
@@ -216,7 +236,6 @@ onMounted(async () => {
 .feed {
   width: 84%;
   padding: 20px;
-  background-color: transparent;
   margin: 0 auto;
   border-style: solid;
   border-color: white;

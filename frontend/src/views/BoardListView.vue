@@ -27,32 +27,37 @@
       </div>
     </div>
     <div class="scroll-container">
-      <div class="post-container">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <RouterLink :to="`/board/${post.id}`">
-            <div class="post-content">
-              <div class="post-content-left">
-                <h2 class="post-title">{{ post.title }}</h2>
-                <p class="post-user">{{ post.user }}</p>
-                <p>👀 {{ post.views }}</p>
-              </div>
-              <div class="post-content-right">
-                <img
-                  :src="post.image"
-                  alt="Post Image"
-                  style="width: auto; height: 60px; border-radius: 8px"
-                />
-              </div>
+      <div v-for="post in posts" :key="post.id" class="post">
+        <RouterLink :to="`/board/${post.id}`">
+          <div class="post-content">
+            <div class="post-content-left">
+              <h2 class="post-title">{{ post.title }}</h2>
+              <p class="post-user">{{ post.user }}</p>
+              <p>👀 {{ post.views }}</p>
             </div>
-          </RouterLink>
-        </div>
+            <div class="post-content-right">
+              <img
+                :src="post.image"
+                alt="Post Image"
+                style="width: auto; height: 60px; border-radius: 8px"
+              />
+            </div>
+          </div>
+        </RouterLink>
       </div>
     </div>
+    <button @click="newPost" class="newpost-button">
+      <img
+        src="https://e7.pngegg.com/pngimages/852/911/png-clipart-pen-pencil-cases-coloring-book-drawing-crayon-pencil-drawing-pencil-monochrome-thumbnail.png"
+        alt="NewPost"
+        style="border-radius: 24px"
+      />
+    </button>
   </main>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 
@@ -84,7 +89,8 @@ const posts = ref([
     title: '게시글 제목 3',
     user: '사용자3',
     content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image: '/path/to/image3.jpg',
+    image:
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShJbsvnGoJrZemz5Xj2DHm1jcitbT5pfw0eg&usqp=CAU',
     views: 18,
   },
   {
@@ -119,6 +125,14 @@ const posts = ref([
     image: '/path/to/image7.jpg',
     views: 2,
   },
+  {
+    id: 8,
+    title: '게시글 제목 8',
+    user: '사용자8',
+    content: '내용이긴글8',
+    image: '/path/to/image8.jpg',
+    views: 14,
+  },
 ]);
 
 const showCategoryOptions = ref(false);
@@ -137,12 +151,27 @@ const selectCategory = (category: string) => {
   showCategoryOptions.value = false; // 선택한 후 옵션 숨김
 };
 
+const route = useRouter();
+const newPost = () => {
+  route.push('/post/new');
+};
+
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
 });
 </script>
 
 <style scoped>
+.newpost-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  @apply z-[4];
+  bottom: 28px;
+  left: 360px;
+  background-color: white;
+  transform: rotate(80deg);
+}
 .search {
   display: flex;
   flex-direction: row;
@@ -208,25 +237,18 @@ onMounted(async () => {
   background-color: #444;
   border-radius: 4px;
 }
-.post-container {
-  width: 92%;
-  padding: 20px;
-  background-color: transparent;
-  height: 100%;
-  margin: 0 auto;
-}
 .post {
-  margin-bottom: 0px;
   padding: 12px;
   border-style: solid;
   border-color: white;
   border-width: 1px 0;
   color: white;
+  width: 84%;
+  margin: 0 auto;
 }
 .post-content {
   display: flex;
   flex-direction: row;
-  align-items: center;
 }
 .post-content-left {
   margin-right: 10px;
