@@ -30,13 +30,6 @@ const router = createRouter({
       path: '/dream-diary/:diaryId',
       name: 'dream-diary',
       component: () => import('@/views/DreamDiaryView.vue'),
-      children: [
-        {
-          path: 'comment',
-          // name: 'comment',
-          component: () => import('@/views/CommentView.vue'),
-        },
-      ],
     },
     // Route for board
     {
@@ -53,13 +46,11 @@ const router = createRouter({
       path: '/post/:postId',
       name: 'post',
       component: () => import('@/views/PostView.vue'),
-      children: [
-        {
-          path: 'comment',
-          name: 'comment',
-          component: () => import('@/views/CommentView.vue'),
-        },
-      ],
+    },
+    {
+      path: '/comment/:filterType/:id',
+      name: 'comment',
+      component: () => import('@/views/CommentView.vue'),
     },
     // Route for calendar
     {
