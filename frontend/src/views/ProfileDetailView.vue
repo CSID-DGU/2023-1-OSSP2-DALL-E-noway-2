@@ -116,15 +116,13 @@ const getUploadedImageUrl = computed(() => {
 
 onMounted(async () => {
   try {
-    if (mine.value.userId === 0) {
-      await useMyInfoStore().apiGetUser();
-      mine.value = getUser();
-      const response = await getProfileDetail(mine.value.userId);
-      if (response.status === 200) {
-        profileDetail.value = response.data;
-      } else {
-        console.log(response);
-      }
+    await useMyInfoStore().apiGetUser();
+    mine.value = getUser();
+    const response = await getProfileDetail(mine.value.userId);
+    if (response.status === 200) {
+      profileDetail.value = response.data;
+    } else {
+      console.log(response);
     }
   } catch (error) {
     console.log(error);

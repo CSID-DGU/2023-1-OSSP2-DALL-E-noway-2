@@ -7,13 +7,14 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommentModule } from './comment/comment.module';
 import TypeOrmConfigService from './config/typeorm.config';
+import { BoardModule } from './board/board.module';
 import { ProfileModule } from './profile/profile.module';
 import { UtilModule } from './util/util.module';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
 import { CategoryModule } from './category/category.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ import { CategoryModule } from './category/category.module';
     }),
     AuthModule,
     UserModule,
+    BoardModule,
+    ProfileModule,
     CommentModule,
     UtilModule,
     DreamDiaryModule,

@@ -46,7 +46,7 @@ export const getFollowers = async (
   length: number,
 ) => {
   const response = await axiosInstance.get(
-    `/api/users/${userId}/followers/?page=${page}&length=${length}`,
+    `/api/users/${userId}/follower/?page=${page}&length=${length}`,
   );
   return response;
 };
@@ -57,8 +57,18 @@ export const getFollowings = async (
   length: number,
 ) => {
   const response = await axiosInstance.get(
-    `/api/users/${userId}/followings?page=${page}&length=${length}`,
+    `/api/users/${userId}/following?page=${page}&length=${length}`,
   );
+  return response;
+};
+
+export const postFollow = async (userId: number) => {
+  const response = await axiosInstance.post(`/api/users/${userId}/follow`);
+  return response;
+};
+
+export const deleteFollow = async (userId: number) => {
+  const response = await axiosInstance.delete(`/api/users/${userId}/follow`);
   return response;
 };
 
