@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { ref } from 'vue';
 import DreamDiaryFeedView from './DreamDiaryFeedView.vue';
+
 const posts = ref([DreamDiaryFeedView]);
 </script>
 
@@ -9,8 +10,10 @@ const posts = ref([DreamDiaryFeedView]);
   <main>
     <h1>Dream Diary</h1>
     <div v-for="post in posts" :key="post.id" class="post">
-      <RouterLink to="comment">
+      <RouterLink :to="`${post.id}/comment`">
         Comment
+        {{ post.id }}
+        아아아
         <p>
           {{ post.title }}
         </p>
