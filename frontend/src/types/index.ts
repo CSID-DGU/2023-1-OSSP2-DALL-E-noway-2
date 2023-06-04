@@ -42,3 +42,15 @@ export interface Profile {
   followerCount: number;
   followingCount: number;
 }
+
+export interface CalendarDayInfo {
+  day: number;
+  diaryId: number | null;
+  dreamScore: number;
+}
+
+export interface CalendarList {
+  year: number;
+  month: number;
+  days: CalendarDayInfo[];
+}

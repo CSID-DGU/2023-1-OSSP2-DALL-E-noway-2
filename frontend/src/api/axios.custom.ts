@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
 
 const postDreamDiaryURL = '/api/dream-diary';
@@ -145,5 +146,92 @@ export const deleteComment = async (commentId: number) => {
     // FIXME: API 엔드포인트 수정 필요
     `/api/comments/test/1/${commentId}`,
   );
+  return response;
+};
+
+export const getMonthDiaryList = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  // const response = await axiosInstance.get(
+  //   `/api/dream-diary/calendar/${year}/${month}`,
+  // );
+  // return response;
+
+  let response = {} as AxiosResponse<any, any>;
+  response.data = {
+    year: 2023,
+    month: 6,
+    days: [
+      {
+        day: 1,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 2,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 3,
+        diaryId: 1,
+        dreamScore: 1,
+      },
+      {
+        day: 4,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 5,
+        diaryId: 2,
+        dreamScore: 2,
+      },
+      {
+        day: 6,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 7,
+        diaryId: 3,
+        dreamScore: 3,
+      },
+      {
+        day: 8,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 9,
+        diaryId: 4,
+        dreamScore: 4,
+      },
+      {
+        day: 10,
+        diaryId: null,
+        dreamScore: 0,
+      },
+      {
+        day: 11,
+        diaryId: 5,
+        dreamScore: 5,
+      },
+      {
+        day: 12,
+        diaryId: null,
+        dreamScore: 0,
+      },
+    ],
+  };
+
+  for (let i = 13; i <= 31; i++) {
+    response.data.days.push({
+      day: i,
+      diaryId: null,
+      dreamScore: 0,
+    });
+  }
   return response;
 };
