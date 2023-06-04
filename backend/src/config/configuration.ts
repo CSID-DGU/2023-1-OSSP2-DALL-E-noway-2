@@ -1,5 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10),
+  beHost: process.env.BE_HOST,
   feHost: process.env.FE_HOST,
   jwt: {
     secret: process.env.JWT_SECRET,
@@ -30,5 +31,10 @@ export default () => ({
     port: parseInt(process.env.DATABASE_PORT, 10),
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_DATABASE,
+  },
+  openai: {
+    host: process.env.OPENAI_HOST,
+    organizationID: process.env.OPENAI_ORGANIZATION_ID,
+    apiKey: process.env.OPENAI_API_KEY,
   },
 });

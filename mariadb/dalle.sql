@@ -115,7 +115,6 @@ CREATE TABLE `comment` (
   `parent_comment_id` int(11) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `user_id` int(11) NOT NULL,
-  `content` text NOT NULL,
   PRIMARY KEY (`comment_id`),
   KEY `comment_id_fk` (`parent_comment_id`),
   KEY `comment_user_null_fk` (`user_id`),
@@ -307,6 +306,31 @@ LOCK TABLES `follow` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `image_requests`
+--
+
+DROP TABLE IF EXISTS `image_requests`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `image_requests` (
+  `user_id` int(11) NOT NULL,
+  `max_request_count` int(11) NOT NULL DEFAULT 3,
+  `cur_request_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `image_requests_user_null_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `image_requests`
+--
+
+LOCK TABLES `image_requests` WRITE;
+/*!40000 ALTER TABLE `image_requests` DISABLE KEYS */;
+/*!40000 ALTER TABLE `image_requests` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `oauth`
 --
 
@@ -351,7 +375,7 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `nickname` (`nickname`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,9 +384,28 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (3,'test1','test1','test1','test1',NULL,3);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`dalle`@`%`*/ /*!50003 TRIGGER user_insert_trigger
+AFTER INSERT ON `user`
+FOR EACH ROW
+BEGIN
+  INSERT INTO image_requests (user_id) VALUES (NEW.user_id);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -373,4 +416,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-10 22:00:32
+-- Dump completed on 2023-05-24 22:51:09

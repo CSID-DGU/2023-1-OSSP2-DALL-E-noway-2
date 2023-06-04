@@ -30,7 +30,7 @@ jobs:
       - name: 종속 모듈들 설치
         # 패키지 설치 중간에 진행 상황이 출력되도록 --progress 플래그 추가
         if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn install --cwd backend --frozen-lockfile --progress
+        run: yarn install --cwd backend --progress
       - name: lint 체크
         run: npm run lint --prefix backend
       - name: 빌드 체크
