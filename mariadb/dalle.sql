@@ -115,7 +115,7 @@ CREATE TABLE `comment` (
   `parent_comment_id` int(11) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `user_id` int(11) NOT NULL,
-  'content' text NOT NULL,
+  `content` text NOT NULL,
   PRIMARY KEY (`comment_id`),
   KEY `comment_id_fk` (`parent_comment_id`),
   KEY `comment_user_null_fk` (`user_id`),
