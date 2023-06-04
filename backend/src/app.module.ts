@@ -12,6 +12,7 @@ import TypeOrmConfigService from './config/typeorm.config';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
 import { CategoryModule } from './category/category.module';
+import { LikeBookmarkListModule } from './likebookmarklist/likebookmarklist.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CategoryModule } from './category/category.module';
     CommentModule,
     DreamDiaryModule,
     CategoryModule,
+    LikeBookmarkListModule,
   ],
 
   controllers: [AppController],
