@@ -29,6 +29,7 @@ export class CommentController {
       '글의 종류, 글 id를 받아와 해당하는 글의 댓글들을 모두 가져옵니다.',
   })
   @Get('/:filter_type/:id')
+  @UseGuards(AuthGuard('jwt'))
   async getAllComments(
     @Param('filter_type') filterType: FilterType,
     @Param('id') id: number,
@@ -74,7 +75,6 @@ export class CommentController {
     @Param('filter_type') filter_type: FilterType,
     @Param('id') id: number,
     @Param('comment_id') comment_id: number,
-
     @GetUser() user: UserDto,
   ) {
     commentRequestDto.filterType = filter_type;
@@ -95,7 +95,7 @@ export class CommentController {
     description:
       '글의 종류, 글 id, 댓글 id를 받아와 해당하는 댓글을 삭제합니다.',
   })
-  @Delete('/:filter_type/:id/:comment_id')
+  @Delete('/:comment_id')
   @UseGuards(AuthGuard('jwt'))
   async deleteComment(
     @Param('comment_id') commentId: number,
