@@ -13,6 +13,7 @@ import { ProfileModule } from './profile/profile.module';
 import { UtilModule } from './util/util.module';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
+import { CategoryModule } from './category/category.module';
 import { CommentModule } from './comment/comment.module';
 
 @Module({
@@ -36,6 +37,7 @@ import { CommentModule } from './comment/comment.module';
     CommentModule,
     UtilModule,
     DreamDiaryModule,
+    CategoryModule,
     ProfileModule,
   ],
 
