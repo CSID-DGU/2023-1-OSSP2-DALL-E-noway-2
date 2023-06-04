@@ -23,6 +23,12 @@ export class Comment {
   id: number;
 
   @Column({
+    type: 'text',
+    name: 'content',
+  })
+  content: string;
+
+  @Column({
     type: 'enum',
     name: 'filter_type',
     enum: FilterType,

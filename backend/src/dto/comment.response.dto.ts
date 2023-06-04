@@ -1,5 +1,5 @@
-import { Comment } from 'src/entities/comment.entity';
+import { CommentDto } from './comment.dto';
 
 export class CommentResponseDto {
-  comments: Comment[];
+  comments: CommentDto[];
 }
