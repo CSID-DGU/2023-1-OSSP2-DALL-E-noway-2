@@ -235,3 +235,26 @@ export const getMonthDiaryList = async (
   }
   return response;
 };
+
+export const getTodayDiaryFeed = async (
+  year: number,
+  month: number,
+  day: number,
+): Promise<AxiosResponse<any, any>> => {
+  // const response = await axiosInstance.get(
+  //   `/api/dream-diary/calendar/${year}/${month}/${day}`,
+  // );
+  // return response;
+
+  let response = {} as AxiosResponse<any, any>;
+  response.data = {
+    diaryId: 1,
+    imageUrl: 'https://i.ibb.co/0jZQY5Z/1.jpg',
+    title: '오늘의 꿈',
+    content:
+      '오늘은 꿈이 없었어요 오늘은 꿈이 없었어요 오늘은 꿈이 없었어요 오늘은 꿈이 없었어요',
+    nickname: '김꿈',
+    viewCount: 0,
+  };
+  return response;
+};

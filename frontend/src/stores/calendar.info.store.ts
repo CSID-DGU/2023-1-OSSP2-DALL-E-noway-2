@@ -1,5 +1,5 @@
-import { getMonthDiaryList } from '@/api/axios.custom';
-import type { CalendarDayInfo, CalendarList } from '@/types';
+import { getMonthDiaryList, getTodayDiaryFeed } from '@/api/axios.custom';
+import type { CalendarDayInfo, CalendarList, DiaryFeed } from '@/types';
 import { getStorage, saveStorage } from '@/utils/local.storage';
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
@@ -195,7 +195,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
       const response = await getMonthDiaryList(year.value, month.value);
       const data = response.data as CalendarList;
       calendarList.value = data;
-      console.log(calendarList.value);
       isLoading.value = false;
     } catch (error) {
       console.log(error);
@@ -203,8 +202,35 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     }
   };
 
+  // 내용을 제한된 길이로 자르고 생략 부호를 추가하는 함수
+  const truncateContent = (content: string, maxLength: number) => {
+    console.log(content);
+    if (content.length <= maxLength) {
+      return content;
+    } else {
+      return content.slice(0, maxLength) + '...';
+    }
+  };
+
+  const todayDiaryFeed = ref({} as DiaryFeed);
   // 오늘 날짜 일기 피드 정보 API 호출
-  // TODO:
+  const fetchTodayDiaryFeed = async () => {
+    isLoading.value = true;
+    try {
+      const response = await getTodayDiaryFeed(
+        year.value,
+        month.value,
+        selectDate.value,
+      );
+      const data = response.data as DiaryFeed;
+      todayDiaryFeed.value = data;
+      todayDiaryFeed.value.content = truncateContent(data.content, 25);
+      isLoading.value = false;
+    } catch (error) {
+      console.log(error);
+      isLoading.value = false;
+    }
+  };
 
   // 이전 달 버튼 클릭
   const prevMonth = () => {
@@ -322,5 +348,7 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     fetchCalendarList,
     calendarList,
     selectDate,
+    fetchTodayDiaryFeed,
+    todayDiaryFeed,
   };
 });

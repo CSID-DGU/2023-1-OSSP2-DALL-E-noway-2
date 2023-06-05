@@ -54,3 +54,12 @@ export interface CalendarList {
   month: number;
   days: CalendarDayInfo[];
 }
+
+export interface DiaryFeed {
+  diaryId: number;
+  imageUrl: string;
+  title: string;
+  content: string;
+  nickname: string;
+  viewCount: number;
+}

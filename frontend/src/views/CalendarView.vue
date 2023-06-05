@@ -5,7 +5,7 @@ import LoadingAnimation from '@/components/common/LoadingAnimation.vue';
 import { useCalendarInfoStore } from '@/stores/calendar.info.store';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { getStorage } from '@/utils/local.storage';
-import { onMounted, ref, watch, type Ref } from 'vue';
+import { onMounted, ref, watch, type Ref, computed } from 'vue';
 
 const { getUser, apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
@@ -22,22 +22,25 @@ const {
   getDateColor,
   fetchCalendarList,
   selectDate,
+  fetchTodayDiaryFeed,
+  todayDiaryFeed,
 } = calendarInfo;
 
 onMounted(async () => {
   await apiGetUser();
   await fetchCalendarList();
-  console.log(calendarInfo.calendarList);
   if (!getStorage('showDate', 'date')) {
     setSelectedDate(new Date().getDate());
   }
+  await fetchTodayDiaryFeed();
 });
 
-const clickDate = (date: number) => {
-  if (checkPastToday(date)) setSelectedDate(date);
-  console.log(calendarInfo.selectDate);
-  // console.log(showSelectedDate());
-  // console.log(6 === showSelectedDate());
+const clickDate = async (date: number) => {
+  if (checkPastToday(date)) {
+    setSelectedDate(date);
+    await fetchTodayDiaryFeed();
+    console.log(calendarInfo.todayDiaryFeed);
+  }
 };
 
 const mine = ref(getUser());
@@ -84,6 +87,21 @@ watch(showIsLoading, (value) => {
           {{ day.day }}
         </div>
       </div>
+    </div>
+    <div v-if="calendarInfo.todayDiaryFeed">
+      <RouterLink :to="`/dream-diary/${calendarInfo.todayDiaryFeed.diaryId}`">
+        <div class="feed-container">
+          <h2 class="feed-title">{{ calendarInfo.todayDiaryFeed.title }}</h2>
+          <p class="feed-user">{{ calendarInfo.todayDiaryFeed.nickname }}</p>
+          <p class="feed-content">
+            {{ calendarInfo.todayDiaryFeed.content }}
+          </p>
+          <p class="feed-view">
+            👀 {{ calendarInfo.todayDiaryFeed.viewCount }}
+          </p>
+          <img :src="calendarInfo.todayDiaryFeed.imageUrl" alt="Post Image" />
+        </div>
+      </RouterLink>
     </div>
   </main>
 </template>
@@ -135,5 +153,28 @@ main {
   border: none;
   background-color: #5a39ff !important;
   transition: background-color 0.3s ease; /* 부드러운 전환 효과를 위한 transition 속성 추가 */
+}
+
+/* today diary feed */
+
+.feed-container {
+  @apply flex flex-col items-center;
+  @apply text-white;
+  @apply m-2;
+}
+
+.feed-container tag {
+  @apply m-2;
+}
+
+.feed-container img {
+  @apply w-full h-full;
+  @apply rounded-2xl;
+}
+.feed-title {
+  @apply text-2xl font-bold;
+}
+.feed-view {
+  @apply flex flex-row;
 }
 </style>
