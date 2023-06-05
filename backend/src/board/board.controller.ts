@@ -35,7 +35,7 @@ import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
 import { FilterType } from 'src/enum/filter.type';
 import { BoardService } from './board.service';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { PostResponseDto } from 'src/dto/post.response.dto';
@@ -66,7 +66,7 @@ export class BoardController {
           callback(null, path);
         },
         filename(req, file, callback) {
-          callback(null, `${uuidv4()}.${file.mimetype.split('/')[1]}`);
+          callback(null, `${uuid()}.${file.mimetype.split('/')[1]}`);
         },
       }),
     }),
