@@ -126,14 +126,14 @@ main {
 .today {
   color: white;
   border: 1px solid var(--cal-today);
-  background: #242424;
+  background-color: white;
 }
 
 .days > .day.selected {
-  background-color: var(--white);
-  color: var(--white) !important;
   font-weight: 700;
   border-radius: 50%;
   border: none;
+  background-color: #5a39ff !important;
+  transition: background-color 0.3s ease; /* 부드러운 전환 효과를 위한 transition 속성 추가 */
 }
 </style>

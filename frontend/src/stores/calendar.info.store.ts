@@ -248,7 +248,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     3: '#7b61ff', // 3점
     4: '#684aff', // 4점
     5: '#5a39ff', // 5점
-    6: 'rgba(255, 0, 0, 0.1)', // today
   };
 
   // 일기 점수 별 색상 계산
