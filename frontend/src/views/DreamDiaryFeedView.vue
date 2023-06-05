@@ -2,6 +2,7 @@
 import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
+
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
   {
@@ -162,7 +163,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  @apply z-[4];
+  z-index: 4;
   bottom: 28px;
   left: 360px;
   background-color: white;
@@ -172,21 +173,21 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   position: fixed;
-  @apply z-[2];
+  z-index: 2;
 }
 .search-bar {
   height: 32px;
   width: 280px;
   top: 4px;
   background-color: #444;
-  @apply inset-x-8;
+  left: 32px;
   padding: 8px;
   border-radius: 28px;
   color: #aaa;
   font-size: 12px;
 }
 .search-left {
-  margin-left: 40px;
+  margin-left: 44px;
 }
 .select-row {
   display: flex;
@@ -196,7 +197,7 @@ onMounted(async () => {
   font-size: 16px;
   color: white;
   left: 2px;
-  @apply inset-y-2;
+  top: 4px;
   display: flex;
   flex-direction: column;
   background-color: black;
@@ -217,14 +218,15 @@ onMounted(async () => {
   color: black;
   width: 60px;
   height: 32px;
-  @apply inset-y-1;
+  top: 4px;
   border-radius: 28px;
 }
 .scroll-container {
-  height: 604px;
+  height: 608px;
   overflow-y: auto;
   scrollbar-width: thin;
-  @apply inset-y-9 z-[1];
+  top: 36px;
+  z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
   width: 8px;

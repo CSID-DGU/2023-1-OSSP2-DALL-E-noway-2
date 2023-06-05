@@ -45,7 +45,6 @@ import { Bookmark } from 'src/entities/bookmark.entity';
 import { CategoryResponseDto } from 'src/dto/category.response.dto';
 import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-import { uuid } from 'uuidv4';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -53,6 +52,8 @@ import { ConfigService } from '@nestjs/config';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { GenerateDreamDiaryImagesRequestDto } from 'src/dto/generate.dreamdiary.images.request.dto';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
+
+const { v4: uuid } = require('uuid');
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
