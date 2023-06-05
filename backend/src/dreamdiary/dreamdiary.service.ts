@@ -8,31 +8,21 @@ import {
   DreamDiaryFeedDto,
   DreamDiaryFeedsResponseDto,
 } from 'src/dto/dreamdiary.feeds.response.dto';
-import { DreamDiaryCreateRequestDto } from 'src/dto/dreamdiary.create.request.dto';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { SortType } from 'src/enum/sort.type';
-import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
-import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
+import { Between, Repository } from 'typeorm';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { FilterType } from 'src/enum/filter.type';
 import { ForbiddenException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Configuration, OpenAIApi } from 'openai';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
 import { UserService } from 'src/user/user.service';
 import { OpenAIService } from 'src/util/openai.service';
-import {
-  CategoryDto,
-  CategoryResponseDto,
-} from 'src/dto/category.response.dto';
 
 @Injectable()
 export class DreamDiaryService {
@@ -468,5 +458,31 @@ export class DreamDiaryService {
       maxFreeGenerateCount: maxRequestCount,
       generatedImages: images,
     } as GeneratedImagesResponseDto;
+  }
+
+  async getDreamDiaryFeedByDate(
+    userId: number,
+    year: number,
+    month: number,
+    day: number,
+  ): Promise<DreamDiaryFeedDto> {
+    const dreamDiaries = await this.dreamDiaryRepository.findOne({
+      where: {
+        userId: userId,
+        createdAt: Between(
+          new Date(year, month - 1, day),
+          new Date(year, month - 1, day + 1),
+        ),
+      },
+      relations: ['author'],
+    });
+    return {
+      diaryId: dreamDiaries.diaryId,
+      title: dreamDiaries.title,
+      content: dreamDiaries.content,
+      viewCount: dreamDiaries.viewCount,
+      nickname: dreamDiaries.author.nickname,
+      imageUrl: dreamDiaries.imageUrl,
+    } as DreamDiaryFeedDto;
   }
 }

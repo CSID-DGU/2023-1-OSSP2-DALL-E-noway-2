@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { DreamDiaryService } from './dreamdiary.service';
@@ -11,6 +11,7 @@ import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { UtilModule } from 'src/util/util.module';
 import { UserModule } from 'src/user/user.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -25,8 +26,10 @@ import { UserModule } from 'src/user/user.module';
     AuthModule,
     UtilModule,
     UserModule,
+    forwardRef(() => CalendarModule),
   ],
   controllers: [DreamDiaryController],
   providers: [DreamDiaryService],
+  exports: [DreamDiaryService],
 })
 export class DreamDiaryModule {}
