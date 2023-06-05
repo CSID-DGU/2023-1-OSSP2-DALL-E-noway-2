@@ -54,6 +54,7 @@ export class DreamDiary {
   @Column({
     type: 'datetime',
     name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
