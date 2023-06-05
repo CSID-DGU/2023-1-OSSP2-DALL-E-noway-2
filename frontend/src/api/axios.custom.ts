@@ -152,6 +152,7 @@ export const deleteComment = async (commentId: number) => {
 export const getMonthDiaryList = async (
   year: number,
   month: number,
+  day: number,
 ): Promise<AxiosResponse<any, any>> => {
   // const response = await axiosInstance.get(
   //   `/api/dream-diary/calendar/${year}/${month}`,
@@ -225,7 +226,6 @@ export const getMonthDiaryList = async (
       },
     ],
   };
-
   for (let i = 13; i <= 31; i++) {
     response.data.days.push({
       day: i,
@@ -241,20 +241,9 @@ export const getTodayDiaryFeed = async (
   month: number,
   day: number,
 ): Promise<AxiosResponse<any, any>> => {
-  // const response = await axiosInstance.get(
-  //   `/api/dream-diary/calendar/${year}/${month}/${day}`,
-  // );
-  // return response;
-
-  let response = {} as AxiosResponse<any, any>;
-  response.data = {
-    diaryId: 1,
-    imageUrl: 'https://i.ibb.co/0jZQY5Z/1.jpg',
-    title: '오늘의 꿈',
-    content:
-      '오늘은 꿈이 없었어요 오늘은 꿈이 없었어요 오늘은 꿈이 없었어요 오늘은 꿈이 없었어요',
-    nickname: '김꿈',
-    viewCount: 0,
-  };
+  const response = await axiosInstance.get(
+    `/api/dream-diary/calendar/${year}/${month + 1}/${day}`,
+  );
+  console.log(response);
   return response;
 };

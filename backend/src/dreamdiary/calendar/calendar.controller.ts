@@ -37,7 +37,7 @@ export class CalendarController {
     description: '문법적인 문제가 발생한 경우, 400 Bad Request를 반환합니다.',
   })
   @UseGuards(AuthGuard('jwt'))
-  @Get('calendar/:year/:month/:day')
+  @Get(':year/:month/:day')
   async getDreamDiaryFeedByDate(
     @GetUser() user: UserDto,
     @Param('year', ParseIntPipe) year: number,

@@ -192,7 +192,11 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
   const fetchCalendarList = async () => {
     isLoading.value = true;
     try {
-      const response = await getMonthDiaryList(year.value, month.value);
+      const response = await getMonthDiaryList(
+        year.value,
+        month.value,
+        selectDate.value,
+      );
       const data = response.data as CalendarList;
       calendarList.value = data;
       isLoading.value = false;
