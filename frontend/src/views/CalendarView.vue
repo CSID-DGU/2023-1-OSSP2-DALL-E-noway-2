@@ -21,25 +21,25 @@ const {
   showSelectedDate,
   getDateColor,
   fetchCalendarList,
-  selectDate,
   fetchTodayDiaryFeed,
-  todayDiaryFeed,
+  showCalendarList,
+  fetchSelectedDiaryFeed,
+  showSelectedDiaryFeed,
 } = calendarInfo;
 
 onMounted(async () => {
   await apiGetUser();
-  await fetchCalendarList();
   if (!getStorage('showDate', 'date')) {
     setSelectedDate(new Date().getDate());
   }
+  await fetchCalendarList();
   await fetchTodayDiaryFeed();
 });
 
 const clickDate = async (date: number) => {
   if (checkPastToday(date)) {
     setSelectedDate(date);
-    await fetchTodayDiaryFeed();
-    console.log(calendarInfo.todayDiaryFeed);
+    await fetchSelectedDiaryFeed(showSelectedDate());
   }
 };
 
@@ -47,6 +47,8 @@ const mine = ref(getUser());
 const lastDate = ref(showLastDate());
 const day = ref(showDay());
 const isLoading = ref(showIsLoading());
+const calendarList = ref(showCalendarList());
+const selectedDiaryFeed = ref(showSelectedDiaryFeed());
 
 watch(showLastDate, (value) => {
   lastDate.value = value;
@@ -57,6 +59,14 @@ watch(showDay, (value) => {
 
 watch(showIsLoading, (value) => {
   isLoading.value = value;
+});
+
+watch(showCalendarList, (value) => {
+  calendarList.value = value;
+});
+
+watch(showSelectedDiaryFeed, (value) => {
+  selectedDiaryFeed.value = value;
 });
 </script>
 
@@ -71,8 +81,8 @@ watch(showIsLoading, (value) => {
       <div v-else id="days" class="days">
         <div v-for="i in day" :key="i" class="noday"></div>
         <div
-          v-for="day in calendarInfo.calendarList.days"
-          :key="day"
+          v-for="day in calendarList.days"
+          :key="day.day"
           @click="clickDate(day.day)"
           class="day"
           :style="{
@@ -88,18 +98,16 @@ watch(showIsLoading, (value) => {
         </div>
       </div>
     </div>
-    <div v-if="calendarInfo.todayDiaryFeed">
-      <RouterLink :to="`/dream-diary/${calendarInfo.todayDiaryFeed.diaryId}`">
+    <div v-if="selectedDiaryFeed">
+      <RouterLink :to="`/dream-diary/${selectedDiaryFeed.diaryId}`">
         <div class="feed-container">
-          <h2 class="feed-title">{{ calendarInfo.todayDiaryFeed.title }}</h2>
-          <p class="feed-user">{{ calendarInfo.todayDiaryFeed.nickname }}</p>
+          <h2 class="feed-title">{{ selectedDiaryFeed.title }}</h2>
+          <p class="feed-user">{{ selectedDiaryFeed.nickname }}</p>
           <p class="feed-content">
-            {{ calendarInfo.todayDiaryFeed.content }}
+            {{ selectedDiaryFeed.content }}
           </p>
-          <p class="feed-view">
-            👀 {{ calendarInfo.todayDiaryFeed.viewCount }}
-          </p>
-          <img :src="calendarInfo.todayDiaryFeed.imageUrl" alt="Post Image" />
+          <p class="feed-view">👀 {{ selectedDiaryFeed.viewCount }}</p>
+          <img :src="selectedDiaryFeed.imageUrl" alt="Post Image" />
         </div>
       </RouterLink>
     </div>

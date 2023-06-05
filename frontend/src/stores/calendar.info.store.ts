@@ -1,4 +1,4 @@
-import { getMonthDiaryList, getTodayDiaryFeed } from '@/api/axios.custom';
+import { getMonthDiaryList, getDreamDiaryFeedByDate } from '@/api/axios.custom';
 import type { CalendarDayInfo, CalendarList, DiaryFeed } from '@/types';
 import { getStorage, saveStorage } from '@/utils/local.storage';
 import { defineStore } from 'pinia';
@@ -172,33 +172,33 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     return monthList.value;
   };
 
-  // 월 별 달력 목록 설정
-  // const setCalendarContainer = () => {
-  //   if (getStorage('calendar-container')) {
-  //     const calendarList: CalendarList = getStorage('calendar-container');
-  //     return calendarList;
-  //   }
-  //   return {} as CalendarList;
-  // };
+  const calendarList: Ref<CalendarList> = ref({
+    year: 0,
+    month: 0,
+    days: Array.from({ length: 31 }, (_, i) => {
+      return {
+        day: i + 1,
+        diaryId: null,
+        dreamScore: 0,
+      } as CalendarDayInfo;
+    }),
+  } as CalendarList);
 
-  const calendarList: Ref<CalendarList> = ref({} as CalendarList);
+  const showCalendarList = () => {
+    return calendarList.value;
+  };
 
-  // const setCalendarList = (data: CalendarList) => {
-  //   calendarList.value = data;
-  //   saveStorage('calendar-list', calendarList.value);
-  // };
+  const setCalendarList = (data: CalendarList) => {
+    calendarList.value = data;
+  };
 
   // 월 일기 작성 현황 API 호출
   const fetchCalendarList = async () => {
     isLoading.value = true;
     try {
-      const response = await getMonthDiaryList(
-        year.value,
-        month.value,
-        selectDate.value,
-      );
+      const response = await getMonthDiaryList(year.value, month.value + 1);
       const data = response.data as CalendarList;
-      calendarList.value = data;
+      setCalendarList(data);
       isLoading.value = false;
     } catch (error) {
       console.log(error);
@@ -208,7 +208,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
 
   // 내용을 제한된 길이로 자르고 생략 부호를 추가하는 함수
   const truncateContent = (content: string, maxLength: number) => {
-    console.log(content);
     if (content.length <= maxLength) {
       return content;
     } else {
@@ -216,24 +215,42 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     }
   };
 
-  const todayDiaryFeed = ref({} as DiaryFeed);
-  // 오늘 날짜 일기 피드 정보 API 호출
-  const fetchTodayDiaryFeed = async () => {
-    isLoading.value = true;
+  const selectedDiaryFeed: Ref<DiaryFeed> = ref({
+    diaryId: 0,
+    imageUrl: '',
+    title: '',
+    content: '',
+    nickname: '',
+    viewCount: 0,
+  } as DiaryFeed);
+
+  const showSelectedDiaryFeed = () => {
+    return selectedDiaryFeed.value;
+  };
+
+  const setSelectedDiaryFeed = (data: DiaryFeed) => {
+    selectedDiaryFeed.value = data;
+  };
+
+  // 선택한 날짜 일기 피드 정보 API 호출
+  const fetchSelectedDiaryFeed = async (day: number) => {
     try {
-      const response = await getTodayDiaryFeed(
+      const response = await getDreamDiaryFeedByDate(
         year.value,
         month.value,
-        selectDate.value,
+        day,
       );
       const data = response.data as DiaryFeed;
-      todayDiaryFeed.value = data;
-      todayDiaryFeed.value.content = truncateContent(data.content, 25);
-      isLoading.value = false;
+      selectedDiaryFeed.value = data;
+      selectedDiaryFeed.value.content = truncateContent(data.content, 25);
     } catch (error) {
       console.log(error);
-      isLoading.value = false;
     }
+  };
+
+  // 오늘 날짜 일기 피드 정보 API 호출
+  const fetchTodayDiaryFeed = async () => {
+    await fetchSelectedDiaryFeed(getStorageDate());
   };
 
   // 이전 달 버튼 클릭
@@ -348,11 +365,10 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     showLastDate,
     showDay,
     showSelectedDate,
-    dateTitle,
     fetchCalendarList,
-    calendarList,
-    selectDate,
+    showCalendarList,
     fetchTodayDiaryFeed,
-    todayDiaryFeed,
+    fetchSelectedDiaryFeed,
+    showSelectedDiaryFeed,
   };
 });

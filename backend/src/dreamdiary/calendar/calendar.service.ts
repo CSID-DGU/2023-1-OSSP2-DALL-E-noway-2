@@ -20,7 +20,7 @@ export class CalendarService {
     year: number,
     month: number,
   ): Promise<CalendarListResponseDto> {
-    this.logger.debug(`Called ${CalendarService.name}`);
+    this.logger.debug(`Called ${this.getMonthDiaryList.name}`);
     const dreamDiaries = await this.dreamDiaryRepository.find({
       where: {
         userId: userId,
@@ -54,7 +54,7 @@ export class CalendarService {
     month: number,
     day: number,
   ): Promise<DreamDiaryFeedDto> {
-    this.logger.debug(`Called ${CalendarService.name}`);
+    this.logger.debug(`Called ${this.getDreamDiaryFeedByDate.name}`);
     const dreamDiaries = await this.dreamDiaryRepository.findOne({
       where: {
         userId: userId,
@@ -65,6 +65,9 @@ export class CalendarService {
       },
       relations: ['author'],
     });
+    if (!dreamDiaries) {
+      return null;
+    }
     return {
       diaryId: dreamDiaries.diaryId,
       title: dreamDiaries.title,
