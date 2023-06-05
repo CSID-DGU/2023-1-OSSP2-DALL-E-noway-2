@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DreamDiaryFeedDto,
@@ -14,7 +10,7 @@ import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
@@ -458,31 +454,5 @@ export class DreamDiaryService {
       maxFreeGenerateCount: maxRequestCount,
       generatedImages: images,
     } as GeneratedImagesResponseDto;
-  }
-
-  async getDreamDiaryFeedByDate(
-    userId: number,
-    year: number,
-    month: number,
-    day: number,
-  ): Promise<DreamDiaryFeedDto> {
-    const dreamDiaries = await this.dreamDiaryRepository.findOne({
-      where: {
-        userId: userId,
-        createdAt: Between(
-          new Date(year, month - 1, day),
-          new Date(year, month - 1, day + 1),
-        ),
-      },
-      relations: ['author'],
-    });
-    return {
-      diaryId: dreamDiaries.diaryId,
-      title: dreamDiaries.title,
-      content: dreamDiaries.content,
-      viewCount: dreamDiaries.viewCount,
-      nickname: dreamDiaries.author.nickname,
-      imageUrl: dreamDiaries.imageUrl,
-    } as DreamDiaryFeedDto;
   }
 }
