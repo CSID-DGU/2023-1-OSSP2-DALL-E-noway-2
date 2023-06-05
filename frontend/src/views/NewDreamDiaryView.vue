@@ -21,7 +21,6 @@ const temporarySaveDiary = () => {
 };
 
 const submitDiary = async () => {
-  console.log(diary);
   const formData = new FormData();
   formData.append('title', diary.title);
   // categoryName으로 id 찾기

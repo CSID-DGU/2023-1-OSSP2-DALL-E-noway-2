@@ -1,3 +1,4 @@
+import type { BoardType } from '@/types/enum/board.type';
 import { axiosInstance } from './axios.instance';
 
 const postDreamDiaryURL = '/api/dream-diary';
@@ -24,9 +25,14 @@ export const getCreditInfo = async () => {
   return response;
 };
 
-const postNewPostUrl = '/api/boards/posts';
-export const postNewPost = async (newPostRequest: FormData) => {
-  const response = await axiosInstance.postForm(postNewPostUrl, newPostRequest);
+export const postNewPost = async (
+  newPostRequest: FormData,
+  boardType: BoardType,
+) => {
+  const response = await axiosInstance.postForm(
+    `/api/boards/posts/${boardType}`,
+    newPostRequest,
+  );
   return response;
 };
 
