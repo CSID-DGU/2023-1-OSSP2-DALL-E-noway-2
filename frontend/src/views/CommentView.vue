@@ -281,6 +281,27 @@ onMounted(async () => {
   @apply bg-black p-4;
 }
 
+.comment-input {
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  filter: var(--menu-shadow);
+  z-index: 9;
+  user-select: none;
+  @apply flex flex-row items-center;
+  @apply bg-black p-4;
+}
+
+@media (min-width: 425px) {
+  .comment-input {
+    max-width: 425px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .comment-input-user {
   @apply flex flex-row items-center;
 }
