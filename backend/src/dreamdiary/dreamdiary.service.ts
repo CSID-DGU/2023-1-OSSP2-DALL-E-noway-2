@@ -76,6 +76,7 @@ export class DreamDiaryService {
       .select([
         'dream_diary.diaryId',
         'dream_diary.title',
+        'dream_diary.content',
         'author.nickname',
         'dream_diary.viewCount',
         'dream_diary.imageUrl',
@@ -120,6 +121,7 @@ export class DreamDiaryService {
         const dreamDiaryFeed: DreamDiaryFeedDto = {
           diaryId: dreamDiary.diaryId,
           title: dreamDiary.title,
+          content: dreamDiary.content,
           viewCount: dreamDiary.viewCount,
           nickname: dreamDiary.author.nickname,
           imageUrl: dreamDiary.imageUrl,
