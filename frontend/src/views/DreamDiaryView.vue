@@ -1,41 +1,31 @@
-<script lang="ts">
+<script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { ref } from 'vue';
 import DreamDiaryFeedView from './DreamDiaryFeedView.vue';
 
-export default {
-  components: {
-    RouterLink,
-    RouterView,
-  },
-  setup() {
-    const posts = ref({ DreamDiaryFeedView });
-    return {
-      posts,
-    };
-  },
-};
+const posts = ref([DreamDiaryFeedView]);
 </script>
 
 <template>
   <main>
     <h1>Dream Diary</h1>
-    <div>
-      <RouterLink to="/dream-diary/1/comment"> Comment </RouterLink>
+    <div v-for="post in posts" :key="post.id" class="post">
+      <RouterLink :to="`${post.id}/comment`">
+        Comment
+        {{ post.id }}
+        아아아
+        <p>
+          {{ post.title }}
+        </p>
+      </RouterLink>
     </div>
-    <RouterView>
-      <div v-for="post in posts" :key="post.id" class="post">
-        {{ post.title }}
-      </div>
-      <div class="feed-post">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <h2 class="feed-title">{{ post.title }}</h2>
-          <p class="feed-user">{{ post.user }}</p>
-          <p class="feed-content">{{ post.content }}</p>
-        </div>
-      </div>
-    </RouterView>
   </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.post {
+  width: auto;
+  height: 600px;
+  color: white;
+}
+</style>

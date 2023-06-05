@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommentDto } from 'src/dto/comment.dto';
 import { CommentRequestDto } from 'src/dto/comment.request.dto';
 import { Comment } from 'src/entities/comment.entity';
 import { Repository } from 'typeorm';
@@ -18,12 +19,34 @@ export class CommentService {
   ): Promise<CommentResponseDto> {
     const query = this.commentRepository
       .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.author', 'author')
       .where('comment.filterType = :filterType', {
         filterType: commentRequestDto.filterType,
       })
       .andWhere('comment.id = :id', { id: commentRequestDto.id });
-    const commentResponseDto = new CommentResponseDto();
-    commentResponseDto.comments = await query.getMany();
+
+    const comments = await query.getMany();
+    const commentDtoArr: CommentDto[] = comments.map((comment) => {
+      const commentDto: CommentDto = {
+        commentId: comment.commentId,
+        id: comment.id,
+        content: comment.content,
+        filterType: comment.filterType,
+        parentCommentId: comment.parentCommentId,
+        createdAt: comment.createdAt,
+        user: {
+          userId: comment.userId,
+          nickname: comment.author.nickname,
+          imageUrl: comment.author.imageUrl,
+        },
+      };
+      return commentDto;
+    });
+
+    const commentResponseDto: CommentResponseDto = {
+      comments: commentDtoArr,
+    };
+
     return commentResponseDto;
   }
 
