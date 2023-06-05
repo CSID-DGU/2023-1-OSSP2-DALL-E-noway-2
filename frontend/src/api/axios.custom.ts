@@ -147,3 +147,8 @@ export const deleteComment = async (commentId: number) => {
   );
   return response;
 };
+
+export const getAllCategories = async () => {
+  const response = await axiosInstance.get('/api/category/category-list');
+  return response;
+};
