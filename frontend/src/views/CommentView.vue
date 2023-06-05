@@ -39,30 +39,7 @@ const arrayLength = computed(() => commentList.value.length);
 
 const initComments = async () => {
   const response = await getAllComments(filterType.value, id.value);
-  // FIXME: 응답으로 UserDto 정보를 같이 받는게 좋을듯.
-  // response.data.forEach((data: any) => {
-  //   commentList.value.push({
-  //     commentId: data.commentId,
-  //     id: data.id,
-  //     parentCommentId: data.parentCommentId,
-  //     content: data.content,
-  //     createdAt: data.createdAt,
-  //     user: await getProfile(data.userId),
-  //   });
-  // });
-
-  commentList.value = [];
-  for (let data of response.data.comments) {
-    const user = await (await getProfile(data.userId)).data.user;
-    commentList.value.push({
-      commentId: data.commentId,
-      id: data.id,
-      parentCommentId: data.parentCommentId,
-      content: data.content,
-      createdAt: data.createdAt,
-      user: user,
-    });
-  }
+  commentList.value = response.data.comments;
 };
 
 const sendComment = async () => {

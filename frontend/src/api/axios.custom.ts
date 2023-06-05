@@ -141,9 +141,6 @@ export const postReply = async (
 };
 
 export const deleteComment = async (commentId: number) => {
-  const response = await axiosInstance.delete(
-    // FIXME: API 엔드포인트 수정 필요
-    `/api/comments/test/1/${commentId}`,
-  );
+  const response = await axiosInstance.delete(`/api/comments/${commentId}`);
   return response;
 };
