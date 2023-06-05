@@ -105,3 +105,45 @@ export const updateProfileRequest = async (
   }
   return response;
 };
+
+export const getAllComments = async (filterType: string, id: number) => {
+  const response = await axiosInstance.get(`/api/comments/${filterType}/${id}`);
+  return response;
+};
+
+export const postComment = async (
+  filterType: string,
+  id: number,
+  content: string,
+) => {
+  const response = await axiosInstance.post(
+    `/api/comments/${filterType}/${id}`,
+    {
+      content,
+    },
+  );
+  return response;
+};
+
+export const postReply = async (
+  filterType: string,
+  id: number,
+  commentId: number,
+  content: string,
+) => {
+  const response = await axiosInstance.post(
+    `/api/comments/${filterType}/${id}/${commentId}`,
+    {
+      content,
+    },
+  );
+  return response;
+};
+
+export const deleteComment = async (commentId: number) => {
+  const response = await axiosInstance.delete(
+    // FIXME: API 엔드포인트 수정 필요
+    `/api/comments/test/1/${commentId}`,
+  );
+  return response;
+};
