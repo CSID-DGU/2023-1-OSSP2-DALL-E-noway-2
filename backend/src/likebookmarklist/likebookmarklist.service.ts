@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DreamDiaryFeedDto,
-  DreamDiaryFeedsResponseDto,
-} from 'src/dto/dreamdiary.feeds.response.dto';
+
 import {
   BoardFeedDto,
   BoardFeedsResponseDto,
 } from 'src/dto/likebookmark.boards.response.dto';
+import {
+  DreamDiaryFeedDto,
+  DreamDiaryFeedsResponseDto,
+} from 'src/dto/likebookmark.diary.response.dto';
 import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Category } from 'src/entities/category.entity';
@@ -45,7 +46,7 @@ export class LikeBookmarkListService {
   ): Promise<DreamDiaryFeedsResponseDto> {
     const favoriteDreamDiaries = await this.dreamDiaryRepository.manager.query(
       `
-      SELECT dream_diary.diary_id, dream_diary.title, dream_diary.view_count, user.nickname, dream_diary.image_url
+      SELECT dream_diary.diary_id, dream_diary.title, dream_diary.view_count, user.nickname, dream_diary.image_url, dream_diary.content
       FROM favorite
       INNER JOIN dream_diary ON favorite.id = dream_diary.diary_id AND favorite.filter_type = 'DIARY'
       INNER JOIN user ON dream_diary.user_id = user.user_id
@@ -57,13 +58,15 @@ export class LikeBookmarkListService {
 
     const dreamDiaryFeedsDto: DreamDiaryFeedDto[] = favoriteDreamDiaries.map(
       (dreamDiary) => {
-        const { diary_id, title, view_count, nickname, image_url } = dreamDiary;
+        const { diary_id, title, view_count, nickname, image_url, content } =
+          dreamDiary;
         return {
           diaryId: diary_id,
           title: title,
           viewCount: view_count,
           nickname: nickname,
           imageUrl: image_url,
+          content: content,
         };
       },
     );
@@ -90,7 +93,7 @@ export class LikeBookmarkListService {
   ): Promise<DreamDiaryFeedsResponseDto> {
     const bookmarkDreamDiaries = await this.dreamDiaryRepository.manager.query(
       `
-      SELECT dream_diary.diary_id, dream_diary.title, dream_diary.view_count, user.nickname, dream_diary.image_url
+      SELECT dream_diary.diary_id, dream_diary.title, dream_diary.view_count, user.nickname, dream_diary.image_url, dream_diary.content
       FROM bookmark
       INNER JOIN dream_diary ON bookmark.id = dream_diary.diary_id AND bookmark.filter_type = 'DIARY'
       INNER JOIN user ON dream_diary.user_id = user.user_id
@@ -102,13 +105,15 @@ export class LikeBookmarkListService {
 
     const dreamDiaryFeedsDto: DreamDiaryFeedDto[] = bookmarkDreamDiaries.map(
       (dreamDiary) => {
-        const { diary_id, title, view_count, nickname, image_url } = dreamDiary;
+        const { diary_id, title, view_count, nickname, image_url, content } =
+          dreamDiary;
         return {
           diaryId: diary_id,
           title: title,
           viewCount: view_count,
           nickname: nickname,
           imageUrl: image_url,
+          content: content,
         };
       },
     );
@@ -136,7 +141,7 @@ export class LikeBookmarkListService {
   ): Promise<BoardFeedsResponseDto> {
     const favoriteBoards = await this.boardRepository.manager.query(
       `
-      SELECT board.post_id, board.title, board.view_count, user.nickname, board.image_url
+      SELECT board.post_id, board.title, board.view_count, user.nickname, board.image_url, board.content
       FROM favorite
       INNER JOIN board ON favorite.id = board.post_id AND favorite.filter_type = '${postType}'
       INNER JOIN user ON board.user_id = user.user_id
@@ -147,13 +152,15 @@ export class LikeBookmarkListService {
     );
 
     const boardFeedsDto: BoardFeedDto[] = favoriteBoards.map((board) => {
-      const { post_id, title, view_count, nickname, image_url } = board;
+      const { post_id, title, view_count, nickname, image_url, content } =
+        board;
       return {
         postId: post_id,
         title: title,
         viewCount: view_count,
         nickname: nickname,
         imageUrl: image_url,
+        content: content,
       };
     });
 
@@ -180,7 +187,7 @@ export class LikeBookmarkListService {
   ): Promise<BoardFeedsResponseDto> {
     const bookmarkBoards = await this.boardRepository.manager.query(
       `
-      SELECT board.post_id, board.title, board.view_count, user.nickname, board.image_url
+      SELECT board.post_id, board.title, board.view_count, user.nickname, board.image_url, board.content
       FROM bookmark
       INNER JOIN board ON bookmark.id = board.post_id AND bookmark.filter_type = '${postType}'
       INNER JOIN user ON board.user_id = user.user_id
@@ -191,13 +198,15 @@ export class LikeBookmarkListService {
     );
 
     const boardFeedsDto: BoardFeedDto[] = bookmarkBoards.map((board) => {
-      const { post_id, title, view_count, nickname, image_url } = board;
+      const { post_id, title, view_count, nickname, image_url, content } =
+        board;
       return {
         postId: post_id,
         title: title,
         viewCount: view_count,
         nickname: nickname,
         imageUrl: image_url,
+        content: content,
       };
     });
 
