@@ -6,11 +6,9 @@ import {
 } from 'src/dto/dreamdiary.feeds.response.dto';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
-import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { Category } from 'src/entities/category.entity';
@@ -31,7 +29,6 @@ export class DreamDiaryService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(DreamDiary)
-    private readonly dreamDiaryRepository: Repository<DreamDiary>,
     @InjectRepository(DiaryCategory)
     private readonly diaryCategoryRepository: Repository<DiaryCategory>,
     @InjectRepository(Category)
@@ -40,7 +37,7 @@ export class DreamDiaryService {
     private readonly favoriteRepository: Repository<Favorite>,
     @InjectRepository(Bookmark)
     private readonly bookMarkRepository: Repository<Bookmark>,
-    private readonly oepnAIService: OpenAIService,
+    private readonly openAIService: OpenAIService,
     private readonly userService: UserService,
     @InjectRepository(DreamDiary)
     private readonly dreamDiaryRepository: Repository<DreamDiary>,
