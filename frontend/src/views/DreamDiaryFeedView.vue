@@ -55,7 +55,6 @@ const posts = ref([
   },
 ]);
 
-// 내용을 제한된 길이로 자르고 생략 부호를 추가하는 함수
 const truncateContent = (content: string, maxLength: number) => {
   if (content.length <= maxLength) {
     return content;
@@ -111,10 +110,18 @@ onMounted(async () => {
           </button>
         </div>
         <div v-if="showCategoryOptions" class="search-keyword">
-          <button @click="selectCategory('제목')">제목</button>
-          <button @click="selectCategory('유저')">유저</button>
-          <button @click="selectCategory('내용')">내용</button>
-          <button @click="selectCategory('전체')">전체</button>
+          <button @click="selectCategory('제목')" class="search-title">
+            제목
+          </button>
+          <button @click="selectCategory('유저')" class="search-user">
+            유저
+          </button>
+          <button @click="selectCategory('내용')" class="search-content">
+            내용
+          </button>
+          <button @click="selectCategory('전체')" class="search-any">
+            전체
+          </button>
         </div>
       </div>
     </div>
@@ -134,8 +141,8 @@ onMounted(async () => {
                 alt="Post Image"
                 style="
                   margin: 0 auto;
-                  width: 240px;
-                  height: auto;
+                  max-width: 260px;
+                  max-height: auto;
                   top: 12px;
                   border-radius: 16px;
                 "
@@ -164,7 +171,7 @@ onMounted(async () => {
   height: 40px;
   border-radius: 20px;
   z-index: 4;
-  bottom: 28px;
+  bottom: 32px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -183,7 +190,7 @@ onMounted(async () => {
   left: 32px;
   padding: 8px;
   border-radius: 28px;
-  color: #aaa;
+  color: white;
   font-size: 12px;
 }
 .search-left {
@@ -194,16 +201,31 @@ onMounted(async () => {
   flex-direction: row;
 }
 .search-keyword {
-  font-size: 16px;
-  color: white;
-  left: 2px;
+  font-size: 12px;
+  font-weight: bold;
+  color: black;
   top: 4px;
   display: flex;
   flex-direction: column;
-  background-color: black;
 }
-.search-keyword button {
-  margin-bottom: 8px;
+.search-title {
+  background-color: white;
+  border-radius: 10px;
+}
+.search-user {
+  background-color: white;
+  border-radius: 10px;
+  top: 2px;
+}
+.search-content {
+  background-color: white;
+  border-radius: 10px;
+  top: 4px;
+}
+.search-any {
+  background-color: white;
+  border-radius: 10px;
+  top: 6px;
 }
 .selected-category {
   color: white;
