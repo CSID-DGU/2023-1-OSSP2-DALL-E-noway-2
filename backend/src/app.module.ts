@@ -20,6 +20,7 @@ import { CommentModule } from './comment/comment.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: '.env',
       load: [configuration],
       isGlobal: true,
     }),
