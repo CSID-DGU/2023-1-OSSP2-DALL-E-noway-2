@@ -1,4 +1,5 @@
 import type { BoardType } from '@/types/enum/board.type';
+import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
 
 const postDreamDiaryURL = '/api/dream-diary';
@@ -156,5 +157,27 @@ export const deleteComment = async (commentId: number) => {
 
 export const getAllCategories = async () => {
   const response = await axiosInstance.get('/api/category/category-list');
+  return response;
+};
+
+export const getMonthDiaryList = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/calendar/month-list/${year}/${month}`,
+  );
+  return response;
+};
+
+export const getDreamDiaryFeedByDate = async (
+  year: number,
+  month: number,
+  day: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/calendar/${year}/${month + 1}/${day}`,
+  );
+  console.log(response);
   return response;
 };
