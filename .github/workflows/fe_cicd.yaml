@@ -56,14 +56,10 @@ jobs:
           script: |
             source $HOME/.bashrc
             echo "해당 리포지토리로 이동"
-            cd $HOME/git/dalle-noway
+            cd $HOME/dalle-noway
             echo "리포지토리 pull"
             git pull origin main
             echo "frontend 앱 빌드"
-            cd $HOME/git/dalle-noway/frontend
-            yarn install
-            npm run build
-            echo "frontend 앱 빌드"
-            cd $HOME/git/dalle-noway/frontend
+            cd $HOME/dalle-noway/frontend
             yarn install
             npm run build
