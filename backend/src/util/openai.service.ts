@@ -48,8 +48,6 @@ export class OpenAIService {
     title: string,
     content: string,
   ): Promise<string> {
-    this.logger.debug(`Called ${this.createDreamInterpretation.name}`);
-
     const response = await this.openAIApi.createCompletion({
       model: 'text-davinci-003',
       prompt:
@@ -57,7 +55,7 @@ export class OpenAIService {
         title +
         '이고 내용은 ' +
         content +
-        '\n\n이것은 꿈일기이고 이 꿈일기의 꿈에 대한 해몽을 알려줘. 꿈에 대한 요약과 세부적인 설명은 필요 없어. 대답은 할 필요 없이 "해몽 : "으로 시작해.',
+        '\n\n이것은 꿈일기이고 이 꿈일기의 꿈에 대한 해몽을 알려줘. 꿈에 대한 요약과 세부적인 설명은 필요 없어. 대답은 할 필요 없이 "해몽 : "으로 시작해. 중복되는 내용이 안들어가게 해줘.',
       max_tokens: 1000,
       temperature: 0.3,
       n: 1,
