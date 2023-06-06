@@ -14,6 +14,7 @@ import { UtilModule } from './util/util.module';
 import { DreamDiaryModule } from './dreamdiary/dreamdiary.module';
 import { join } from 'path';
 import { CategoryModule } from './category/category.module';
+import { LikeBookmarkListModule } from './likebookmarklist/likebookmarklist.module';
 import { CommentModule } from './comment/comment.module';
 
 @Module({
@@ -38,6 +39,7 @@ import { CommentModule } from './comment/comment.module';
     UtilModule,
     DreamDiaryModule,
     CategoryModule,
+    LikeBookmarkListModule,
     ProfileModule,
   ],
 
