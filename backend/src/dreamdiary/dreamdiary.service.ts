@@ -1,7 +1,5 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Configuration, OpenAIApi } from 'openai';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { UserService } from 'src/user/user.service';
