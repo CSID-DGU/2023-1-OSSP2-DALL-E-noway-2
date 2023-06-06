@@ -1,26 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class DreamDiaryFeedsResponseDto {
-  dreamDiaryFeeds: DreamDiaryFeedDto[];
+export class BoardFeedsResponseDto {
+  boardFeeds: BoardFeedDto[];
   totalLength: number;
 }
 
-export class DreamDiaryFeedDto {
+export class BoardFeedDto {
   @ApiProperty({
     example: 1,
-    description: '꿈일기 아이디',
+    description: '게시판 아이디',
   })
-  diaryId: number;
+  postId: number;
   @ApiProperty({
-    example: '옥상에서 떨어지는 꿈',
-    description: '꿈일기 제목',
+    example: '게시판 제목입니다.',
+    description: '게시판 제목',
   })
   title: string;
-  @ApiProperty({
-    example: '옥상에서 떨어지는 꿈을 꿨어요...',
-    description: '꿈일기 내용',
-  })
-  content: string;
   @ApiProperty({
     example: 1,
     description: '조회수',
@@ -36,4 +31,9 @@ export class DreamDiaryFeedDto {
     description: '꿈일기 이미지',
   })
   imageUrl: string;
+  @ApiProperty({
+    example: '게시판 내용입니다.',
+    description: '게시판 내용',
+  })
+  content: string;
 }

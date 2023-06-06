@@ -19,10 +19,18 @@
           </button>
         </div>
         <div v-if="showCategoryOptions" class="search-keyword">
-          <button @click="selectCategory('제목')">제목</button>
-          <button @click="selectCategory('유저')">유저</button>
-          <button @click="selectCategory('내용')">내용</button>
-          <button @click="selectCategory('전체')">전체</button>
+          <button @click="selectCategory('제목')" class="search-title">
+            제목
+          </button>
+          <button @click="selectCategory('유저')" class="search-user">
+            유저
+          </button>
+          <button @click="selectCategory('내용')" class="search-content">
+            내용
+          </button>
+          <button @click="selectCategory('전체')" class="search-any">
+            전체
+          </button>
         </div>
       </div>
     </div>
@@ -39,7 +47,7 @@
               <img
                 :src="post.image"
                 alt="Post Image"
-                style="width: auto; height: 60px; border-radius: 8px"
+                style="max-width: 84px; height: 60px; border-radius: 8px"
               />
             </div>
           </div>
@@ -166,7 +174,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  @apply z-[4];
+  z-index: 4;
   bottom: 28px;
   left: 360px;
   background-color: white;
@@ -176,37 +184,53 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   position: fixed;
-  @apply z-[2];
+  z-index: 2;
 }
 .search-bar {
   height: 32px;
   width: 280px;
   top: 4px;
   background-color: #444;
-  @apply inset-x-8;
+  left: 32px;
   padding: 8px;
   border-radius: 28px;
   color: #aaa;
   font-size: 12px;
 }
 .search-left {
-  margin-left: 40px;
+  margin-left: 44px;
 }
 .select-row {
   display: flex;
   flex-direction: row;
 }
 .search-keyword {
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: bold;
   color: white;
   left: 2px;
-  @apply inset-y-2;
+  top: 8px;
   display: flex;
   flex-direction: column;
-  background-color: black;
 }
-.search-keyword button {
-  margin-bottom: 8px;
+.search-title {
+  background-color: black;
+  border-radius: 10px;
+}
+.search-user {
+  background-color: black;
+  border-radius: 10px;
+  top: 2px;
+}
+.search-content {
+  background-color: black;
+  border-radius: 10px;
+  top: 4px;
+}
+.search-any {
+  background-color: black;
+  border-radius: 10px;
+  top: 6px;
 }
 .selected-category {
   color: white;
@@ -221,14 +245,15 @@ onMounted(async () => {
   color: black;
   width: 60px;
   height: 32px;
-  @apply inset-y-1;
   border-radius: 28px;
+  top: 4px;
 }
 .scroll-container {
   height: 604px;
   overflow-y: auto;
   scrollbar-width: thin;
-  @apply inset-y-9 z-[1];
+  top: 36px;
+  z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
   width: 8px; /* 스크롤바 너비 설정 */

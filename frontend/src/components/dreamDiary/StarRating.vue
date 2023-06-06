@@ -1,6 +1,19 @@
 <script setup lang="ts">
-defineProps(['dreamScore']);
-defineEmits(['update:dreamScore']);
+import { useDiaryCreateStore } from '@/stores/diary.create.store';
+import { onMounted, ref, watch } from 'vue';
+
+const { getDiary, getDreamScore } = useDiaryCreateStore();
+const diary = getDiary();
+
+const dreamScore = ref(getDreamScore());
+
+watch(getDreamScore, (value) => {
+  dreamScore.value = value;
+});
+
+onMounted(() => {
+  dreamScore.value = diary.dreamScore;
+});
 </script>
 
 <template>
@@ -10,7 +23,9 @@ defineEmits(['update:dreamScore']);
       id="5-stars"
       name="dreamScore"
       :value="5"
-      @input="$emit('update:dreamScore', $event.target.value)"
+      v-model="diary.dreamScore"
+      @input="dreamScore = $event.target.value"
+      :checked="dreamScore === 5"
     />
     <label for="5-stars" class="star pr-4">★</label>
     <input
@@ -18,7 +33,9 @@ defineEmits(['update:dreamScore']);
       id="4-stars"
       name="dreamScore"
       :value="4"
-      @input="$emit('update:dreamScore', $event.target.value)"
+      v-model="diary.dreamScore"
+      @input="dreamScore = $event.target.value"
+      :checked="dreamScore === 4"
     />
     <label for="4-stars" class="star">★</label>
     <input
@@ -26,7 +43,9 @@ defineEmits(['update:dreamScore']);
       id="3-stars"
       name="dreamScore"
       :value="3"
-      @input="$emit('update:dreamScore', $event.target.value)"
+      v-model="diary.dreamScore"
+      @input="dreamScore = $event.target.value"
+      :checked="dreamScore === 3"
     />
     <label for="3-stars" class="star">★</label>
     <input
@@ -34,7 +53,9 @@ defineEmits(['update:dreamScore']);
       id="2-stars"
       name="dreamScore"
       :value="2"
-      @input="$emit('update:dreamScore', $event.target.value)"
+      v-model="diary.dreamScore"
+      @input="dreamScore = $event.target.value"
+      :checked="dreamScore === 2"
     />
     <label for="2-stars" class="star">★</label>
     <input
@@ -42,7 +63,9 @@ defineEmits(['update:dreamScore']);
       id="1-star"
       name="dreamScore"
       :value="1"
-      @input="$emit('update:dreamScore', $event.target.value)"
+      v-model="diary.dreamScore"
+      @input="dreamScore = $event.target.value"
+      :checked="dreamScore === 1"
     />
     <label for="1-star" class="star">★</label>
   </div>

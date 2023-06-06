@@ -2,6 +2,8 @@
 import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import { categoryInfoStore } from '@/stores/category.info.store';
+
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
   {
@@ -54,7 +56,6 @@ const posts = ref([
   },
 ]);
 
-// 내용을 제한된 길이로 자르고 생략 부호를 추가하는 함수
 const truncateContent = (content: string, maxLength: number) => {
   if (content.length <= maxLength) {
     return content;
@@ -84,8 +85,11 @@ const newDiary = () => {
   route.push('/dream-diary/new');
 };
 
+const { fetchAllCategories } = categoryInfoStore();
+
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
+  await fetchAllCategories();
 });
 </script>
 
@@ -110,10 +114,18 @@ onMounted(async () => {
           </button>
         </div>
         <div v-if="showCategoryOptions" class="search-keyword">
-          <button @click="selectCategory('제목')">제목</button>
-          <button @click="selectCategory('유저')">유저</button>
-          <button @click="selectCategory('내용')">내용</button>
-          <button @click="selectCategory('전체')">전체</button>
+          <button @click="selectCategory('제목')" class="search-title">
+            제목
+          </button>
+          <button @click="selectCategory('유저')" class="search-user">
+            유저
+          </button>
+          <button @click="selectCategory('내용')" class="search-content">
+            내용
+          </button>
+          <button @click="selectCategory('전체')" class="search-any">
+            전체
+          </button>
         </div>
       </div>
     </div>
@@ -133,8 +145,8 @@ onMounted(async () => {
                 alt="Post Image"
                 style="
                   margin: 0 auto;
-                  width: 240px;
-                  height: auto;
+                  max-width: 260px;
+                  max-height: auto;
                   top: 12px;
                   border-radius: 16px;
                 "
@@ -162,8 +174,8 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  @apply z-[4];
-  bottom: 28px;
+  z-index: 4;
+  bottom: 32px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -172,37 +184,52 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   position: fixed;
-  @apply z-[2];
+  z-index: 2;
 }
 .search-bar {
   height: 32px;
   width: 280px;
   top: 4px;
   background-color: #444;
-  @apply inset-x-8;
+  left: 32px;
   padding: 8px;
   border-radius: 28px;
-  color: #aaa;
+  color: white;
   font-size: 12px;
 }
 .search-left {
-  margin-left: 40px;
+  margin-left: 44px;
 }
 .select-row {
   display: flex;
   flex-direction: row;
 }
 .search-keyword {
-  font-size: 16px;
-  color: white;
-  left: 2px;
-  @apply inset-y-2;
+  font-size: 12px;
+  font-weight: bold;
+  color: black;
+  top: 4px;
   display: flex;
   flex-direction: column;
-  background-color: black;
 }
-.search-keyword button {
-  margin-bottom: 8px;
+.search-title {
+  background-color: white;
+  border-radius: 10px;
+}
+.search-user {
+  background-color: white;
+  border-radius: 10px;
+  top: 2px;
+}
+.search-content {
+  background-color: white;
+  border-radius: 10px;
+  top: 4px;
+}
+.search-any {
+  background-color: white;
+  border-radius: 10px;
+  top: 6px;
 }
 .selected-category {
   color: white;
@@ -217,14 +244,15 @@ onMounted(async () => {
   color: black;
   width: 60px;
   height: 32px;
-  @apply inset-y-1;
+  top: 4px;
   border-radius: 28px;
 }
 .scroll-container {
-  height: 604px;
+  height: 608px;
   overflow-y: auto;
   scrollbar-width: thin;
-  @apply inset-y-9 z-[1];
+  top: 36px;
+  z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
   width: 8px;

@@ -35,7 +35,7 @@ import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
 import { FilterType } from 'src/enum/filter.type';
 import { BoardService } from './board.service';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { PostResponseDto } from 'src/dto/post.response.dto';
@@ -66,7 +66,7 @@ export class BoardController {
           callback(null, path);
         },
         filename(req, file, callback) {
-          callback(null, `${uuidv4()}.${file.mimetype.split('/')[1]}`);
+          callback(null, `${uuid()}.${file.mimetype.split('/')[1]}`);
         },
       }),
     }),
@@ -77,7 +77,6 @@ export class BoardController {
   })
   @UseGuards(AuthGuard('jwt'))
   async createPost(
-    @Body() postRequestDto: PostRequestDto,
     @Body('title') title: string,
     @Body('content') content: string,
     @Body('disclosureScope') disclosureScope: DisclosureScopeType,
@@ -85,17 +84,18 @@ export class BoardController {
     @GetUser() user: UserDto,
     @UploadedFile() image?: any,
   ) {
-    postRequestDto.title = title;
-    postRequestDto.content = content;
-    postRequestDto.disclosureScope = disclosureScope;
-    postRequestDto.boardType = boardType;
-    postRequestDto.userId = user.userId;
+    let imageUrl: string;
     if (image) {
-      postRequestDto.imageUrl = `${this.configService.get<string>('beHost')}/${
-        image.path
-      }`;
+      imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
     }
-    const result = await this.boardService.createPost(postRequestDto);
+    const result = await this.boardService.createPost(
+      title,
+      content,
+      disclosureScope,
+      boardType,
+      user.userId,
+      imageUrl,
+    );
     return result.postId;
   }
   @ApiOperation({
@@ -113,13 +113,43 @@ export class BoardController {
     description: 'post_id에 해당하는 게시글의 세부사항을 수정합니다.',
   })
   @Put('/posts/:post_id')
+  @UseInterceptors(
+    FileInterceptor(`image`, {
+      storage: diskStorage({
+        destination(req, file, callback) {
+          const path = 'uploads';
+          if (!existsSync(path)) {
+            mkdirSync(path);
+          }
+          callback(null, path);
+        },
+        filename(req, file, callback) {
+          callback(null, `${uuid()}.${file.mimetype.split('/')[1]}`);
+        },
+      }),
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: PostRequestDto,
+  })
   @UseGuards(AuthGuard('jwt'))
   async postUpdate(
+    @Body('title') title: string,
+    @Body('content') content: string,
+    @Body('disclosureScope') disclosureScope: DisclosureScopeType,
     @Param('post_id') postId: number,
-    @Body() postRequestDto: PostRequestDto,
+    @GetUser() user: UserDto,
+    @UploadedFile() image?: any,
   ) {
-    postRequestDto.postId = postId;
-    return await this.boardService.postUpdate(postRequestDto);
+    return await this.boardService.postUpdate(
+      postId,
+      title,
+      content,
+      disclosureScope,
+      user.userId,
+      image,
+    );
   }
 
   @ApiOperation({

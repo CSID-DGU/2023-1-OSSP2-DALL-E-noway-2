@@ -14,6 +14,12 @@ export class DreamDiaryFeedDto {
   title: string;
 
   @ApiProperty({
+    example: '옥상에서 떨어지는 꿈을 꿨어요...',
+    description: '꿈일기 내용',
+  })
+  content: string;
+
+  @ApiProperty({
     example: '0',
     description: '조회수',
   })
