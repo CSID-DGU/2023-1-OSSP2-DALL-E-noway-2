@@ -6,6 +6,7 @@ import { DreamDiaryController } from './dreamdiary.controller';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { UtilModule } from 'src/util/util.module';
 import { UserModule } from 'src/user/user.module';
+import { OpenAIService } from 'src/util/openai.service';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
   ],
   controllers: [DreamDiaryController],
-  providers: [DreamDiaryService],
+  providers: [DreamDiaryService, OpenAIService],
 })
 export class DreamDiaryModule {}
