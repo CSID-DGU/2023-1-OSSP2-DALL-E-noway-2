@@ -19,7 +19,7 @@ export class CategoryController {
   })
   @ApiCreatedResponse({ description: '꿈일기 카테고리 목록을 조회합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
-  @Get('categorylist')
+  @Get('category-list')
   async getCategoryList(): Promise<CategoryResponseDto> {
     const categoryList = await this.categoryService.getCategoryList();
 

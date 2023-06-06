@@ -40,7 +40,7 @@ import { UserDto } from 'src/dto/user.dto';
 import { DreamDiaryFeedsResponseDto } from 'src/dto/dreamdiary.feeds.response.dto';
 import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -158,8 +158,6 @@ export class DreamDiaryController {
   ): Promise<number> {
     try {
       let imageUrl: string;
-      console.log(category);
-      console.log(typeof category);
       if (image) {
         imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
       }

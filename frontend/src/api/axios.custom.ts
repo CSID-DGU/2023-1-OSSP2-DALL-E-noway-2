@@ -1,3 +1,4 @@
+import type { BoardType } from '@/types/enum/board.type';
 import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
 
@@ -25,9 +26,14 @@ export const getCreditInfo = async () => {
   return response;
 };
 
-const postNewPostUrl = '/api/boards/posts';
-export const postNewPost = async (newPostRequest: FormData) => {
-  const response = await axiosInstance.postForm(postNewPostUrl, newPostRequest);
+export const postNewPost = async (
+  newPostRequest: FormData,
+  boardType: BoardType,
+) => {
+  const response = await axiosInstance.postForm(
+    `/api/boards/posts/${boardType}`,
+    newPostRequest,
+  );
   return response;
 };
 
@@ -146,6 +152,11 @@ export const deleteComment = async (commentId: number) => {
     // FIXME: API 엔드포인트 수정 필요
     `/api/comments/test/1/${commentId}`,
   );
+  return response;
+};
+
+export const getAllCategories = async () => {
+  const response = await axiosInstance.get('/api/category/category-list');
   return response;
 };
 

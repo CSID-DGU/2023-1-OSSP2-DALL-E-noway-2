@@ -9,10 +9,11 @@ import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
-import router from '@/router';
 import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 import { usePostCreateStore } from '@/stores/post.create.store';
+import { BoardType } from '@/types/enum/board.type';
 
+const router = useRouter();
 const post = usePostCreateStore().getPost();
 
 const temporarySavPost = () => {
@@ -21,19 +22,19 @@ const temporarySavPost = () => {
 
 const submitPost = async () => {
   console.log(post);
-  // const formData = new FormData();
-  // formData.append('title', post.value.title);
-  // // post.value.image.forEach((image) => {
-  // //   formData.append('image', image);
-  // // });
-  // formData.append('disclosureScope', post.value.disclosureScope);
-  // formData.append('content', post.value.content);
-  // const response = await postNewPost(formData as FormData);
-  // if (response.status === 201) {
-  //   router.push({ name: 'post' });
-  // } else {
-  //   console.log(response);
-  // }
+  const formData = new FormData();
+  formData.append('title', post.title);
+  formData.append('content', post.content);
+  formData.append('image', post.image[0]);
+  // FIXME: 실제 값으로 변경 필요.
+  post.boardType = BoardType.FREE;
+  formData.append('disclosureScope', post.disclosureScope);
+  const response = await postNewPost(formData as FormData, post.boardType);
+  if (response.status === 201) {
+    router.push({ name: 'board', params: { postId: response.data } });
+  } else {
+    console.log(response);
+  }
 };
 
 const onInputImage = (event: any) => {
