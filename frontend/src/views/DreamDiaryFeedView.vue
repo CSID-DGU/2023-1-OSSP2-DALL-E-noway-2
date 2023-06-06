@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { categoryInfoStore } from '@/stores/category.info.store';
+import ProfileEdit from '@/components/profile/ProfileEdit.vue';
+import { useProfileStore } from '@/stores/profile.store';
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
@@ -86,6 +88,19 @@ const newDiary = () => {
 };
 
 const { fetchAllCategories } = categoryInfoStore();
+const { setEditing, isEditing } = useProfileStore();
+
+const { query } = useRoute();
+const editing = ref(isEditing());
+const isFirstLogin = query.isFirstLogin === 'true';
+if (isFirstLogin) {
+  setEditing(true);
+  route.push('/home');
+}
+
+watch(isEditing, (value) => {
+  editing.value = value;
+});
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
@@ -166,6 +181,9 @@ onMounted(async () => {
         style="border-radius: 24px"
       />
     </button>
+
+    <!-- 최초 로그인 시, 프로필 설정 모달 -->
+    <ProfileEdit v-if="isEditing()" />
   </main>
 </template>
 
