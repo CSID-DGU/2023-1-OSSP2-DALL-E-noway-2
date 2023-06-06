@@ -8,6 +8,7 @@ import { PostsResponseDto } from 'src/dto/posts.response.dto';
 import { Board } from 'src/entities/board.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
+import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { FilterType } from 'src/enum/filter.type';
 import { SearchType } from 'src/enum/search.type';
@@ -27,8 +28,22 @@ export class BoardService {
   ) {}
 
   // 게시글 생성 기능 / 게시글의 종류와 게시글 내용을 받아와 해당하는 게시판에 게시글을 등록하는 API
-  async createPost(postRequestDto: PostRequestDto): Promise<Board> {
-    const board = this.boardRepository.create(postRequestDto);
+  async createPost(
+    title: string,
+    content: string,
+    disclosureScope: DisclosureScopeType,
+    boardType: BoardType,
+    userId: number,
+    imageUrl?: string,
+  ): Promise<Board> {
+    const board = this.boardRepository.create({
+      title,
+      content,
+      imageUrl,
+      disclosureScope,
+      boardType,
+      userId,
+    });
     board.createdAt = new Date();
     return await this.boardRepository.save(board);
   }
@@ -48,22 +63,30 @@ export class BoardService {
   }
 
   // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API
-  async postUpdate(postRequestDto: PostRequestDto) {
-    const result = await this.boardRepository.update(
-      { postId: postRequestDto.postId },
-      {
-        title: postRequestDto.title,
-        content: postRequestDto.content,
-        imageUrl: postRequestDto.imageUrl,
+  async postUpdate(
+    postId: number,
+    title: string,
+    content: string,
+    disclosureScope: DisclosureScopeType,
+    userId: number,
+    imageUrl?: string,
+  ) {
+    const result = await this.boardRepository
+      .createQueryBuilder('board')
+      .update()
+      .set({
+        title,
+        content,
+        imageUrl,
         updatedAt: new Date(),
-        disclosureScope: postRequestDto.disclosureScope,
-      },
-    );
+        disclosureScope,
+      })
+      .where('postId = :postId', { postId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
 
     if (result.affected === 0) {
-      throw new NotFoundException(
-        `Could not find post with ID ${postRequestDto.postId}`,
-      );
+      throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
   }
 

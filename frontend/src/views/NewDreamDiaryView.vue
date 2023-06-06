@@ -1,55 +1,51 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import StarRating from '@/components/dreamDiary/StarRating.vue';
 import { postDreamDiary } from '@/api/axios.custom';
 import type { Category } from '@/types/index';
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
-import router from '@/router';
+import { categoryInfoStore } from '@/stores/category.info.store';
 
-// const router = useRouter();
+const router = useRouter();
 
 const diary = useDiaryCreateStore().getDiary();
-
-// const diary = ref({
-//   title: '',
-//   category: '',
-//   dreamScore: 0,
-//   image: '',
-//   disclosureScope: '',
-//   content: '',
-// });
+const { getCategories } = categoryInfoStore();
 
 const temporarySaveDiary = () => {
   console.log(diary);
 };
 
 const submitDiary = async () => {
-  console.log(diary);
-  // const formData = new FormData();
-  // formData.append('title', diary.value.title);
-  // formData.append('category', diary.value.category);
-  // formData.append('dreamScore', diary.value.dreamScore.toString());
-  // formData.append('image', diary.value.image);
-  // formData.append('disclosureScope', diary.value.disclosureScope);
-  // formData.append('content', diary.value.content);
-  // const response = await postDreamDiary(formData as FormData);
-  // if (response.status === 201) {
-  //   router.push({ name: 'dream-diary' });
-  // } else {
-  //   console.log(response);
-  // }
+  const formData = new FormData();
+  formData.append('title', diary.title);
+  // categoryName으로 id 찾기
+  const categories = getCategories();
+  const categoryId = categories.find(
+    (category: Category) => category.categoryName === diary.category,
+  )?.categoryId;
+  formData.append('category', String(categoryId));
+  formData.append('dreamScore', diary.dreamScore.toString());
+  formData.append('image', diary.image[0]);
+  formData.append('disclosureScope', diary.disclosureScope);
+  formData.append('content', diary.content);
+  const response = await postDreamDiary(formData as FormData);
+  if (response.status === 201) {
+    router.push({ name: 'dream-diary', params: { diaryId: response.data } });
+  } else {
+    console.log(response);
+  }
 };
 
 const onInputImage = (event: any) => {
-  for (let i = 0; i < event.target.files.length; i++) {
-    diary.image.push(event.target.files[i] as Blob);
-  }
+  // for (let i = 0; i < event.target.files.length; i++) {
+  //   diary.image.push(event.target.files[i] as Blob);
+  // }
+  diary.image.push(event.target.files[0] as Blob);
 };
 
 const fileInput = ref<HTMLElement | null>(null);
@@ -101,7 +97,6 @@ const goToImageCreation = () => {
               :text="'이미지 업로드'"
             />
             <input
-              multiple
               ref="fileInput"
               type="file"
               style="display: none"

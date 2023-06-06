@@ -15,6 +15,7 @@ const validRoutes = [
   'new-dream-diary',
   'generate-image',
   'board',
+  'post',
   'new-board',
   'comment',
   'profile',

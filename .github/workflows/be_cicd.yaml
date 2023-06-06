@@ -39,3 +39,29 @@ jobs:
       #   run: npm run test --prefix backend
       # - name: 통합 테스트 체크
       #   run: npm run test:e2e --prefix backend
+
+  backend-CD:
+    runs-on: ubuntu-latest
+    needs: backend-CI
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - name: 리모트 쉘 접속
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script_stop: true
+          script: |
+            source $HOME/.bashrc
+            echo "해당 리포지토리로 이동"
+            cd $HOME/git/dalle-noway
+            echo "리포지토리 pull"
+            git pull origin main
+            echo "backend 앱 빌드"
+            cd $HOME/git/dalle-noway/backend
+            yarn install
+            npm run build
+            echo "앱 배포 (reload)"
+            pm2 reload main
