@@ -315,13 +315,15 @@ export class ProfileService {
       .getMany();
 
     const dreamDiaryFeeds = dreamDiaries.map((dreamDiary) => {
-      const { diaryId, title, viewCount, author, imageUrl } = dreamDiary;
+      const { diaryId, title, content, viewCount, author, imageUrl } =
+        dreamDiary;
       const diaryImageUrl = imageUrl ? imageUrl : null;
       const { nickname } = author;
 
       return {
         diaryId,
         title,
+        content,
         viewCount,
         nickname,
         diaryImageUrl,

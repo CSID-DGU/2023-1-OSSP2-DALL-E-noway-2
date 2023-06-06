@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
 
 const postDreamDiaryURL = '/api/dream-diary';
@@ -145,5 +146,27 @@ export const deleteComment = async (commentId: number) => {
     // FIXME: API 엔드포인트 수정 필요
     `/api/comments/test/1/${commentId}`,
   );
+  return response;
+};
+
+export const getMonthDiaryList = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/calendar/month-list/${year}/${month}`,
+  );
+  return response;
+};
+
+export const getDreamDiaryFeedByDate = async (
+  year: number,
+  month: number,
+  day: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/calendar/${year}/${month + 1}/${day}`,
+  );
+  console.log(response);
   return response;
 };
