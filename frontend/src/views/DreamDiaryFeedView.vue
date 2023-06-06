@@ -2,6 +2,7 @@
 import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import { categoryInfoStore } from '@/stores/category.info.store';
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
@@ -84,8 +85,11 @@ const newDiary = () => {
   route.push('/dream-diary/new');
 };
 
+const { fetchAllCategories } = categoryInfoStore();
+
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
+  await fetchAllCategories();
 });
 </script>
 

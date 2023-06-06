@@ -41,6 +41,10 @@ export const useDiaryCreateStore = defineStore('diary-create', () => {
     return diary.value;
   };
 
+  const getDreamScore = () => {
+    return diary.value.dreamScore;
+  };
+
   return {
     diary,
     setTitle,
@@ -50,5 +54,6 @@ export const useDiaryCreateStore = defineStore('diary-create', () => {
     setDisclosureScope,
     setContent,
     getDiary,
+    getDreamScore,
   };
 });

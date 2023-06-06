@@ -1,17 +1,15 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { LikeBookmarkListController } from './likebookmarklist.controller';
+import { LikeBookmarkListService } from './likebookmarklist.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
-import { DreamDiaryService } from './dreamdiary.service';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
-import { DreamDiaryController } from './dreamdiary.controller';
 import { User } from 'src/entities/user.entity';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
-import { UtilModule } from 'src/util/util.module';
-import { UserModule } from 'src/user/user.module';
-import { CalendarModule } from './calendar/calendar.module';
+import { Board } from 'src/entities/board.entity';
 
 @Module({
   imports: [
@@ -22,14 +20,11 @@ import { CalendarModule } from './calendar/calendar.module';
       Category,
       Favorite,
       Bookmark,
+      Board,
     ]),
     AuthModule,
-    UtilModule,
-    UserModule,
-    forwardRef(() => CalendarModule),
   ],
-  controllers: [DreamDiaryController],
-  providers: [DreamDiaryService],
-  exports: [DreamDiaryService],
+  controllers: [LikeBookmarkListController],
+  providers: [LikeBookmarkListService],
 })
-export class DreamDiaryModule {}
+export class LikeBookmarkListModule {}

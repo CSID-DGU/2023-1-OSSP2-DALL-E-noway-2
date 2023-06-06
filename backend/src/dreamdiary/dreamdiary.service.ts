@@ -1,38 +1,26 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DreamDiaryFeedDto,
   DreamDiaryFeedsResponseDto,
 } from 'src/dto/dreamdiary.feeds.response.dto';
-import { DreamDiaryCreateRequestDto } from 'src/dto/dreamdiary.create.request.dto';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { SortType } from 'src/enum/sort.type';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { FilterType } from 'src/enum/filter.type';
 import { ForbiddenException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Configuration, OpenAIApi } from 'openai';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
 import { UserService } from 'src/user/user.service';
 import { OpenAIService } from 'src/util/openai.service';
-import {
-  CategoryDto,
-  CategoryResponseDto,
-} from 'src/dto/category.response.dto';
 
 @Injectable()
 export class DreamDiaryService {
@@ -76,6 +64,7 @@ export class DreamDiaryService {
       .select([
         'dream_diary.diaryId',
         'dream_diary.title',
+        'dream_diary.content',
         'author.nickname',
         'dream_diary.viewCount',
         'dream_diary.imageUrl',
@@ -120,6 +109,7 @@ export class DreamDiaryService {
         const dreamDiaryFeed: DreamDiaryFeedDto = {
           diaryId: dreamDiary.diaryId,
           title: dreamDiary.title,
+          content: dreamDiary.content,
           viewCount: dreamDiary.viewCount,
           nickname: dreamDiary.author.nickname,
           imageUrl: dreamDiary.imageUrl,

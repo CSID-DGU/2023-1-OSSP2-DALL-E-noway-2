@@ -39,30 +39,7 @@ const arrayLength = computed(() => commentList.value.length);
 
 const initComments = async () => {
   const response = await getAllComments(filterType.value, id.value);
-  // FIXME: 응답으로 UserDto 정보를 같이 받는게 좋을듯.
-  // response.data.forEach((data: any) => {
-  //   commentList.value.push({
-  //     commentId: data.commentId,
-  //     id: data.id,
-  //     parentCommentId: data.parentCommentId,
-  //     content: data.content,
-  //     createdAt: data.createdAt,
-  //     user: await getProfile(data.userId),
-  //   });
-  // });
-
-  commentList.value = [];
-  for (let data of response.data.comments) {
-    const user = await (await getProfile(data.userId)).data.user;
-    commentList.value.push({
-      commentId: data.commentId,
-      id: data.id,
-      parentCommentId: data.parentCommentId,
-      content: data.content,
-      createdAt: data.createdAt,
-      user: user,
-    });
-  }
+  commentList.value = response.data.comments;
 };
 
 const sendComment = async () => {
@@ -302,6 +279,27 @@ onMounted(async () => {
   @apply fixed bottom-0 left-0 right-0;
   @apply flex flex-row items-center;
   @apply bg-black p-4;
+}
+
+.comment-input {
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  filter: var(--menu-shadow);
+  z-index: 9;
+  user-select: none;
+  @apply flex flex-row items-center;
+  @apply bg-black p-4;
+}
+
+@media (min-width: 425px) {
+  .comment-input {
+    max-width: 425px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 .comment-input-user {
