@@ -14,8 +14,12 @@ const {
 } = calendarInfo;
 
 const isLoading = ref(showIsLoading());
+const dateTitle = ref(showDateTitle());
 watch(showIsLoading, (value) => {
   isLoading.value = value;
+});
+watch(showDateTitle, (value) => {
+  dateTitle.value = value;
 });
 
 const clickPrevMonth = () => {
@@ -34,7 +38,7 @@ const clickNextMonth = () => {
     <select
       class="title select"
       @change="selectMonth"
-      v-model="calendarInfo.dateTitle"
+      v-model="dateTitle"
       name="year-month"
     >
       <option
