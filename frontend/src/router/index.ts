@@ -1,16 +1,18 @@
+import { getCookie } from '@/api/cookie';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // Route for dream diary
+    // Route for login
     {
       path: '/',
-      name: 'home',
-      redirect: '/dream-diary-feed',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
     },
+    // Route for dream diary
     {
-      path: '/dream-diary-feed',
+      path: '/home',
       name: 'dream-diary-feed',
       component: () => import('@/views/DreamDiaryFeedView.vue'),
     },
@@ -20,22 +22,14 @@ const router = createRouter({
       component: () => import('@/views/NewDreamDiaryView.vue'),
     },
     {
+      path: '/dream-diary/new/generate-image',
+      name: 'generate-image',
+      component: () => import('@/views/GenerateImageView.vue'),
+    },
+    {
       path: '/dream-diary/:diaryId',
       name: 'dream-diary',
       component: () => import('@/views/DreamDiaryView.vue'),
-      children: [
-        {
-          path: 'comment',
-          // name: 'comment',
-          component: () => import('@/views/CommentView.vue'),
-        },
-      ],
-    },
-    // Route for login
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
     },
     // Route for board
     {
@@ -44,21 +38,19 @@ const router = createRouter({
       component: () => import('@/views/BoardListView.vue'),
     },
     {
-      path: '/board/new',
-      name: 'new-board',
-      component: () => import('@/views/NewBoardView.vue'),
+      path: '/post/new',
+      name: 'new-post',
+      component: () => import('@/views/NewPostView.vue'),
     },
     {
-      path: '/board/:boardId',
+      path: '/board/:postId',
       name: 'board',
-      component: () => import('@/views/BoardView.vue'),
-      children: [
-        {
-          path: 'comment',
-          name: 'comment',
-          component: () => import('@/views/CommentView.vue'),
-        },
-      ],
+      component: () => import('@/views/PostView.vue'),
+    },
+    {
+      path: '/comment/:filterType/:id',
+      name: 'comment',
+      component: () => import('@/views/CommentView.vue'),
     },
     // Route for calendar
     {
@@ -68,14 +60,14 @@ const router = createRouter({
     },
     // Route for profile
     {
-      path: '/profile',
+      path: '/profile/:userId',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
     },
     {
-      path: '/profile/edit',
-      name: 'profile-edit',
-      component: () => import('@/views/ProfileEditView.vue'),
+      path: '/profile/detail',
+      name: 'profile-detail',
+      component: () => import('@/views/ProfileDetailView.vue'),
     },
     {
       path: '/profile/bookmark',
@@ -87,6 +79,11 @@ const router = createRouter({
       name: 'like',
       component: () => import('@/views/LikeView.vue'),
     },
+    {
+      path: '/profile/follow/:userId/:followType',
+      name: 'follow',
+      component: () => import('@/views/FollowView.vue'),
+    },
     // miss match
     {
       path: '/:pathMatch(.*)*',
@@ -94,6 +91,16 @@ const router = createRouter({
       component: () => import('@/views/NotFoundView.vue'),
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const token = getCookie();
+  if (to.name !== 'login' && !token) {
+    next({ name: 'login' });
+    alert('로그인 정보가 유효하지 않습니다.\n다시 로그인해주세요.');
+  } else {
+    next();
+  }
 });
 
 export default router;

@@ -1,0 +1,41 @@
+name: CI/CD
+on:
+  push:
+    paths:
+      - "backend/**"
+
+jobs:
+  backend-CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v2
+      - name: Node.js 16.x Version
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+          # yarn을 사용하도록 설정
+          # yarn 버전을 명시하지 않으면 최신 버전을 사용한다.
+          registry-url: "https://registry.yarnpkg.com"
+          cache: "yarn"
+      - name: 종속 모듈들 캐싱
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/backend/node_modules
+          # yarn.lock 파일을 사용하여 해시 값을 계산하도록 한다.
+          key: yarn-packages-${{ hashFiles('**/backend/yarn.lock') }}
+          # yarn이 사용하는 캐시 경로를 지정
+          restore-keys: |
+            yarn-packages-
+      - name: 종속 모듈들 설치
+        # 패키지 설치 중간에 진행 상황이 출력되도록 --progress 플래그 추가
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --cwd backend --progress
+      - name: lint 체크
+        run: npm run lint --prefix backend
+      - name: 빌드 체크
+        run: npm run build --prefix backend
+      # - name: 단위 테스트 체크
+      #   run: npm run test --prefix backend
+      # - name: 통합 테스트 체크
+      #   run: npm run test:e2e --prefix backend
