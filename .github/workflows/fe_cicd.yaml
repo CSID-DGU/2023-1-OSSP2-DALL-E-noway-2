@@ -54,6 +54,8 @@ jobs:
           port: ${{ secrets.PORT }}
           script_stop: true
           script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             source $HOME/.bashrc
             echo "해당 리포지토리로 이동"
             cd $HOME/dalle-noway
