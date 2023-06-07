@@ -36,4 +36,33 @@ export class OpenAIService {
     });
     return response.data.data.map((data) => data.url);
   }
+
+  /**
+   * OpenAI의 Davinci 엔진을 이용해 해몽을 생성합니다.
+   *
+   * @param title 꿈일기 제목
+   * @param content 꿈일기 내용
+   * @returns 생성된 해몽 결과
+   */
+  async createDreamInterpretation(
+    title: string,
+    content: string,
+  ): Promise<string> {
+    const response = await this.openAIApi.createCompletion({
+      model: 'text-davinci-003',
+      prompt:
+        '제목은 ' +
+        title +
+        '이고 내용은 ' +
+        content +
+        '\n\n이것은 꿈일기이고 이 꿈일기의 꿈에 대한 해몽을 알려줘. 꿈에 대한 요약과 세부적인 설명은 필요 없어. 대답은 할 필요 없이 "해몽 : "으로 시작해. 중복되는 내용이 안들어가게 해줘.',
+      max_tokens: 1000,
+      temperature: 0.3,
+      n: 1,
+    });
+
+    const interpretation = response.data.choices[0].text.trim();
+
+    return interpretation;
+  }
 }
