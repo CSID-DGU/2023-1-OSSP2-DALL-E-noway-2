@@ -240,9 +240,20 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
         month.value,
         day,
       );
-      const data = response.data as DiaryFeed;
-      selectedDiaryFeed.value = data;
-      selectedDiaryFeed.value.content = truncateContent(data.content, 25);
+      if (response.status === 200 && response.data !== '') {
+        const data = response.data as DiaryFeed;
+        selectedDiaryFeed.value = data;
+        selectedDiaryFeed.value.content = truncateContent(data.content, 25);
+      } else {
+        selectedDiaryFeed.value = {
+          diaryId: 0,
+          imageUrl: '',
+          title: '',
+          content: '',
+          nickname: '',
+          viewCount: 0,
+        } as DiaryFeed;
+      }
     } catch (error) {
       console.log(error);
     }
