@@ -152,8 +152,6 @@ export class DreamDiaryService {
     const categoryNames = getCategory.map((category) => category.categoryName);
     const responseDto = new DreamDiaryResponseDto();
 
-    console.log(categoryNames);
-
     responseDto.diaryId = dreamDiary.diaryId;
     responseDto.title = dreamDiary.title;
     responseDto.content = dreamDiary.content;

@@ -56,16 +56,21 @@ export class AuthController {
     this.logger.debug(`Called ${this.naverLoginCallback.name}`);
     try {
       // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
-      const user = await this.userService.findOrCreateUserBySocialProfile(
-        profile,
-      );
+      const [user, isFirstLogin] =
+        await this.userService.findOrCreateUserBySocialProfile(profile);
 
       // JWT 토큰을 발급 후 쿠키에 저장합니다.
       const token = this.authService.generateJwtToken(user);
       res.cookie('accessToken', token);
 
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
-      return res.redirect(this.configService.get<string>('feHost') + '/home');
+      return isFirstLogin
+        ? res.redirect(
+            this.configService.get<string>('feHost') +
+              '/home' +
+              '?isFirstLogin=true',
+          )
+        : res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
       this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
@@ -98,16 +103,21 @@ export class AuthController {
     this.logger.debug(`Called ${this.kakaoLoginCallback.name}`);
     try {
       // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
-      const user = await this.userService.findOrCreateUserBySocialProfile(
-        profile,
-      );
+      const [user, isFirstLogin] =
+        await this.userService.findOrCreateUserBySocialProfile(profile);
 
       // JWT 토큰을 발급 후 쿠키에 저장합니다.
       const token = this.authService.generateJwtToken(user);
       res.cookie('accessToken', token);
 
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
-      return res.redirect(this.configService.get<string>('feHost') + '/home');
+      return isFirstLogin
+        ? res.redirect(
+            this.configService.get<string>('feHost') +
+              '/home' +
+              '?isFirstLogin=true',
+          )
+        : res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
       this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
@@ -140,16 +150,21 @@ export class AuthController {
     this.logger.debug(`Called ${this.googleLoginCallback.name}`);
     try {
       // 유저가 존재하지 않으면 유저를 생성하고, 유저 정보를 반환합니다.
-      const user = await this.userService.findOrCreateUserBySocialProfile(
-        profile,
-      );
+      const [user, isFirstLogin] =
+        await this.userService.findOrCreateUserBySocialProfile(profile);
 
       // JWT 토큰을 발급 후 쿠키에 저장합니다.
       const token = this.authService.generateJwtToken(user);
       res.cookie('accessToken', token);
 
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
-      return res.redirect(this.configService.get<string>('feHost') + '/home');
+      return isFirstLogin
+        ? res.redirect(
+            this.configService.get<string>('feHost') +
+              '/home' +
+              '?isFirstLogin=true',
+          )
+        : res.redirect(this.configService.get<string>('feHost') + '/home');
     } catch (err) {
       this.logger.error(err.message);
       throw new InternalServerErrorException(err.message);
