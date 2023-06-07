@@ -63,7 +63,6 @@ export class AuthController {
       const token = this.authService.generateJwtToken(user);
       res.cookie('accessToken', token);
 
-      console.log(isFirstLogin);
       // NOTE: 이후에는 프론트엔드로 리다이렉트 합니다.
       return isFirstLogin
         ? res.redirect(
