@@ -1,60 +1,42 @@
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, type Ref } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { categoryInfoStore } from '@/stores/category.info.store';
+import axios from 'axios';
+import type { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
+import type { Category, Diary } from '@/types';
+import { useDiaryCreateStore } from '@/stores/diary.create.store';
 
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    score: '☆☆☆☆☆',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content:
-      '내용이긴글1아무거나작성을해볼게요밑으로내려갈까요아님옆으로밀릴까요어떻게될까요',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-  {
-    id: 2,
-    title: '게시글 제목 2',
-    user: '사용자2',
-    content: '내용이긴글2',
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    views: 5,
-  },
-  {
-    id: 3,
-    title: '게시글 제목 3',
-    user: '사용자3',
-    content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image: 'https://t1.daumcdn.net/cfile/tistory/99C6FD385D6CAD1206',
-    views: 18,
-  },
-  {
-    id: 4,
-    title: '게시글 제목 4',
-    user: '사용자4',
-    content: '내용이긴글4',
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    views: 13,
-  },
-  {
-    id: 5,
-    title: '게시글 제목 5',
-    user: '사용자5',
-    content: '내용이긴글5',
-    image: '/path/to/image5.jpg',
-    views: 7,
-  },
-]);
+interface Diary {
+  title: string;
+  id: number;
+  category: string;
+  dreamScore: number;
+  image: string;
+  disclosureScope: string;
+  content: string;
+  likes: number;
+  views: number;
+  bookmarks: number;
+  user: string;
+}
+
+const diary: Diary = {
+  title: '',
+  category: '',
+  dreamScore: 0,
+  image: '',
+  disclosureScope: '',
+  content: '',
+  likes: 0,
+  views: 0,
+  bookmarks: 0,
+  user: '',
+  id: 1,
+};
+
+const posts: Ref<Diary[]> = ref<Diary[]>([diary]);
 
 const truncateContent = (content: string, maxLength: number) => {
   if (content.length <= maxLength) {
@@ -146,7 +128,7 @@ onMounted(async () => {
                 style="
                   margin: 0 auto;
                   max-width: 260px;
-                  max-height: auto;
+                  max-height: auto
                   top: 12px;
                   border-radius: 16px;
                 "
@@ -175,7 +157,7 @@ onMounted(async () => {
   height: 40px;
   border-radius: 20px;
   z-index: 4;
-  bottom: 32px;
+  bottom: 36px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -206,7 +188,6 @@ onMounted(async () => {
 }
 .search-keyword {
   font-size: 12px;
-  font-weight: bold;
   color: black;
   top: 4px;
   display: flex;
@@ -230,6 +211,13 @@ onMounted(async () => {
   background-color: white;
   border-radius: 10px;
   top: 6px;
+}
+.search-any:hover,
+.search-title:hover,
+.search-user:hover,
+.search-content:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .selected-category {
   color: white;
@@ -255,7 +243,7 @@ onMounted(async () => {
   z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
 }
 .scroll-container::-webkit-scrollbar-thumb {
   background-color: #444;

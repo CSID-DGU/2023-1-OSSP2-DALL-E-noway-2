@@ -52,7 +52,7 @@ const posts = ref([
   },
 ]);
 
-const category = ref('');
+const category = ref('꿈일기목록');
 
 const selectCategory = (cate: string) => {
   category.value = cate;
@@ -70,16 +70,19 @@ const truncateContent = (content: string, maxLength: number) => {
 <template>
   <main>
     <div class="like-category">
-      <button @click="selectCategory('꿈일기목록')" class="like-dream-diary">
-        꿈일기목록
-      </button>
-      <button @click="selectCategory('자유')" class="like-free">자유</button>
-      <button @click="selectCategory('수면팁')" class="like-sleep">
-        수면 팁
-      </button>
-      <button @click="selectCategory('해몽의뢰')" class="like-read-dream">
-        해몽 의뢰
-      </button>
+      <div class="pageinfo">좋아요 목록</div>
+      <div class="select-like-cate">
+        <button @click="selectCategory('꿈일기목록')" class="like-dream-diary">
+          꿈일기목록
+        </button>
+        <button @click="selectCategory('자유')" class="like-free">자유</button>
+        <button @click="selectCategory('수면팁')" class="like-sleep">
+          수면 팁
+        </button>
+        <button @click="selectCategory('해몽의뢰')" class="like-read-dream">
+          해몽 의뢰
+        </button>
+      </div>
     </div>
     <div class="like-list">
       <template v-if="category === '꿈일기목록'">
@@ -147,38 +150,60 @@ const truncateContent = (content: string, maxLength: number) => {
 <style scoped>
 .like-category {
   width: 360px;
-  background-color: white;
+  background-color: #333;
   margin: 0 auto;
   text-align: center;
   height: 32px;
   border-radius: 16px;
+  top: 24px;
+  z-index: 1;
+  color: white;
+}
+.pageinfo {
+  bottom: 28px;
+  font-weight: bold;
+}
+.select-like-cate {
+  font-size: 12px;
+  top: 1px;
 }
 .like-dream-diary {
-  width: 80px;
-  background-color: #ccc;
+  width: 92px;
+  background-color: #666;
   border-radius: 10px;
-  top: 5px;
+  right: 18px;
+  bottom: 17px;
 }
 .like-free {
   width: 52px;
-  background-color: #ccc;
+  right: 6px;
+  background-color: #666;
   border-radius: 10px;
-  top: 5px;
+  bottom: 17px;
 }
 .like-sleep {
+  left: 6px;
   width: 60px;
-  background-color: #ccc;
+  background-color: #666;
   border-radius: 10px;
-  top: 5px;
+  bottom: 17px;
 }
 .like-read-dream {
   width: 80px;
-  background-color: #ccc;
+  left: 18px;
+  background-color: #666;
   border-radius: 10px;
-  top: 5px;
+  bottom: 17px;
+}
+.like-dream-diary:hover,
+.like-free:hover,
+.like-sleep:hover,
+.like-read-dream:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .scroll-container {
-  height: 608px;
+  height: 568px;
   overflow-y: auto;
   scrollbar-width: thin;
   top: 36px;
@@ -195,7 +220,6 @@ const truncateContent = (content: string, maxLength: number) => {
   width: 84%;
   padding: 20px;
   margin: 0 auto;
-  border-style: solid;
   border-color: white;
   border-width: 1px 0;
   color: white;

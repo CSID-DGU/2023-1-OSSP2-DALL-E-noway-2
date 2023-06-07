@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
-import { ref } from 'vue';
-import DreamDiaryFeedView from './DreamDiaryFeedView.vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import '@fortawesome/fontawesome-free/css/all.css';
-
-const feedposts = ref([DreamDiaryFeedView.posts]);
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
@@ -22,7 +20,7 @@ const posts = ref([
     likes: 10,
     bookmarks: 5,
     tag: '#해시태그1  #해시태그2',
-    interprete: '아무말이나해봐',
+    interprete: '해몽에는 무슨 내용이 들어갈까요',
   },
 ]);
 
@@ -44,6 +42,11 @@ const postModify = () => {
 
 const postDelete = () => {
   route.push('/home');
+};
+
+const showInterprete = ref(false);
+const buttonInterprete = () => {
+  showInterprete.value = !showInterprete.value;
 };
 
 const clickLike = () => {};
@@ -78,10 +81,12 @@ const clickBookmark = () => {};
           <div class="post-content">
             <h1>{{ post.content }}</h1>
             <div class="post-tag">{{ post.tag }}</div>
-            <RouterLink to="read-dream" class="read-dream">
+            <button @click="buttonInterprete" class="read-dream">
               해몽보기
-            </RouterLink>
-            <RouterView> </RouterView>
+            </button>
+            <div v-if="showInterprete" class="interpretation">
+              {{ post.interprete }}
+            </div>
             <div class="icon-row">
               <button @click="clickLike" class="click-like">
                 <i class="fas fa-heart"> {{ post.likes }}</i>
@@ -135,7 +140,7 @@ const clickBookmark = () => {};
   text-align: center;
 }
 .icon-row {
-  top: 4px;
+  top: 36px;
   z-index: 2;
 }
 
@@ -161,6 +166,7 @@ const clickBookmark = () => {};
 }
 .click-bookmark i {
   font-size: 20px;
+  transition: red;
 }
 .list-row {
   display: flex;
@@ -177,10 +183,19 @@ const clickBookmark = () => {};
   min-height: auto;
 }
 .post-tag {
+  top: 8px;
   font-size: 12px;
 }
 .read-dream {
   font-size: 12px;
+  top: 16px;
+}
+.read-dream:active {
+  text-decoration: underline;
+}
+.interpretation {
+  font-size: 12px;
+  top: 16px;
 }
 .change-button {
   background-color: white;
