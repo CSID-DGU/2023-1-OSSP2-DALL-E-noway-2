@@ -81,14 +81,19 @@ export class OpenAIService {
    */
   async createText(prompt: string, model: string): Promise<string> {
     this.logger.debug(`Called ${this.createText.name}`);
-    const response = await this.openAIApi.createCompletion({
-      prompt,
+
+    const response = await this.openAIApi.createChatCompletion({
       model,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
       max_tokens: 1000,
-      temperature: 0.3,
-      n: 1,
+      temperature: 0,
     });
-    return response.data.choices[0].text.trim();
+    return response.data.choices[0].message.content.trim();
   }
 
   /**

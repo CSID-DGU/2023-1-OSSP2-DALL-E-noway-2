@@ -437,7 +437,7 @@ export class DreamDiaryService {
 
     const dallePrompt = await this.openAIService.createText(
       gptPromptForDalle,
-      'text-davinci-003',
+      'gpt-3.5-turbo',
     );
     console.log(dallePrompt);
 
