@@ -367,6 +367,7 @@ export class DreamDiaryController {
       return await this.dreamDiaryService.createDreamDiaryImages(
         generateDreamDiaryImagesRequestDto.title,
         generateDreamDiaryImagesRequestDto.content,
+        generateDreamDiaryImagesRequestDto.n,
         user.userId,
       );
     } catch (err) {

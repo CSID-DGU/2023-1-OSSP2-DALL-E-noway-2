@@ -12,10 +12,15 @@ export const postDreamDiary = async (dreamDiaryCreateRequest: FormData) => {
 };
 
 const postDreamImageUrl = '/api/dream-diary/dream-images';
-export const postDreamImage = async (title: string, content: string) => {
+export const postDreamImage = async (
+  title: string,
+  content: string,
+  n: number,
+) => {
   const response = await axiosInstance.post(postDreamImageUrl, {
     title,
     content,
+    n,
   });
   return response;
 };
