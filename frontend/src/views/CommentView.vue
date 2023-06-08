@@ -27,6 +27,7 @@ interface Comment {
   content: string;
   createdAt: Date;
   user: User;
+  replies: Comment[];
 }
 
 const commentList: Ref<Comment[]> = ref([]);
@@ -39,7 +40,30 @@ const arrayLength = computed(() => commentList.value.length);
 
 const initComments = async () => {
   const response = await getAllComments(filterType.value, id.value);
-  commentList.value = response.data.comments;
+  // commentList.value = response.data.comments;
+  const comments = response.data.comments as Comment[];
+
+  // Reset commentList
+  commentList.value = [];
+
+  // Create a map to store comments using their commentId as the key
+  const commentMap: Record<number, Comment> = {};
+
+  // Iterate over comments and populate the commentMap
+  comments.forEach((comment) => {
+    comment.replies = []; // Initialize empty replies array
+    commentMap[comment.commentId] = comment;
+  });
+
+  // Iterate over comments again to build the nested structure
+  comments.forEach((comment) => {
+    const parentComment = commentMap[comment.parentCommentId];
+    if (parentComment) {
+      parentComment.replies.push(comment); // Add the comment as a reply
+    } else {
+      commentList.value.push(comment); // Add the top-level comment
+    }
+  });
 };
 
 const sendComment = async () => {
@@ -186,16 +210,45 @@ onMounted(async () => {
             <IconDelete /> 댓글 삭제
           </div>
         </div>
+        <div>
+          <div v-if="comment.replies.length > 0" class="replies">
+            <div
+              v-for="reply in comment.replies"
+              :key="reply.commentId"
+              class="comment-card reply-card"
+            >
+              <RouterLink :to="`/profile/${reply.user.userId}`">
+                <div class="comment-user">
+                  <div class="comment-user-image">
+                    <img :src="reply.user.imageUrl" alt="user-image" />
+                  </div>
+                  <div class="comment-user-nickname">
+                    <h1>{{ reply.user.nickname }}</h1>
+                  </div>
+                </div>
+              </RouterLink>
+              <div class="comment-content">
+                <h1>{{ reply.content }}</h1>
+              </div>
+              <div class="comment-date">
+                <h1>{{ reply.createdAt }}</h1>
+              </div>
+            </div>
+          </div>
 
-        <!-- 답글 입력 칸 -->
-        <div v-if="isReplyInputVisible(comment.commentId)" class="reply-input">
-          <input
-            v-model="replyInputs[comment.commentId]"
-            type="text"
-            placeholder="답글을 입력하세요"
-          />
-          <div class="reply-send" @click="sendReply(comment.commentId)">
-            <IconSend />
+          <!-- 답글 입력 칸 -->
+          <div
+            v-if="isReplyInputVisible(comment.commentId)"
+            class="reply-input"
+          >
+            <input
+              v-model="replyInputs[comment.commentId]"
+              type="text"
+              placeholder="답글을 입력하세요"
+            />
+            <div class="reply-send" @click="sendReply(comment.commentId)">
+              <IconSend />
+            </div>
           </div>
         </div>
       </div>
