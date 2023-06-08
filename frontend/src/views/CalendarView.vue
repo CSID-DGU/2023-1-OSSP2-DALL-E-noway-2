@@ -12,12 +12,12 @@ import 'swiper/css/pagination';
 import { Pagination } from 'swiper';
 import CountPieStat from '@/components/calendar/CountPieStat.vue';
 import ScoreBarStat from '@/components/calendar/ScoreBarStat.vue';
+import AverageBarStat from '@/components/calendar/AverageBarStat.vue';
 
 const { getUser, apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
 const {
   showIsLoading,
-  selectMonth,
   setSelectedDate,
   checkPastToday,
   showLastDate,
@@ -25,7 +25,6 @@ const {
   getDateBgColor,
   checkToday,
   showSelectedDate,
-  getDateColor,
   fetchCalendarList,
   fetchTodayDiaryFeed,
   showCalendarList,
@@ -132,6 +131,9 @@ const modules = [Pagination];
       </swiper-slide>
       <swiper-slide>
         <ScoreBarStat />
+      </swiper-slide>
+      <swiper-slide>
+        <AverageBarStat />
       </swiper-slide>
     </swiper>
   </main>
