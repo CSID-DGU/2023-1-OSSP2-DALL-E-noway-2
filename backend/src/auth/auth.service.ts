@@ -17,8 +17,6 @@ export class AuthService {
     this.logger.debug(`Called ${this.generateJwtToken.name}`);
     return this.jwtService.sign({
       userId: user.userId,
-      nickname: user.nickname,
-      imageUrl: user.imageUrl,
     });
   }
 }

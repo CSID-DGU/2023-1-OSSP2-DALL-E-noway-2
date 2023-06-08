@@ -34,9 +34,7 @@ const goFollowView = (followType: FollowType) => {
 
 onMounted(async () => {
   try {
-    if (user.value.userId === 0) {
-      await apiGetUser();
-    }
+    await apiGetUser();
     user.value = getUser();
     const response = await getProfile(props.userId);
     if (response.status === 200) {

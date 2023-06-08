@@ -6,11 +6,9 @@ import {
 } from 'src/dto/dreamdiary.feeds.response.dto';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { DiaryCategory } from 'src/entities/diary.category.entity';
-import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { Category } from 'src/entities/category.entity';
@@ -19,8 +17,10 @@ import { Bookmark } from 'src/entities/bookmark.entity';
 import { FilterType } from 'src/enum/filter.type';
 import { ForbiddenException, Logger } from '@nestjs/common';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
+import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { UserService } from 'src/user/user.service';
 import { OpenAIService } from 'src/util/openai.service';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class DreamDiaryService {
@@ -29,7 +29,6 @@ export class DreamDiaryService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(DreamDiary)
-    private readonly dreamDiaryRepository: Repository<DreamDiary>,
     @InjectRepository(DiaryCategory)
     private readonly diaryCategoryRepository: Repository<DiaryCategory>,
     @InjectRepository(Category)
@@ -38,8 +37,10 @@ export class DreamDiaryService {
     private readonly favoriteRepository: Repository<Favorite>,
     @InjectRepository(Bookmark)
     private readonly bookMarkRepository: Repository<Bookmark>,
-    private readonly oepnAIService: OpenAIService,
+    private readonly openAIService: OpenAIService,
     private readonly userService: UserService,
+    @InjectRepository(DreamDiary)
+    private readonly dreamDiaryRepository: Repository<DreamDiary>,
   ) {}
 
   /**
@@ -150,8 +151,6 @@ export class DreamDiaryService {
 
     const categoryNames = getCategory.map((category) => category.categoryName);
     const responseDto = new DreamDiaryResponseDto();
-
-    console.log(categoryNames);
 
     responseDto.diaryId = dreamDiary.diaryId;
     responseDto.title = dreamDiary.title;
@@ -456,5 +455,23 @@ export class DreamDiaryService {
       maxFreeGenerateCount: maxRequestCount,
       generatedImages: images,
     } as GeneratedImagesResponseDto;
+  }
+
+  async createDreamInterpretation(diaryId: number) {
+    this.logger.debug(`Called ${this.createDreamInterpretation.name}`);
+
+    const dreamDiary = await this.dreamDiaryRepository.findOne({
+      where: { diaryId: diaryId },
+    });
+
+    const interpretation = await this.openAIService.createDreamInterpretation(
+      dreamDiary.title,
+      dreamDiary.content,
+    );
+
+    dreamDiary.interpretation = interpretation;
+
+    await this.dreamDiaryRepository.save(dreamDiary);
+    return interpretation;
   }
 }
