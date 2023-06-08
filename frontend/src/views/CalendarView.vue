@@ -11,6 +11,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination } from 'swiper';
 import CountPieStat from '@/components/calendar/CountPieStat.vue';
+import ScoreBarStat from '@/components/calendar/ScoreBarStat.vue';
 
 const { getUser, apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
@@ -128,6 +129,9 @@ const modules = [Pagination];
       </swiper-slide>
       <swiper-slide>
         <CountPieStat />
+      </swiper-slide>
+      <swiper-slide>
+        <ScoreBarStat />
       </swiper-slide>
     </swiper>
   </main>

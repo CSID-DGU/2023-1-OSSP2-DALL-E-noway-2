@@ -1,14 +1,29 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, type Ref } from 'vue';
-import { Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Bar } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from 'chart.js';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { categoryInfoStore } from '@/stores/category.info.store';
-import type { CountStat } from '@/types';
-import { getCountStatByMonth } from '@/api/axios.custom';
+import type { ScoreStat } from '@/types';
+import { getScoreStatByMonth } from '@/api/axios.custom';
 import { useCalendarInfoStore } from '@/stores/calendar.info.store';
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 const options = {
   responsive: true,
@@ -16,7 +31,7 @@ const options = {
   plugins: {
     title: {
       display: true,
-      text: '카테고리 별 꿈을 꾼 횟수',
+      text: '카테고리 별 평균 꿈 점수',
       font: {
         size: 20,
       },
@@ -28,7 +43,7 @@ const { getCategories, fetchAllCategories } = categoryInfoStore();
 const { showYear, showMonth } = useCalendarInfoStore();
 
 const categories = ref(getCategories());
-const countStats: Ref<CountStat[]> = ref([]);
+const scoreStats: Ref<ScoreStat[]> = ref([]);
 const year = ref(showYear());
 const month = ref(showMonth());
 
@@ -41,32 +56,33 @@ const getRandomColor = () => {
 };
 
 const data = computed(() => {
-  if (countStats.value.length === 0) {
+  if (scoreStats.value.length === 0) {
     return {
       labels: [],
       datasets: [],
     };
   }
-  const labels = countStats.value.map((countStat) => countStat.categoryName);
-  const data = countStats.value.map((countStat) => Number(countStat.count));
+  const labels = scoreStats.value.map((scoreStat) => scoreStat.categoryName);
+  const data = scoreStats.value.map((scoreStat) => Number(scoreStat.scoreAvg));
 
   return {
     labels: labels,
     datasets: [
       {
+        label: '1~5',
         data: data,
-        backgroundColor: countStats.value.map(() => getRandomColor()),
+        backgroundColor: scoreStats.value.map(() => getRandomColor()),
         borderWidth: 1,
       },
     ],
-  } as ChartData;
+  };
 });
 
-const fetchCountStats = async () => {
+const fetchScoreStat = async () => {
   try {
-    const response = await getCountStatByMonth(year.value, month.value + 1);
+    const response = await getScoreStatByMonth(year.value, month.value + 1);
     if (response.status === 200) {
-      countStats.value = response.data;
+      scoreStats.value = response.data;
     } else {
       console.error(response);
     }
@@ -77,7 +93,7 @@ const fetchCountStats = async () => {
 
 onMounted(async () => {
   await fetchAllCategories();
-  await fetchCountStats();
+  await fetchScoreStat();
 });
 
 watch(getCategories, (value) => {
@@ -93,13 +109,13 @@ watch(showMonth, (value) => {
 });
 
 watch([year, month], () => {
-  fetchCountStats();
+  fetchScoreStat();
 });
 </script>
 
 <template>
   <div>
-    <Pie id="my-chart-id" :options="options" :data="data" />
+    <Bar id="my-chart-id" :options="options" :data="data" />
   </div>
 </template>
 
