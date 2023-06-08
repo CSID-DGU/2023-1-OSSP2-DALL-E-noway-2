@@ -10,7 +10,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination } from 'swiper';
-import CountDougnutStat from '@/components/calendar/CountDoughnutStat.vue';
+import CountPieStat from '@/components/calendar/CountPieStat.vue';
 
 const { getUser, apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
@@ -127,7 +127,7 @@ const modules = [Pagination];
         </div>
       </swiper-slide>
       <swiper-slide>
-        <CountDougnutStat />
+        <CountPieStat />
       </swiper-slide>
     </swiper>
   </main>

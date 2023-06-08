@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, type Ref } from 'vue';
-import { Doughnut } from 'vue-chartjs';
+import { Pie } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { categoryInfoStore } from '@/stores/category.info.store';
 import type { CountStat } from '@/types';
@@ -90,7 +90,7 @@ watch([year, month], () => {
 
 <template>
   <div>
-    <Doughnut id="my-chart-id" :options="options" :data="data" />
+    <Pie id="my-chart-id" :options="options" :data="data" />
   </div>
 </template>
 
