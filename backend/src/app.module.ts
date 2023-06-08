@@ -16,6 +16,7 @@ import { join } from 'path';
 import { CategoryModule } from './category/category.module';
 import { LikeBookmarkListModule } from './likebookmarklist/likebookmarklist.module';
 import { CommentModule } from './comment/comment.module';
+import { StatModule } from './dreamdiary/calendar/stat/stat.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { CommentModule } from './comment/comment.module';
     CategoryModule,
     LikeBookmarkListModule,
     ProfileModule,
+    StatModule,
   ],
 
   controllers: [AppController],
