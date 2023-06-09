@@ -81,3 +81,23 @@ export interface DiaryFeed {
   nickname: string;
   viewCount: number;
 }
+
+// 카테고리 별 개수 통계
+export interface CountStat {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+}
+
+// 카테고리 별 평균 점수 통계
+export interface ScoreStat {
+  categoryId: number;
+  categoryName: string;
+  scoreAvg: number;
+}
+
+// 내 평균 점수와 전체 유저 평균 점수 통계
+export interface AverageStat {
+  myScoreAvg: number;
+  othersScoreAvg: number;
+}
