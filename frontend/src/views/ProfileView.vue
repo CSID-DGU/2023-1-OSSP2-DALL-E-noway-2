@@ -16,7 +16,7 @@ const selectedFilterType: Ref<FilterType> = ref(FilterType.DIARY);
 const diaryFeeds: Ref<DiaryFeed[]> = ref([]);
 const boardList: Ref<Board[]> = ref([]);
 
-const MAX_LENGTH = 2;
+const MAX_LENGTH = 4;
 
 const truncateContent = (content: string, maxLength: number) => {
   if (content.length <= maxLength) {
