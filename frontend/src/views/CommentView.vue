@@ -27,6 +27,7 @@ interface Comment {
   content: string;
   createdAt: Date;
   user: User;
+  replies: Comment[];
 }
 
 const commentList: Ref<Comment[]> = ref([]);
@@ -39,7 +40,28 @@ const arrayLength = computed(() => commentList.value.length);
 
 const initComments = async () => {
   const response = await getAllComments(filterType.value, id.value);
-  commentList.value = response.data.comments;
+  const comments = response.data.comments as Comment[];
+
+  commentList.value = [];
+
+  // commentId를 key로 하는 commentMap을 만든다.
+  const commentMap: Record<number, Comment> = {};
+
+  // comments를 순회하면서 commentMap에 commentId를 key로 하는 comment를 추가한다.
+  comments.forEach((comment) => {
+    comment.replies = [];
+    commentMap[comment.commentId] = comment;
+  });
+
+  // 답글이 있는 댓글을 찾아서 commentMap에 추가한다.
+  comments.forEach((comment) => {
+    const parentComment = commentMap[comment.parentCommentId];
+    if (parentComment) {
+      parentComment.replies.push(comment); // Add the comment as a reply
+    } else {
+      commentList.value.push(comment); // Add the top-level comment
+    }
+  });
 };
 
 const sendComment = async () => {
@@ -135,55 +157,102 @@ onMounted(async () => {
       <h1>댓글({{ arrayLength }})</h1>
     </div>
     <div class="comment-list" ref="commentListRef">
-      <!-- comment.parentCommentId !== 0이라면 reply-card 클래스 적용 -->
-      <div
-        v-for="comment in commentList"
-        :key="comment.commentId"
-        class="comment-card"
-        :class="{ 'reply-card': comment.parentCommentId !== null }"
-      >
-        <RouterLink :to="`/profile/${comment.user.userId}`">
-          <div class="comment-user">
-            <div class="comment-user-image">
-              <img :src="comment.user.imageUrl" alt="user-image" />
+      <!-- 댓글 -->
+      <div v-for="comment in commentList" :key="comment.commentId">
+        <div
+          class="comment-card"
+          :class="{ 'reply-card': comment.parentCommentId !== null }"
+        >
+          <RouterLink :to="`/profile/${comment.user.userId}`">
+            <div class="comment-user">
+              <div class="comment-user-image">
+                <img :src="comment.user.imageUrl" alt="user-image" />
+              </div>
+              <div class="comment-user-nickname">
+                <h1>{{ comment.user.nickname }}</h1>
+              </div>
             </div>
-            <div class="comment-user-nickname">
-              <h1>{{ comment.user.nickname }}</h1>
+          </RouterLink>
+          <div class="comment-content">
+            <h1>{{ comment.content }}</h1>
+          </div>
+          <div class="comment-date">
+            <h1>{{ comment.createdAt }}</h1>
+          </div>
+          <!-- ... 토글 버튼 -->
+          <div
+            class="toggle-reply-button"
+            @click="showReplyOptions(comment.commentId)"
+          >
+            <IconThreeDots />
+          </div>
+
+          <!-- 더보기 옵션 -->
+          <div
+            v-if="showReplyOptionsFor === comment.commentId"
+            class="reply-options"
+          >
+            <div
+              class="reply-option"
+              @click="toggleReplyInput(comment.commentId)"
+            >
+              답글 달기
+            </div>
+            <div
+              v-if="comment.user.userId === mine.userId"
+              class="reply-option"
+              @click="removeComment(comment.commentId)"
+            >
+              댓글 삭제
             </div>
           </div>
-        </RouterLink>
-        <div class="comment-content">
-          <h1>{{ comment.content }}</h1>
-        </div>
-        <div class="comment-date">
-          <h1>{{ comment.createdAt }}</h1>
         </div>
 
-        <!-- ... 토글 버튼 -->
-        <div
-          class="toggle-reply-button"
-          @click="showReplyOptions(comment.commentId)"
-        >
-          <IconThreeDots />
-        </div>
+        <div>
+          <!-- 답글  -->
+          <div v-if="comment.replies.length > 0" class="replies">
+            <div v-for="reply in comment.replies" :key="reply.commentId">
+              <div class="comment-card reply-card">
+                <RouterLink :to="`/profile/${reply.user.userId}`">
+                  <div class="comment-user">
+                    <div class="comment-user-image">
+                      <img :src="reply.user.imageUrl" alt="user-image" />
+                    </div>
+                    <div class="comment-user-nickname">
+                      <h1>{{ reply.user.nickname }}</h1>
+                    </div>
+                  </div>
+                </RouterLink>
+                <div class="comment-content">
+                  <h1>{{ reply.content }}</h1>
+                </div>
+                <div class="comment-date">
+                  <h1>{{ reply.createdAt }}</h1>
+                </div>
 
-        <!-- 더보기 옵션 -->
-        <div
-          v-if="showReplyOptionsFor === comment.commentId"
-          class="reply-options"
-        >
-          <div
-            class="reply-option"
-            @click="toggleReplyInput(comment.commentId)"
-          >
-            <IconReply /> 답글 달기
-          </div>
-          <div
-            v-if="comment.user.userId === mine.userId"
-            class="reply-option"
-            @click="removeComment(comment.commentId)"
-          >
-            <IconDelete /> 댓글 삭제
+                <!-- ... 토글 버튼 -->
+                <div
+                  class="toggle-reply-button"
+                  @click="showReplyOptions(reply.commentId)"
+                >
+                  <IconThreeDots />
+                </div>
+
+                <!-- 더보기 옵션 -->
+                <div
+                  v-if="showReplyOptionsFor === reply.commentId"
+                  class="reply-options"
+                >
+                  <div
+                    v-if="reply.user.userId === mine.userId"
+                    class="reply-option"
+                    @click="removeComment(reply.commentId)"
+                  >
+                    댓글 삭제
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -200,27 +269,27 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <!-- 댓글 입력 칸 -->
-    <div class="comment-input">
-      <div class="comment-input-user">
-        <div class="comment-input-user-image">
-          <img :src="mine.imageUrl" alt="user-image" />
-        </div>
-        <div class="comment-input-user-nickname">
-          <h1>{{ mine.nickname }}</h1>
-        </div>
+  </div>
+  <!-- 댓글 입력 칸 -->
+  <div class="comment-input">
+    <div class="comment-input-user">
+      <div class="comment-input-user-image">
+        <img :src="mine.imageUrl" alt="user-image" />
       </div>
-      <div class="comment-input-content">
-        <input
-          v-model="commentInput"
-          type="text"
-          placeholder="댓글을 입력하세요"
-        />
+      <div class="comment-input-user-nickname">
+        <h1>{{ mine.nickname }}</h1>
       </div>
-      <!-- 댓글 전송 버튼 -->
-      <div class="comment-input-send" @click="sendComment">
-        <IconSend />
-      </div>
+    </div>
+    <div class="comment-input-content">
+      <input
+        v-model="commentInput"
+        type="text"
+        placeholder="댓글을 입력하세요"
+      />
+    </div>
+    <!-- 댓글 전송 버튼 -->
+    <div class="comment-input-send" @click="sendComment">
+      <IconSend />
     </div>
   </div>
 </template>
