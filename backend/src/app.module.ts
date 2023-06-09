@@ -30,7 +30,7 @@ import { StatModule } from './dreamdiary/calendar/stat/stat.module';
       useClass: TypeOrmConfigService,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, 'uploads'),
       serveRoot: '/uploads',
     }),
     ServeStaticModule.forRoot({
