@@ -24,9 +24,11 @@ export class StatService {
     try {
       const categoryCounts = await this.dreamDiaryRepository
         .createQueryBuilder('dream_diary')
-        .select('categories.categoryId', 'categoryId')
-        .addSelect('categories.categoryName', 'categoryName')
-        .addSelect('COUNT(*)', 'count')
+        .select([
+          'categories.categoryId AS categoryId',
+          'categories.categoryName AS categoryName',
+          'CAST(COUNT(*) AS INTEGER) AS count',
+        ])
         .innerJoin('dream_diary.diaryCategories', 'diaryCategories')
         .innerJoin('diaryCategories.category', 'categories')
         .innerJoin('dream_diary.author', 'user')
@@ -36,6 +38,9 @@ export class StatService {
         .groupBy('categories.categoryId')
         .getRawMany();
 
+      categoryCounts.map((categoryCount) => {
+        categoryCount.count = parseInt(categoryCount.count);
+      });
       return categoryCounts;
     } catch (error) {
       console.error(error);
@@ -66,6 +71,9 @@ export class StatService {
         .groupBy('categories.categoryId')
         .getRawMany();
 
+      categoryScoreAvgs.map((categoryScoreAvg) => {
+        categoryScoreAvg.scoreAvg = parseFloat(categoryScoreAvg.scoreAvg);
+      });
       return categoryScoreAvgs;
     } catch (error) {
       console.error(error);
@@ -101,8 +109,9 @@ export class StatService {
           .getRawOne(),
       ]);
 
-      const myAvgScore = myAvgScoreResult?.myAvgScore || 0;
-      const othersAvgScore = othersAvgScoreResult?.othersAvgScore || 0;
+      const myAvgScore = parseFloat(myAvgScoreResult?.myAvgScore) || 0;
+      const othersAvgScore =
+        parseFloat(othersAvgScoreResult?.othersAvgScore) || 0;
       const dto: DreamScoreAverageResponseDto = {
         myAvgScore: myAvgScore,
         othersAvgScore: othersAvgScore,
