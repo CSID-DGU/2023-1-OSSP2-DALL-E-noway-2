@@ -5,6 +5,7 @@ import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import router from '@/router';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
 import { onMounted, ref, type Ref } from 'vue';
+import IconCoin from '@/components/icons/IconCoin.vue';
 
 const diary = useDiaryCreateStore().getDiary();
 
@@ -24,6 +25,8 @@ const contents: Ref<Contents> = ref({
   selectedImages: new Map<number, string>(),
 });
 
+const requestCount = ref(1);
+
 onMounted(async () => {
   try {
     const response = await getCreditInfo();
@@ -38,18 +41,15 @@ onMounted(async () => {
 
 const requestImage = async () => {
   try {
-    console.log(diary.title, diary.content);
-    const response = await postDreamImage(diary.title, diary.content);
+    const response = await postDreamImage(
+      diary.title,
+      diary.content,
+      requestCount.value,
+    );
     contents.value.credits = response.data.credits;
     contents.value.freeGenerateCount = response.data.freeGenerateCount;
     contents.value.maxFreeGenerateCount = response.data.maxFreeGenerateCount;
     contents.value.generatedImages = response.data.generatedImages;
-    for (let i = 0; i < 12; i++) {
-      contents.value.generatedImages.push(
-        'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-      );
-    }
-    console.log(contents.value);
   } catch (error) {
     console.log(error);
   }
@@ -60,31 +60,37 @@ const temporarySaveDiary = () => {
 };
 
 const convertUrlToBlob = async (url: string) => {
-  const response = await fetch(url);
+  // cors 허용
+  const response = await fetch(url, {
+    mode: 'no-cors',
+  });
   const blob = await response.blob();
   return blob;
 };
 
 const registerSelectedImage = async () => {
   // selectedImages의 value에 해당하는 이미지 파일을 diary.image에 넣어준다.
-  for (const [key, value] of contents.value.selectedImages) {
+  for (const [_, value] of contents.value.selectedImages) {
     const blob = await convertUrlToBlob(value);
     diary.image.push(blob);
   }
-  console.log(diary);
-
   router.push({ name: 'new-dream-diary' });
 };
 
 const selectImage = (imageId: number) => {
-  if (contents.value.selectedImages.has(imageId)) {
-    contents.value.selectedImages.delete(imageId);
-  } else {
-    contents.value.selectedImages.set(
-      imageId,
-      contents.value.generatedImages[imageId],
-    );
-  }
+  // if (contents.value.selectedImages.has(imageId)) {
+  //   contents.value.selectedImages.delete(imageId);
+  // } else {
+  //   contents.value.selectedImages.set(
+  //     imageId,
+  //     contents.value.generatedImages[imageId],
+  //   );
+  // }
+  contents.value.selectedImages.clear(); // Clear previously selected images
+  contents.value.selectedImages.set(
+    imageId,
+    contents.value.generatedImages[imageId],
+  );
 };
 
 // onMounted(() => {
@@ -94,100 +100,162 @@ const selectImage = (imageId: number) => {
 
 <template>
   <div class="wrap">
-    <div class="col-group">
-      <div class="credtis flex justify-between items-center">
-        <div class="flex items-center">
-          <span class="mr-2">보유 크레딧</span>
-          <span>{{ contents.credits }}</span>
-        </div>
+    <div class="credit-info">
+      <div class="credit-label">
+        <h1>보유 크레딧</h1>
       </div>
+      <div class="credit-count">
+        <IconCoin />
+        <h1>{{ contents.credits }}</h1>
+      </div>
+    </div>
 
-      <div class="free-generate flex justify-between items-center">
-        <div class="flex items-center">
-          <span class="mr-2">3회 무료 이미지 생성</span>
-          <span
-            >{{ contents.freeGenerateCount }}/{{
-              contents.maxFreeGenerateCount
-            }}</span
-          >
-        </div>
+    <div class="generate-info">
+      <div class="generate-description">
+        <h1>3회 무료 이미지 생성</h1>
+      </div>
+      <div class="generate-able-count">
+        <h1>
+          {{ contents.freeGenerateCount }} / {{ contents.maxFreeGenerateCount }}
+        </h1>
+      </div>
+    </div>
+
+    <div class="generate-info-2">
+      <div class="generate-count">
+        <input type="number" v-model="requestCount" min="1" max="12" />
+      </div>
+      <div class="generate-button">
         <WhiteBGButton :text="'이미지 생성'" @click="requestImage" />
       </div>
-      <div class="image-list">
-        <ul class="grid grid-cols-2 gap-4">
-          <li v-for="(image, i) in contents.generatedImages" v-bind:key="i">
-            <img
-              :src="image"
-              :key="i"
-              :class="{
-                'selected-image': contents.selectedImages.has(i),
-              }"
-              @click="selectImage(i)"
-            />
-          </li>
-        </ul>
-      </div>
+    </div>
 
-      <div class="button-group">
-        <BlackBGButton @click="temporarySaveDiary" :text="'임시저장'" />
-        <BlackBGButton
-          @click="registerSelectedImage"
-          type="submit"
-          :text="'등록'"
-        />
-      </div>
+    <div class="image-list">
+      <ul class="grid grid-cols-2 gap-4">
+        <li v-for="(image, i) in contents.generatedImages" v-bind:key="i">
+          <img
+            :src="image"
+            :key="i"
+            :class="{
+              'selected-image': contents.selectedImages.has(i),
+            }"
+            @click="selectImage(i)"
+          />
+        </li>
+      </ul>
+    </div>
+
+    <div class="button-group">
+      <BlackBGButton @click="temporarySaveDiary" :text="'임시저장'" />
+      <BlackBGButton
+        @click="registerSelectedImage"
+        type="submit"
+        :text="'등록'"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-/* .top-content {
-  @apply flex flex-row;
-} */
 .wrap {
   @apply w-full flex flex-col justify-center h-full z-[1];
+  @apply text-white;
+  @apply items-center;
 }
 
-.col-group {
-  @apply flex flex-col justify-center items-center;
+.credit-info {
+  @apply flex flex-row items-center justify-center;
+  @apply w-full;
+  @apply m-2;
 }
 
-.credits {
-  @apply flex flex-row left-0;
+.credit-label {
+  @apply flex flex-row items-center justify-center;
 }
 
-.free-generate {
-  @apply flex flex-row;
+.credit-count {
+  @apply flex flex-row items-center justify-center;
+}
+
+.generate-info {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+  @apply w-full;
+}
+
+.generate-info-2 {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+  @apply w-full;
+}
+
+.generate-description {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+}
+
+.generate-able-count {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+}
+
+.generate-count {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+}
+
+.generate-count input {
+  @apply w-12;
+  @apply text-black;
+  @apply text-center;
+  @apply border-2 border-white;
+  @apply rounded-md;
+}
+
+.generate-button {
+  @apply m-2;
+  @apply flex flex-row items-center justify-center;
+}
+
+.image-list {
+  height: 32rem;
+  overflow: auto;
+  @apply m-4;
+}
+
+.image-card {
+  @apply flex flex-row items-center justify-center;
+  @apply w-full;
+  @apply m-2;
+}
+
+.selected-image {
+  border: 2px solid red; /* Apply your desired styling for selected images */
 }
 
 .button-group {
-  @apply flex flex-row bottom-0 right-0 fixed;
+  @apply fixed bottom-0 left-0 right-0;
+  @apply flex flex-row items-center;
+  @apply p-4;
 }
+.button-group {
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  filter: var(--menu-shadow);
+  z-index: 9;
+  user-select: none;
+  @apply flex flex-row items-center;
+  @apply p-4;
+}
+
 @media (min-width: 425px) {
   .button-group {
     max-width: 425px;
     left: 50%;
     transform: translateX(-50%);
   }
-}
-
-.image-list {
-  @apply h-full overflow-auto;
-}
-/*
-.credits.row-item {
-  @apply m-0.5;
-}
-
-.credits.row-item:nth-child(1) {
-  flex: 2;
-}
-
-.credits.row-item:nth-child(2) {
-  flex: 1;
-} */
-
-.selected-image {
-  border: 2px solid red; /* Apply your desired styling for selected images */
 }
 </style>
