@@ -118,6 +118,29 @@ export const updateProfileRequest = async (
   return response;
 };
 
+export const getUserDiaryFeeds = async (
+  userId: number,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/dream-diary/feeds?page=${page}&length=${length}`,
+  );
+  return response;
+};
+
+export const getUserBoards = async (
+  userId: number,
+  boardType: BoardType,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/${boardType}/boards/?page=${page}&length=${length}`,
+  );
+  return response;
+};
+
 export const getAllComments = async (filterType: string, id: number) => {
   const response = await axiosInstance.get(`/api/comments/${filterType}/${id}`);
   return response;

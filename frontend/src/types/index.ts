@@ -82,6 +82,14 @@ export interface DiaryFeed {
   viewCount: number;
 }
 
+export interface Board {
+  postId: number;
+  title: string;
+  viewCount: number;
+  nickname: string;
+  imageUrl: string;
+}
+
 // 카테고리 별 개수 통계
 export interface CountStat {
   categoryId: number;
