@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
 import { ref } from 'vue';
-import DreamDiaryFeedView from './DreamDiaryFeedView.vue';
 import '@fortawesome/fontawesome-free/css/all.css';
-
-const feedposts = ref([DreamDiaryFeedView.posts]);
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)

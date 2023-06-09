@@ -381,5 +381,7 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     fetchTodayDiaryFeed,
     fetchSelectedDiaryFeed,
     showSelectedDiaryFeed,
+    showYear,
+    showMonth,
   };
 });

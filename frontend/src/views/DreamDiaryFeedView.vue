@@ -1,6 +1,7 @@
 <script setup lang="ts">
+
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, type Ref } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { categoryInfoStore } from '@/stores/category.info.store';
 import ProfileEdit from '@/components/profile/ProfileEdit.vue';
@@ -161,7 +162,7 @@ onMounted(async () => {
                 style="
                   margin: 0 auto;
                   max-width: 260px;
-                  max-height: auto;
+                  max-height: auto
                   top: 12px;
                   border-radius: 16px;
                 "
@@ -193,7 +194,7 @@ onMounted(async () => {
   height: 40px;
   border-radius: 20px;
   z-index: 4;
-  bottom: 32px;
+  bottom: 36px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -224,7 +225,6 @@ onMounted(async () => {
 }
 .search-keyword {
   font-size: 12px;
-  font-weight: bold;
   color: black;
   top: 4px;
   display: flex;
@@ -248,6 +248,13 @@ onMounted(async () => {
   background-color: white;
   border-radius: 10px;
   top: 6px;
+}
+.search-any:hover,
+.search-title:hover,
+.search-user:hover,
+.search-content:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .selected-category {
   color: white;
@@ -273,7 +280,7 @@ onMounted(async () => {
   z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
 }
 .scroll-container::-webkit-scrollbar-thumb {
   background-color: #444;

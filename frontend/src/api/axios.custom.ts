@@ -180,6 +180,35 @@ export const getDreamDiaryFeedByDate = async (
   const response = await axiosInstance.get(
     `/api/dream-diary/calendar/${year}/${month + 1}/${day}`,
   );
-  console.log(response);
+  return response;
+};
+
+export const getCountStatByMonth = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/stat/categories/count/?year=${year}&month=${month}`,
+  );
+  return response;
+};
+
+export const getScoreStatByMonth = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/stat/categories/score/?year=${year}&month=${month}`,
+  );
+  return response;
+};
+
+export const getAverageStatByMonth = async (
+  year: number,
+  month: number,
+): Promise<AxiosResponse<any, any>> => {
+  const response = await axiosInstance.get(
+    `/api/stat/average/?year=${year}&month=${month}`,
+  );
   return response;
 };

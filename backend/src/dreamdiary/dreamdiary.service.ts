@@ -28,7 +28,6 @@ export class DreamDiaryService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(DreamDiary)
     @InjectRepository(DiaryCategory)
     private readonly diaryCategoryRepository: Repository<DiaryCategory>,
     @InjectRepository(Category)
@@ -231,7 +230,7 @@ export class DreamDiaryService {
       const diaryCategory = new DiaryCategory();
       diaryCategory.diaryId = diaryId;
       diaryCategory.categoryId = categoryId;
-      await this.diaryCategoryRepository.save(diaryCategory);
+      await this.diaryCategoryRepository.insert(diaryCategory);
     }
 
     user.credits += 1;
@@ -297,7 +296,7 @@ export class DreamDiaryService {
       await this.diaryCategoryRepository.save(diaryCategory);
     }
 
-    await this.dreamDiaryRepository.save(dreamDiary);
+    await this.dreamDiaryRepository.insert(dreamDiary);
   }
 
   /**
