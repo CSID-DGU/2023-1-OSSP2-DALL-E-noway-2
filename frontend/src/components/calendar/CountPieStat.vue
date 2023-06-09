@@ -48,7 +48,7 @@ const data = computed(() => {
     };
   }
   const labels = countStats.value.map((countStat) => countStat.categoryName);
-  const data = countStats.value.map((countStat) => Number(countStat.count));
+  const data = countStats.value.map((countStat) => countStat.count);
 
   return {
     labels: labels,
