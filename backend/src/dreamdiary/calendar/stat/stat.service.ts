@@ -24,11 +24,9 @@ export class StatService {
     try {
       const categoryCounts = await this.dreamDiaryRepository
         .createQueryBuilder('dream_diary')
-        .select([
-          'categories.categoryId AS categoryId',
-          'categories.categoryName AS categoryName',
-          'CAST(COUNT(*) AS INTEGER) AS count',
-        ])
+        .select('categories.categoryId', 'categoryId')
+        .addSelect('categories.categoryName', 'categoryName')
+        .addSelect('COUNT(*)', 'count')
         .innerJoin('dream_diary.diaryCategories', 'diaryCategories')
         .innerJoin('diaryCategories.category', 'categories')
         .innerJoin('dream_diary.author', 'user')
