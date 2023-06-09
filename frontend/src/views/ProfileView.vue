@@ -6,6 +6,8 @@ import { onMounted, ref, watch, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getUserDiaryFeeds, getUserBoards } from '@/api/axios.custom';
 import type { BoardType } from '@/types/enum/board.type';
+// @ts-ignore
+import InfiniteLoading from 'v3-infinite-loading';
 
 const { params } = useRoute();
 const userId = Number(params.userId);
@@ -13,6 +15,16 @@ const userId = Number(params.userId);
 const selectedFilterType: Ref<FilterType> = ref(FilterType.DIARY);
 const diaryFeeds: Ref<DiaryFeed[]> = ref([]);
 const boardList: Ref<Board[]> = ref([]);
+
+const MAX_LENGTH = 2;
+
+const truncateContent = (content: string, maxLength: number) => {
+  if (content.length <= maxLength) {
+    return content;
+  } else {
+    return content.slice(0, maxLength) + '...';
+  }
+};
 
 const initDiaryFeeds = async (page: number, length: number) => {
   try {
@@ -67,23 +79,118 @@ const initBoardList = async (
   }
 };
 
+const curDiaryPage = ref(1);
+
+const fetchDiaryFeeds = async (page: number, length: number) => {
+  try {
+    const response = await getUserDiaryFeeds(userId, page, length);
+    const results = response.data;
+    if (response.status === 200) {
+      // response.data의 각 요소 중 diaryImageUrl을 diaryFeeds의 각 요소 중 imageUrl로 옮겨줌
+      for (let i = 0; i < results.dreamDiaryFeeds.length; i += 1) {
+        diaryFeeds.value.push({
+          diaryId: results.dreamDiaryFeeds[i].diaryId,
+          title: results.dreamDiaryFeeds[i].title,
+          content: results.dreamDiaryFeeds[i].content,
+          nickname: results.dreamDiaryFeeds[i].nickname,
+          viewCount: results.dreamDiaryFeeds[i].viewCount,
+          imageUrl: results.dreamDiaryFeeds[i].diaryImageUrl,
+        });
+      }
+    } else {
+      console.log(response);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// @ts-ignore
+const loadMoreDiary = async ($state) => {
+  try {
+    const response = await getUserDiaryFeeds(
+      userId,
+      // @ts-ignore
+      curDiaryPage.value + 1,
+      MAX_LENGTH,
+    );
+    const results = response.data;
+    if (response.status === 200) {
+      // response.data의 각 요소 중 diaryImageUrl을 diaryFeeds의 각 요소 중 imageUrl로 옮겨줌
+      for (let i = 0; i < results.dreamDiaryFeeds.length; i += 1) {
+        diaryFeeds.value.push({
+          diaryId: results.dreamDiaryFeeds[i].diaryId,
+          title: results.dreamDiaryFeeds[i].title,
+          content: results.dreamDiaryFeeds[i].content,
+          nickname: results.dreamDiaryFeeds[i].nickname,
+          viewCount: results.dreamDiaryFeeds[i].viewCount,
+          imageUrl: results.dreamDiaryFeeds[i].diaryImageUrl,
+        });
+      }
+      if (response.data.dreamDiaryFeeds.length < MAX_LENGTH) {
+        $state.complete();
+      } else {
+        $state.loaded();
+      }
+      ++curDiaryPage.value;
+    }
+    console.log(`curDiaryPage: ${curDiaryPage.value}`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const curBoardPage = ref(1);
+
+// @ts-ignore
+const loadMoreBoard = async ($state) => {
+  try {
+    const response = await getUserBoards(
+      userId,
+      // @ts-ignore
+      selectedFilterType.value as BoardType,
+      curBoardPage.value + 1,
+      MAX_LENGTH,
+    );
+    const results = response.data;
+    if (response.status === 200) {
+      // response.data의 각 요소 중 boardImageUrl을 boardList의 각 요소 중 imageUrl로 옮겨줌
+      for (let i = 0; i < results.boardList.length; i += 1) {
+        boardList.value.push({
+          postId: results.boardList[i].postId,
+          title: results.boardList[i].title,
+          nickname: results.boardList[i].nickname,
+          viewCount: results.boardList[i].viewCount,
+          imageUrl: results.boardList[i].boardImageUrl,
+        });
+      }
+      if (response.data.boardList.length < MAX_LENGTH) {
+        $state.complete();
+      } else {
+        $state.loaded();
+      }
+      ++curBoardPage.value;
+    }
+    console.log(`curBoardPage: ${curBoardPage.value}`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 watch(
   () => selectedFilterType.value,
   async (value) => {
     if (value === FilterType.DIARY) {
-      await initDiaryFeeds(1, 10);
+      await initDiaryFeeds(1, MAX_LENGTH);
     } else {
       // @ts-ignore
-      await initBoardList(value as BoardType, 1, 10);
+      await initBoardList(value as BoardType, 1, MAX_LENGTH);
     }
-    console.log(diaryFeeds.value);
-    console.log(boardList.value);
   },
 );
 
 onMounted(async () => {
-  await initDiaryFeeds(1, 10);
-  console.log(diaryFeeds.value);
+  await initDiaryFeeds(1, MAX_LENGTH);
 });
 </script>
 
@@ -132,13 +239,14 @@ onMounted(async () => {
               <h2 class="feed-title">{{ diaryFeed.title }}</h2>
               <p class="feed-user">{{ diaryFeed.nickname }}</p>
               <p class="feed-content">
-                {{ diaryFeed.content }}
+                {{ truncateContent(diaryFeed.content, 25) }}
               </p>
               <p class="feed-view">👀 {{ diaryFeed.viewCount }}</p>
               <img :src="diaryFeed.imageUrl" alt="Post Image" />
             </RouterLink>
           </div>
         </div>
+        <InfiniteLoading @infinite="loadMoreDiary"></InfiniteLoading>
       </div>
     </div>
 
@@ -158,6 +266,7 @@ onMounted(async () => {
             </div>
           </RouterLink>
         </div>
+        <InfiniteLoading @infinite="loadMoreBoard"></InfiniteLoading>
       </div>
     </div>
   </div>
@@ -189,19 +298,26 @@ onMounted(async () => {
   @apply justify-center py-2 text-white;
 }
 
+/* 일기 */
 .diary-container {
   @apply flex overflow-y-auto;
 }
 
-/* 일기 */
 .diary-list {
   @apply flex-shrink-0;
   @apply w-full h-[500px];
+  color: white;
+  width: 84%;
+  margin: 0 auto;
 }
 
 .diary-card {
-  @apply text-white;
-  @apply m-4;
+  /* @apply text-white;
+  @apply m-4; */
+  @apply flex flex-row justify-between;
+  @apply border-solid border-white;
+  border-width: 1px 0;
+  @apply p-3;
 }
 
 .diary-card tag {
@@ -209,7 +325,7 @@ onMounted(async () => {
 }
 
 .diary-card img {
-  @apply w-full h-full;
+  @apply w-32 h-32;
   @apply rounded-2xl;
 }
 .feed-title {
