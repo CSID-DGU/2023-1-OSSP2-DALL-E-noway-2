@@ -1,5 +1,15 @@
 <template>
   <main>
+    <div class="like-category">
+      <div class="pageinfo">기타 게시판 목록</div>
+      <button @click="selectCategory('자유')" class="like-free">자유</button>
+      <button @click="selectCategory('수면팁')" class="like-sleep">
+        수면 팁
+      </button>
+      <button @click="selectCategory('해몽의뢰')" class="like-read-dream">
+        해몽 의뢰
+      </button>
+    </div>
     <div class="search">
       <div>
         <input
@@ -11,24 +21,24 @@
       </div>
       <div class="search-left">
         <div class="select-row">
-          <button @click="toggleCategoryOptions" class="dropdown-button">
+          <button @click="toggleResearchOptions" class="dropdown-button">
             <span ref="textSpan" class="selected-not-yet">검색어선택</span>
-            <div v-if="selectedCategory" class="selected-category">
-              {{ selectedCategory }}
+            <div v-if="selectedResearch" class="selected-category">
+              {{ selectedResearch }}
             </div>
           </button>
         </div>
-        <div v-if="showCategoryOptions" class="search-keyword">
-          <button @click="selectCategory('제목')" class="search-title">
+        <div v-if="showResearchOptions" class="search-keyword">
+          <button @click="selectResearch('제목')" class="search-title">
             제목
           </button>
-          <button @click="selectCategory('유저')" class="search-user">
+          <button @click="selectResearch('유저')" class="search-user">
             유저
           </button>
-          <button @click="selectCategory('내용')" class="search-content">
+          <button @click="selectResearch('내용')" class="search-content">
             내용
           </button>
-          <button @click="selectCategory('전체')" class="search-any">
+          <button @click="selectResearch('전체')" class="search-any">
             전체
           </button>
         </div>
@@ -143,20 +153,24 @@ const posts = ref([
   },
 ]);
 
-const showCategoryOptions = ref(false);
-const selectedCategory = ref(' ');
+const showResearchOptions = ref(false);
+const category = ref('자유');
+const selectedResearch = ref(' ');
 const textSpan = ref<HTMLElement | null>(null);
 
-const toggleCategoryOptions = () => {
-  showCategoryOptions.value = !showCategoryOptions.value;
-  if (selectedCategory.value && textSpan.value !== null) {
+const toggleResearchOptions = () => {
+  showResearchOptions.value = !showResearchOptions.value;
+  if (selectedResearch.value && textSpan.value !== null) {
     textSpan.value.style.display = 'none';
   }
 };
+const selectCategory = (cate: string) => {
+  category.value = cate;
+};
 
-const selectCategory = (category: string) => {
-  selectedCategory.value = category;
-  showCategoryOptions.value = false; // 선택한 후 옵션 숨김
+const selectResearch = (research: string) => {
+  selectedResearch.value = research;
+  showResearchOptions.value = false;
 };
 
 const route = useRouter();
@@ -170,12 +184,56 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.like-category {
+  width: 360px;
+  background-color: #333;
+  margin: 0 auto;
+  text-align: center;
+  height: 32px;
+  border-radius: 16px;
+  top: 24px;
+  z-index: 1;
+  color: white;
+}
+.pageinfo {
+  bottom: 28px;
+  color: white;
+  font-weight: bold;
+}
+.like-free {
+  width: 52px;
+  right: 18px;
+  background-color: #666;
+  border-radius: 10px;
+  bottom: 19px;
+  font-size: 12px;
+}
+.like-sleep {
+  width: 60px;
+  background-color: #666;
+  border-radius: 10px;
+  bottom: 19px;
+  font-size: 12px;
+}
+.like-free:hover,
+.like-sleep:hover,
+.like-read-dream:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
+}
+.like-read-dream {
+  width: 80px;
+  left: 18px;
+  background-color: #666;
+  border-radius: 10px;
+  bottom: 19px;
+  font-size: 12px;
+}
 .newpost-button {
   width: 40px;
   height: 40px;
   border-radius: 20px;
   z-index: 4;
-  bottom: 28px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -185,20 +243,20 @@ onMounted(async () => {
   flex-direction: row;
   position: fixed;
   z-index: 2;
+  top: 124px;
 }
 .search-bar {
   height: 32px;
-  width: 280px;
-  top: 4px;
+  width: 290px;
   background-color: #444;
   left: 32px;
   padding: 8px;
-  border-radius: 28px;
+  border-radius: 16px;
   color: #aaa;
   font-size: 12px;
 }
 .search-left {
-  margin-left: 44px;
+  margin-left: 42px;
 }
 .select-row {
   display: flex;
@@ -206,35 +264,43 @@ onMounted(async () => {
 }
 .search-keyword {
   font-size: 12px;
-  font-weight: bold;
-  color: white;
-  left: 2px;
+  color: black;
   top: 8px;
   display: flex;
   flex-direction: column;
 }
 .search-title {
-  background-color: black;
+  background-color: white;
   border-radius: 10px;
+  cursor: pointer;
+}
+.search-title:hover,
+.search-user:hover,
+.search-content:hover,
+.search-any:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .search-user {
-  background-color: black;
+  background-color: white;
   border-radius: 10px;
   top: 2px;
 }
+
 .search-content {
-  background-color: black;
+  background-color: white;
   border-radius: 10px;
   top: 4px;
 }
 .search-any {
-  background-color: black;
+  background-color: white;
   border-radius: 10px;
   top: 6px;
 }
 .selected-category {
   color: white;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: bold;
 }
 .selected-not-yet {
   color: #aaa;
@@ -246,17 +312,17 @@ onMounted(async () => {
   width: 60px;
   height: 32px;
   border-radius: 28px;
-  top: 4px;
 }
 .scroll-container {
-  height: 604px;
+  height: 540px;
   overflow-y: auto;
   scrollbar-width: thin;
-  top: 36px;
+  top: 72px;
   z-index: 1;
+  margin: 0 auto;
 }
 .scroll-container::-webkit-scrollbar {
-  width: 8px; /* 스크롤바 너비 설정 */
+  width: 0px;
 }
 .scroll-container::-webkit-scrollbar-thumb {
   background-color: #444;

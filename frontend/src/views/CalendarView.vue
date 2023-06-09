@@ -5,13 +5,19 @@ import LoadingAnimation from '@/components/common/LoadingAnimation.vue';
 import { useCalendarInfoStore } from '@/stores/calendar.info.store';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { getStorage } from '@/utils/local.storage';
-import { onMounted, ref, watch, type Ref, computed } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Pagination } from 'swiper';
+import CountPieStat from '@/components/calendar/CountPieStat.vue';
+import ScoreBarStat from '@/components/calendar/ScoreBarStat.vue';
+import AverageBarStat from '@/components/calendar/AverageBarStat.vue';
 
 const { getUser, apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
 const {
   showIsLoading,
-  selectMonth,
   setSelectedDate,
   checkPastToday,
   showLastDate,
@@ -19,7 +25,6 @@ const {
   getDateBgColor,
   checkToday,
   showSelectedDate,
-  getDateColor,
   fetchCalendarList,
   fetchTodayDiaryFeed,
   showCalendarList,
@@ -68,49 +73,69 @@ watch(showCalendarList, (value) => {
 watch(showSelectedDiaryFeed, (value) => {
   selectedDiaryFeed.value = value;
 });
+
+const modules = [Pagination];
 </script>
 
 <template>
   <main>
-    <CalendarPagination />
-    <div class="calendar">
-      <CalendarWeek />
-      <div v-if="isLoading" class="loading">
-        <LoadingAnimation />
-      </div>
-      <div v-else id="days" class="days">
-        <div v-for="i in day" :key="i" class="noday"></div>
-        <div
-          v-for="day in calendarList.days"
-          :key="day.day"
-          @click="clickDate(day.day)"
-          class="day"
-          :style="{
-            background: getDateBgColor(day.dreamScore),
-            color: 'white',
-          }"
-          :class="{
-            today: checkToday(day.day),
-            selected: day.day === showSelectedDate(),
-          }"
-        >
-          {{ day.day }}
+    <div>
+      <CalendarPagination />
+      <div class="calendar">
+        <CalendarWeek />
+        <div v-if="isLoading" class="loading">
+          <LoadingAnimation />
+        </div>
+        <div v-else id="days" class="days">
+          <div v-for="i in day" :key="i" class="noday"></div>
+          <div
+            v-for="day in calendarList.days"
+            :key="day.day"
+            @click="clickDate(day.day)"
+            class="day"
+            :style="{
+              background: getDateBgColor(day.dreamScore),
+              color: 'white',
+            }"
+            :class="{
+              today: checkToday(day.day),
+              selected: day.day === showSelectedDate(),
+            }"
+          >
+            {{ day.day }}
+          </div>
         </div>
       </div>
     </div>
-    <div v-if="selectedDiaryFeed && selectedDiaryFeed.diaryId !== 0">
-      <RouterLink :to="`/dream-diary/${selectedDiaryFeed.diaryId}`">
-        <div class="feed-container">
-          <h2 class="feed-title">{{ selectedDiaryFeed.title }}</h2>
-          <p class="feed-user">{{ selectedDiaryFeed.nickname }}</p>
-          <p class="feed-content">
-            {{ selectedDiaryFeed.content }}
-          </p>
-          <p class="feed-view">👀 {{ selectedDiaryFeed.viewCount }}</p>
-          <img :src="selectedDiaryFeed.imageUrl" alt="Post Image" />
+    <swiper :pagination="true" :modules="modules">
+      <swiper-slide>
+        <div v-if="selectedDiaryFeed && selectedDiaryFeed.diaryId !== 0">
+          <RouterLink :to="`/dream-diary/${selectedDiaryFeed.diaryId}`">
+            <div class="feed-container">
+              <h2 class="feed-title">{{ selectedDiaryFeed.title }}</h2>
+              <p class="feed-user">{{ selectedDiaryFeed.nickname }}</p>
+              <p class="feed-content">
+                {{ selectedDiaryFeed.content }}
+              </p>
+              <p class="feed-view">👀 {{ selectedDiaryFeed.viewCount }}</p>
+              <img :src="selectedDiaryFeed.imageUrl" alt="Post Image" />
+            </div>
+          </RouterLink>
         </div>
-      </RouterLink>
-    </div>
+        <div v-else class="feed-container">
+          <p class="no-diary-message">이 날에는 일기를 쓰지 않았어요</p>
+        </div>
+      </swiper-slide>
+      <swiper-slide>
+        <CountPieStat />
+      </swiper-slide>
+      <swiper-slide>
+        <ScoreBarStat />
+      </swiper-slide>
+      <swiper-slide>
+        <AverageBarStat />
+      </swiper-slide>
+    </swiper>
   </main>
 </template>
 
@@ -120,6 +145,28 @@ main {
   background-color: #242424;
   min-height: 100%;
   @apply flex flex-col items-center m-4;
+}
+
+.swiper {
+  width: 100%;
+  @apply m-4;
+}
+
+/* .swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+
+.swiper-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .loading {
@@ -184,5 +231,9 @@ main {
 }
 .feed-view {
   @apply flex flex-row;
+}
+
+.no-diary-message {
+  @apply text-white text-center m-4;
 }
 </style>

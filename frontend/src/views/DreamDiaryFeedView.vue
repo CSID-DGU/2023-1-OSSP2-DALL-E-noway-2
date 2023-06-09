@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, watch, type Ref } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { categoryInfoStore } from '@/stores/category.info.store';
+import ProfileEdit from '@/components/profile/ProfileEdit.vue';
+import { useProfileStore } from '@/stores/profile.store';
 
 const posts = ref([
   // 게시글 데이터 (가상 데이터로 대체)
@@ -86,6 +89,19 @@ const newDiary = () => {
 };
 
 const { fetchAllCategories } = categoryInfoStore();
+const { setEditing, isEditing } = useProfileStore();
+
+const { query } = useRoute();
+const editing = ref(isEditing());
+const isFirstLogin = query.isFirstLogin === 'true';
+if (isFirstLogin) {
+  setEditing(true);
+  route.push('/home');
+}
+
+watch(isEditing, (value) => {
+  editing.value = value;
+});
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
@@ -146,7 +162,7 @@ onMounted(async () => {
                 style="
                   margin: 0 auto;
                   max-width: 260px;
-                  max-height: auto;
+                  max-height: auto
                   top: 12px;
                   border-radius: 16px;
                 "
@@ -166,6 +182,9 @@ onMounted(async () => {
         style="border-radius: 24px"
       />
     </button>
+
+    <!-- 최초 로그인 시, 프로필 설정 모달 -->
+    <ProfileEdit v-if="isEditing()" />
   </main>
 </template>
 
@@ -175,7 +194,7 @@ onMounted(async () => {
   height: 40px;
   border-radius: 20px;
   z-index: 4;
-  bottom: 32px;
+  bottom: 36px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -206,7 +225,6 @@ onMounted(async () => {
 }
 .search-keyword {
   font-size: 12px;
-  font-weight: bold;
   color: black;
   top: 4px;
   display: flex;
@@ -230,6 +248,13 @@ onMounted(async () => {
   background-color: white;
   border-radius: 10px;
   top: 6px;
+}
+.search-any:hover,
+.search-title:hover,
+.search-user:hover,
+.search-content:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .selected-category {
   color: white;
@@ -255,7 +280,7 @@ onMounted(async () => {
   z-index: 1;
 }
 .scroll-container::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
 }
 .scroll-container::-webkit-scrollbar-thumb {
   background-color: #444;

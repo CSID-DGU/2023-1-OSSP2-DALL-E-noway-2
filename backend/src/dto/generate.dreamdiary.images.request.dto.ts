@@ -12,4 +12,10 @@ export class GenerateDreamDiaryImagesRequestDto {
     description: '꿈일기 내용',
   })
   content: string;
+
+  @ApiProperty({
+    example: 3,
+    description: '생성할 이미지의 개수',
+  })
+  n: number;
 }

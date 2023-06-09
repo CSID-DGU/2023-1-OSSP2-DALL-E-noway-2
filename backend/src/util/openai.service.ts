@@ -15,6 +15,44 @@ export class OpenAIService {
   }
 
   /**
+   * Dalle 모델에게 프롬프트를 제공하기 위해 GPT 모델에게 제시할 프롬프트를 구성합니다.
+   * @param title
+   * @param content
+   * @returns GPT 모델에게 제시할 프롬프트
+   */
+  constructGPTPromptForDalle(title: string, content: string): string {
+    const prompt = `
+      다음은 유저가 작성한 꿈 일기의 제목과 내용이야.
+      이 일기의 내용을 바탕으로 텍스트를 이미지로 만들어주는 모델에게 적절한 프롬프트를 제시해주려고 해.
+      아래 지시사항을 바탕으로 해당 모델에게 제공해줄 프롬프트를 만들어줘.
+      1. 꿈 일기의 내용에서 등장하는 장소, 물체, 인물, 색상 등을 명확하게 언급해줘.
+      2. 꿈 일기의 내용에서 드러나는 감정이나 분위기에 대한 정보를 제시해줘. (고요, 신비, 활기참, 공포 등)
+      3. 필요에 따라 꿈 일기 내용에서 발생하는 (움직임, 빛, 음악 등)과 같은 감각적인 요소가 있다면 이를 강조해줘.
+
+      # 유저의 일기
+      —
+      title: ${title}
+      content: ${content}
+      —
+
+      $framing: 사진의 구도(close-up 등)
+      $flimType: 흑백 여부(black or white)
+      $emotion: 사진에서 드러나는 감정이나 분위기 정보
+      $target: 등장하는 장소나 물체, 인물 색상 등
+      $sensoryElements: 발생하는 감각적 요소 정보
+
+      # 원하는 출력 형태
+      —
+      A $framing, $flimType $emotion $target, $sensoryElements.
+      —
+
+      P.S
+      답변은 반드시 영어 400자 이내로 해줘.
+    `;
+    return prompt;
+  }
+
+  /**
    * OpenAI의 Dalle API를 이용해 이미지를 생성합니다.
    *
    * @param prompt dalle에게 제공될 prompt
@@ -35,6 +73,27 @@ export class OpenAIService {
       response_format: 'url',
     });
     return response.data.data.map((data) => data.url);
+  }
+
+  /**
+   * OpenAI의 텍스트 생성 API를 이용해 답변을 생성합니다.
+   * @param prompt GPT 모델에게 제공할 프롬프트
+   */
+  async createText(prompt: string, model: string): Promise<string> {
+    this.logger.debug(`Called ${this.createText.name}`);
+
+    const response = await this.openAIApi.createChatCompletion({
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 1000,
+      temperature: 0,
+    });
+    return response.data.choices[0].message.content.trim();
   }
 
   /**
