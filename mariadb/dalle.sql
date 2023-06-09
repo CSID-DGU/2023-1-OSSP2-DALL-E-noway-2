@@ -290,7 +290,8 @@ CREATE TABLE `follow` (
   `follower_id` int(11) NOT NULL,
   `following_id` int(11) NOT NULL,
   `created_at` datetime NOT NULL,
-  PRIMARY KEY (`follower_id`),
+  PRIMARY KEY (`follower_id`, `following_id`),
+  KEY `follower_user_fk` (`follower_id`),
   KEY `following_user_fk` (`following_id`),
   CONSTRAINT `follower_user_fk` FOREIGN KEY (`follower_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `following_user_fk` FOREIGN KEY (`following_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
