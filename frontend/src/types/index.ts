@@ -74,17 +74,11 @@ export interface CalendarList {
 
 export interface DiaryFeed {
   diaryId: number;
-  imageUrl: string;
-  dreamScore: number;
   title: string;
   content: string;
   nickname: string;
   viewCount: number;
-  likes: number;
-  bookmarks: number;
-  interpretation: string;
-  tags: string[];
-  datetime: string;
+  imageUrl: string;
 }
 
 export interface Board {
