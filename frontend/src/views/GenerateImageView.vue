@@ -6,6 +6,7 @@ import router from '@/router';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
 import { onMounted, ref, type Ref } from 'vue';
 import IconCoin from '@/components/icons/IconCoin.vue';
+import LoadingAnimation from '@/components/common/LoadingAnimation.vue';
 
 const diary = useDiaryCreateStore().getDiary();
 
@@ -26,6 +27,7 @@ const contents: Ref<Contents> = ref({
 });
 
 const requestCount = ref(1);
+const isLoading = ref(false);
 
 onMounted(async () => {
   try {
@@ -41,6 +43,7 @@ onMounted(async () => {
 
 const requestImage = async () => {
   try {
+    isLoading.value = true;
     const response = await postDreamImage(
       diary.title,
       diary.content,
@@ -50,8 +53,10 @@ const requestImage = async () => {
     contents.value.freeGenerateCount = response.data.freeGenerateCount;
     contents.value.maxFreeGenerateCount = response.data.maxFreeGenerateCount;
     contents.value.generatedImages = response.data.generatedImages;
+    isLoading.value = false;
   } catch (error) {
     console.log(error);
+    isLoading.value = false;
   }
 };
 
@@ -130,7 +135,10 @@ const selectImage = (imageId: number) => {
       </div>
     </div>
 
-    <div class="image-list">
+    <div v-if="isLoading" class="loading">
+      <LoadingAnimation />
+    </div>
+    <div v-else class="image-list">
       <ul class="grid grid-cols-2 gap-4">
         <li v-for="(image, i) in contents.generatedImages" v-bind:key="i">
           <img
@@ -257,5 +265,9 @@ const selectImage = (imageId: number) => {
     left: 50%;
     transform: translateX(-50%);
   }
+}
+
+.loading {
+  height: 190px;
 }
 </style>
