@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DreamDiaryFeedDto,
@@ -21,6 +21,7 @@ import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { UserService } from 'src/user/user.service';
 import { OpenAIService } from 'src/util/openai.service';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DreamDiaryService {
@@ -41,6 +42,7 @@ export class DreamDiaryService {
     private readonly userService: UserService,
     @InjectRepository(DreamDiary)
     private readonly dreamDiaryRepository: Repository<DreamDiary>,
+    @Inject(ConfigService) private configService: ConfigService,
   ) {}
 
   /**
@@ -213,7 +215,7 @@ export class DreamDiaryService {
       dreamDiary.imageUrl = imageUrl;
     } else {
       dreamDiary.imageUrl =
-        'https://dream-vision.shop/uploads/Diary_DefaultImage.png';
+        this.configService.get<string>('image.defaultImage');
     }
 
     const result = await this.dreamDiaryRepository.save(dreamDiary);
