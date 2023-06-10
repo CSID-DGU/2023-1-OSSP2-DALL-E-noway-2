@@ -169,7 +169,7 @@ yarn --cwd backend start:dev
 ```
 
 ```bash
-yarn dev --cwd frontend
+yarn --cwd frontend dev
 ```
 
 **6. 사이트 접속**
