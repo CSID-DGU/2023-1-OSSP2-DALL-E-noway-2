@@ -127,7 +127,12 @@ export class DreamDiaryController {
     FileInterceptor('image', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const path = `../uploads`;
+          let path: string;
+          if (process.env.NODE_ENV === 'production') {
+            path = '../uploads';
+          } else {
+            path = 'uploads';
+          }
           if (!existsSync(path)) {
             mkdirSync(path);
           }
@@ -159,7 +164,9 @@ export class DreamDiaryController {
     try {
       let imageUrl: string;
       if (image) {
-        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/uploads/${
+          image.filename
+        }`;
       }
 
       return await this.dreamDiaryService.creatDreamDiary(
@@ -185,7 +192,12 @@ export class DreamDiaryController {
     FileInterceptor('image', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const path = `../uploads`;
+          let path: string;
+          if (process.env.NODE_ENV === 'production') {
+            path = '../uploads';
+          } else {
+            path = 'uploads';
+          }
           if (!existsSync(path)) {
             mkdirSync(path);
           }
@@ -218,7 +230,9 @@ export class DreamDiaryController {
       let imageUrl: string;
 
       if (image) {
-        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/uploads/${
+          image.filename
+        }`;
       }
 
       return this.dreamDiaryService.updateDreamDiary(

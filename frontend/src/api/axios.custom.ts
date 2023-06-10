@@ -7,6 +7,11 @@ export const postDreamDiary = async (dreamDiaryCreateRequest: FormData) => {
   const response = await axiosInstance.postForm(
     postDreamDiaryURL,
     dreamDiaryCreateRequest,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   );
   return response;
 };
@@ -118,6 +123,29 @@ export const updateProfileRequest = async (
   return response;
 };
 
+export const getUserDiaryFeeds = async (
+  userId: number,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/dream-diary/feeds?page=${page}&length=${length}`,
+  );
+  return response;
+};
+
+export const getUserBoards = async (
+  userId: number,
+  boardType: BoardType,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/users/${userId}/${boardType}/boards/?page=${page}&length=${length}`,
+  );
+  return response;
+};
+
 export const getAllComments = async (filterType: string, id: number) => {
   const response = await axiosInstance.get(`/api/comments/${filterType}/${id}`);
   return response;
@@ -210,5 +238,29 @@ export const getAverageStatByMonth = async (
   const response = await axiosInstance.get(
     `/api/stat/average/?year=${year}&month=${month}`,
   );
+  return response;
+};
+
+export const getDreamDiaryFeedList = async (
+  searchType: string,
+  page: number,
+  length: number,
+  searchKeyword: string,
+) => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/feeds/${searchType}`,
+    {
+      params: {
+        page,
+        length,
+        searchKeyword,
+      },
+    },
+  );
+  return response;
+};
+
+export const getDreamDiaryFeedPost = async (diaryId: number) => {
+  const response = await axiosInstance.get(`/api/dream-diary/${diaryId}`);
   return response;
 };

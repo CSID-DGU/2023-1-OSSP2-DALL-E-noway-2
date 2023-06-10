@@ -25,7 +25,7 @@ export const useDiaryCreateStore = defineStore('diary-create', () => {
     diary.value.dreamScore = score;
   };
 
-  const setImage = (image: Blob[]) => {
+  const setImage = (image: string[]) => {
     diary.value.image = image;
   };
 

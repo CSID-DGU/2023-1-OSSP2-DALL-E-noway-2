@@ -37,4 +37,7 @@ export default () => ({
     organizationID: process.env.OPENAI_ORGANIZATION_ID,
     apiKey: process.env.OPENAI_API_KEY,
   },
+  image: {
+    defaultImage: process.env.DEFAULT_IMAGE_URL,
+  },
 });

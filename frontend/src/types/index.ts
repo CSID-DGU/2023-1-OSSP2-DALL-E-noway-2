@@ -1,6 +1,5 @@
 import type { BoardType } from './enum/board.type';
 import type { DisclosureScopeType } from './enum/disclosure.scope.type';
-
 export interface Category {
   categoryId: number;
   categoryName: string;
@@ -10,7 +9,7 @@ export interface Diary {
   title: string;
   category: string;
   dreamScore: number;
-  image: Blob[];
+  image: string[];
   disclosureScope: DisclosureScopeType;
   content: string;
 }
@@ -75,11 +74,19 @@ export interface CalendarList {
 
 export interface DiaryFeed {
   diaryId: number;
-  imageUrl: string;
   title: string;
   content: string;
   nickname: string;
   viewCount: number;
+  imageUrl: string;
+}
+
+export interface Board {
+  postId: number;
+  title: string;
+  viewCount: number;
+  nickname: string;
+  imageUrl: string;
 }
 
 // 카테고리 별 개수 통계

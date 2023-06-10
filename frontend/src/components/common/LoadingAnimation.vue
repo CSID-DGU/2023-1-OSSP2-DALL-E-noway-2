@@ -48,7 +48,7 @@
 
 @keyframes loading {
   50% {
-    background: var(--color-primary);
+    background: white;
   }
 }
 </style>
