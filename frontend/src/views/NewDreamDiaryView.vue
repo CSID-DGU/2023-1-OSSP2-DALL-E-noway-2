@@ -44,12 +44,16 @@ const submitDiary = async () => {
   )?.categoryId;
   formData.append('category', String(categoryId));
   formData.append('dreamScore', diary.value.dreamScore.toString());
-  // @ts-ignore
-  if (diary.value.image[0] instanceof File) {
-    formData.append('image', diary.value.image[0]);
+  if (diary.value.image.length > 0) {
+    // @ts-ignore
+    if (diary.value.image[0] instanceof File) {
+      formData.append('image', diary.value.image[0]);
+    } else {
+      const blob = dataURLToBlob(diary.value.image[0]);
+      formData.append('image', blob, 'image.png');
+    }
   } else {
-    const blob = dataURLToBlob(diary.value.image[0]);
-    formData.append('image', blob, 'image.png');
+    formData.append('image', '');
   }
   formData.append('disclosureScope', diary.value.disclosureScope);
   formData.append('content', diary.value.content);

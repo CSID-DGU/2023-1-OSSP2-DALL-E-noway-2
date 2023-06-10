@@ -34,7 +34,10 @@ import { StatModule } from './dreamdiary/calendar/stat/stat.module';
       serveRoot: '/uploads',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../', 'frontend/dist'),
+      rootPath:
+        process.env.NODE_ENV === 'production'
+          ? join(__dirname, './uploads')
+          : join(__dirname, '../uploads'),
       exclude: ['/api/(.*)', '/auth/(.*)'],
     }),
     AuthModule,

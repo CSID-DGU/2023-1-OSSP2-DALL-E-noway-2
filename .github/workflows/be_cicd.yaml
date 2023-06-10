@@ -64,6 +64,6 @@ jobs:
             echo "backend 앱 빌드"
             cd $HOME/dalle-noway/backend
             yarn install
-            npm run build
+            npm run build:prod
             echo "앱 배포 (reload)"
             pm2 reload main
