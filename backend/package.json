@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build && mkdir -p uploads; cp -n image.png uploads",
-    "build:prod": "nest build && mkdir -p dist/uploads; mkdir -p uploads; cp -n image.png uploads; cp -rn uploads/* dist/uploads",
+    "build:prod": "cp -n dist/uploads/* uploads/; nest build && mkdir -p dist/uploads; mkdir -p uploads; cp -n image.png uploads; cp -n uploads/* dist/uploads",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "mkdir -p uploads; cp -n image.png uploads; nest start --watch",
