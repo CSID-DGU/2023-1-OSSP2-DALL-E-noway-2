@@ -173,7 +173,7 @@ yarn dev --cwd frontend
 ```
 
 **6. 사이트 접속**
-https://localhost:81
+http://localhost:81
 
 <br/>
 <br/>
