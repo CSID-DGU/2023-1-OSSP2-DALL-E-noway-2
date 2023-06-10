@@ -59,7 +59,7 @@ export class BoardController {
     FileInterceptor(`image`, {
       storage: diskStorage({
         destination(req, file, callback) {
-          const path = 'uploads';
+          const path = '../uploads';
           if (!existsSync(path)) {
             mkdirSync(path);
           }
@@ -117,7 +117,7 @@ export class BoardController {
     FileInterceptor(`image`, {
       storage: diskStorage({
         destination(req, file, callback) {
-          const path = 'uploads';
+          const path = '../uploads';
           if (!existsSync(path)) {
             mkdirSync(path);
           }

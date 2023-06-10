@@ -36,6 +36,9 @@ export class StatService {
         .groupBy('categories.categoryId')
         .getRawMany();
 
+      categoryCounts.map((categoryCount) => {
+        categoryCount.count = parseInt(categoryCount.count);
+      });
       return categoryCounts;
     } catch (error) {
       console.error(error);
@@ -66,6 +69,9 @@ export class StatService {
         .groupBy('categories.categoryId')
         .getRawMany();
 
+      categoryScoreAvgs.map((categoryScoreAvg) => {
+        categoryScoreAvg.scoreAvg = parseFloat(categoryScoreAvg.scoreAvg);
+      });
       return categoryScoreAvgs;
     } catch (error) {
       console.error(error);
@@ -101,8 +107,9 @@ export class StatService {
           .getRawOne(),
       ]);
 
-      const myAvgScore = myAvgScoreResult?.myAvgScore || 0;
-      const othersAvgScore = othersAvgScoreResult?.othersAvgScore || 0;
+      const myAvgScore = parseFloat(myAvgScoreResult?.myAvgScore) || 0;
+      const othersAvgScore =
+        parseFloat(othersAvgScoreResult?.othersAvgScore) || 0;
       const dto: DreamScoreAverageResponseDto = {
         myAvgScore: myAvgScore,
         othersAvgScore: othersAvgScore,

@@ -73,8 +73,8 @@ const fetchAverageStat = async () => {
   try {
     const response = await getAverageStatByMonth(year.value, month.value + 1);
     if (response.status === 200) {
-      averageStat.value.myScoreAvg = Number(response.data.myAvgScore);
-      averageStat.value.othersScoreAvg = Number(response.data.othersAvgScore);
+      averageStat.value.myScoreAvg = response.data.myAvgScore;
+      averageStat.value.othersScoreAvg = response.data.othersAvgScore;
     } else {
       console.error(response);
     }

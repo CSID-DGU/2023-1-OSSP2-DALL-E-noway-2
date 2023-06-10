@@ -127,7 +127,7 @@ export class DreamDiaryController {
     FileInterceptor('image', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const path = `uploads`;
+          const path = `../uploads`;
           if (!existsSync(path)) {
             mkdirSync(path);
           }
@@ -185,7 +185,7 @@ export class DreamDiaryController {
     FileInterceptor('image', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const path = `uploads`;
+          const path = `../uploads`;
           if (!existsSync(path)) {
             mkdirSync(path);
           }

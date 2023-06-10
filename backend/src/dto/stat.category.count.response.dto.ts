@@ -8,7 +8,7 @@ export class DreamDiaryCategoryCount {
     example: 1,
     description: '카테고리 아이디',
   })
-  categoryId: string;
+  categoryId: number;
 
   @ApiProperty({
     example: '악몽',

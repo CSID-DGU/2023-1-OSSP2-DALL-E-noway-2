@@ -63,7 +63,7 @@ const data = computed(() => {
     };
   }
   const labels = scoreStats.value.map((scoreStat) => scoreStat.categoryName);
-  const data = scoreStats.value.map((scoreStat) => Number(scoreStat.scoreAvg));
+  const data = scoreStats.value.map((scoreStat) => scoreStat.scoreAvg);
 
   return {
     labels: labels,
