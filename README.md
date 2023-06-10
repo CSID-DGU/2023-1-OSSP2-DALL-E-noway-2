@@ -67,7 +67,7 @@ Dream Vision은 꿈을 향한 여정을 더욱 풍요롭게 만들어줄 것입�
 **1. 레포지토리 클론**
 
 ```bash
-git clone https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2.git dalle-noway
+git clone https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2.git dalle-noway && cd dalle-noway
 ```
 
 **2. 의존 라이브러리 설치**
@@ -183,19 +183,16 @@ yarn dev --cwd frontend
 
 <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/> <img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=ESLint&logoColor=white"/> <img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=Prettier&logoColor=white"/>
 
-<br/>
 
 ### Frontend
 
 <img src="https://img.shields.io/badge/VueJS-4FC08D?style=flat-square&logo=Vue.js&logoColor=white"/> <img src="https://img.shields.io/badge/Pinia-4FC08D?style=flat-square&logo=Vue.js&logoColor=white"/> <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=Vite&logoColor=white"/> <img src="https://img.shields.io/badge/ChartJS-FF6384?style=flat-square&logo=Chart.js&logoColor=white"/> <img src="https://img.shields.io/badge/Axios-5FC0E0?style=flat-square&logo=axios&logoColor=white"/>
 
-<br/>
 
 ### Backend
 
 <img src="https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=NestJS&logoColor=white"/> <img src="https://img.shields.io/badge/TypeORM-F37626?style=flat-square&logo=TypeORM&logoColor=white"/> <img src="https://img.shields.io/badge/PassportJS-34E27A?style=flat-square&logo=Passport&logoColor=white"/> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=MySQL&logoColor=white"/> <img src="https://img.shields.io/badge/SwaggerJS-85EA2D?style=flat-square&logo=Swagger&logoColor=white"/>
 
-<br/>
 
 ### Infra
 
