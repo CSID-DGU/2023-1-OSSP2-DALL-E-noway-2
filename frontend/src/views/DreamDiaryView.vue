@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
 import { ref, onMounted, type Ref } from 'vue';
 import axios from 'axios';
@@ -222,4 +222,14 @@ const clickBookmark = () => {
   top: 8px;
   border-radius: 10px;
 }
-</style>
+</style> -->
+
+<script setup lang="ts">
+import { ref } from 'vue';
+</script>
+
+<template>
+  <div></div>
+</template>
+
+<style scoped></style>
