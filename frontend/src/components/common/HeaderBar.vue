@@ -23,6 +23,7 @@ const validRoutes = [
   'follow',
   'bookmark',
   'like',
+  'profile-detail',
 ];
 
 const goBack = () => {

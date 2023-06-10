@@ -11,6 +11,7 @@ import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';
 import { UtilModule } from 'src/util/util.module';
 import { UserModule } from 'src/user/user.module';
+import { OpenAIService } from 'src/util/openai.service';
 import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
@@ -29,7 +30,7 @@ import { CalendarModule } from './calendar/calendar.module';
     forwardRef(() => CalendarModule),
   ],
   controllers: [DreamDiaryController],
-  providers: [DreamDiaryService],
+  providers: [DreamDiaryService, OpenAIService],
   exports: [DreamDiaryService],
 })
 export class DreamDiaryModule {}

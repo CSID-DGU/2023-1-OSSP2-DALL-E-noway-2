@@ -98,7 +98,7 @@ watch(showSelectedDiaryFeed, (value) => {
         </div>
       </div>
     </div>
-    <div v-if="selectedDiaryFeed">
+    <div v-if="selectedDiaryFeed && selectedDiaryFeed.diaryId !== 0">
       <RouterLink :to="`/dream-diary/${selectedDiaryFeed.diaryId}`">
         <div class="feed-container">
           <h2 class="feed-title">{{ selectedDiaryFeed.title }}</h2>

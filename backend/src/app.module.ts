@@ -20,6 +20,7 @@ import { CommentModule } from './comment/comment.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: '.env',
       load: [configuration],
       isGlobal: true,
     }),
@@ -30,6 +31,10 @@ import { CommentModule } from './comment/comment.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../../', 'frontend/dist'),
+      exclude: ['/api/(.*)', '/auth/(.*)'],
     }),
     AuthModule,
     UserModule,

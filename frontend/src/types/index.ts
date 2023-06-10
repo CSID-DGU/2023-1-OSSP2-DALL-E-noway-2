@@ -42,6 +42,24 @@ export interface Profile {
   followingCount: number;
 }
 
+export interface ProfileDetail {
+  userId: number;
+  username: string;
+  email: string;
+  nickname: string;
+  imageUrl: string;
+  presentation: string;
+  credits: number;
+  followerCount: number;
+  followingCount: number;
+}
+
+export interface EditedProfile {
+  image: Blob;
+  nickname: string;
+  presentation: string;
+}
+
 export interface CalendarDayInfo {
   day: number;
   diaryId: number | null;

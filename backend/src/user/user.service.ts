@@ -27,7 +27,7 @@ export class UserService {
    */
   async findOrCreateUserBySocialProfile(
     profile: SocialProfile,
-  ): Promise<UserDto> {
+  ): Promise<[UserDto, boolean]> {
     this.logger.debug(`Called ${this.findOrCreateUserBySocialProfile.name}`);
     const find = await this.userRepository.findOne({
       where: {
@@ -35,11 +35,14 @@ export class UserService {
       },
     });
     if (find) {
-      return {
-        userId: find.userId,
-        nickname: find.nickname,
-        imageUrl: find.imageUrl,
-      };
+      return [
+        {
+          userId: find.userId,
+          nickname: find.nickname,
+          imageUrl: find.imageUrl,
+        },
+        false,
+      ];
     }
 
     let provider: ProviderType;
@@ -78,11 +81,14 @@ export class UserService {
       },
     );
 
-    return {
-      userId: result.identifiers[0].userId,
-      nickname: user.nickname,
-      imageUrl: user.imageUrl,
-    };
+    return [
+      {
+        userId: result.identifiers[0].userId,
+        nickname: user.nickname,
+        imageUrl: user.imageUrl,
+      },
+      true,
+    ];
   }
 
   /**
