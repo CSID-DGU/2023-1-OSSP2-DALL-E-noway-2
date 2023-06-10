@@ -7,8 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build & mkdir -p uploads; cp -n image.png uploads",
-    "build:prod": "npm run build & mkdir -p dist/uploads; cp -n image.png dist/uploads",
+    "build": "nest build && mkdir -p uploads; cp -n image.png uploads",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "mkdir -p uploads; cp -n image.png uploads; nest start --watch",
