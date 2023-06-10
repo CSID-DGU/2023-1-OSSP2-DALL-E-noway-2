@@ -25,29 +25,24 @@ export class OpenAIService {
       다음은 유저가 작성한 꿈 일기의 제목과 내용이야.
       이 일기의 내용을 바탕으로 텍스트를 이미지로 만들어주는 모델에게 적절한 프롬프트를 제시해주려고 해.
       아래 지시사항을 바탕으로 해당 모델에게 제공해줄 프롬프트를 만들어줘.
-      1. 꿈 일기의 내용에서 등장하는 장소, 물체, 인물, 색상 등을 명확하게 언급해줘.
+      1. 꿈 일기의 내용에서 등장하는 가장 주요한 대상을 제시해줘. (사람, 장소, 물체 등)
       2. 꿈 일기의 내용에서 드러나는 감정이나 분위기에 대한 정보를 제시해줘. (고요, 신비, 활기참, 공포 등)
       3. 필요에 따라 꿈 일기 내용에서 발생하는 (움직임, 빛, 음악 등)과 같은 감각적인 요소가 있다면 이를 강조해줘.
+      4. 내용을 바탕으로 사진의 구도를 제시해줘.
 
       # 유저의 일기
       —
-      title: ${title}
-      content: ${content}
+      제목: ${title}
+      내용: ${content}
       —
+      # 답변 형태
+      -
+      [TARGET]: The main object that appears in the dream diary
+      [EMOTION]: The emotion or mood revealed in the dream diary
+      [SENSORY ELEMENTS]: the sensory element of the dream diary
+      [COMPOSITION]: the composition of the photo based on the content of the dream diary
 
-      $framing: 사진의 구도(close-up 등)
-      $flimType: 흑백 여부(black or white)
-      $emotion: 사진에서 드러나는 감정이나 분위기 정보
-      $target: 등장하는 장소나 물체, 인물 색상 등
-      $sensoryElements: 발생하는 감각적 요소 정보
-
-      # 원하는 출력 형태
-      —
-      A $framing, $flimType $emotion $target, $sensoryElements.
-      —
-
-      P.S
-      답변은 반드시 영어 400자 이내로 해줘.
+      ***** 답변은 반드시 영어 500자 이내로 해줘. *****
     `;
     return prompt;
   }
