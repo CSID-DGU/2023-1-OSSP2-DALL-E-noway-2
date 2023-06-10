@@ -172,6 +172,9 @@ yarn --cwd backend start:dev
 yarn dev --cwd frontend
 ```
 
+**6. 사이트 접속**
+https://localhost:81
+
 <br/>
 <br/>
 
