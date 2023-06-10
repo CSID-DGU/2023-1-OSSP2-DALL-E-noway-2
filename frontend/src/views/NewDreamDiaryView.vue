@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import StarRating from '@/components/dreamDiary/StarRating.vue';
 import { postDreamDiary } from '@/api/axios.custom';
-import type { Category } from '@/types/index';
+import type { Category, Diary } from '@/types/index';
 import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
@@ -13,26 +13,46 @@ import { categoryInfoStore } from '@/stores/category.info.store';
 
 const router = useRouter();
 
-const diary = useDiaryCreateStore().getDiary();
+const { getDiary } = useDiaryCreateStore();
 const { getCategories } = categoryInfoStore();
+
+const diary: Ref<Diary> = ref(getDiary());
 
 const temporarySaveDiary = () => {
   console.log(diary);
 };
 
+function dataURLToBlob(dataURL: string) {
+  const parts = dataURL.split(';base64,');
+  const contentType = parts[0].split(':')[1];
+  const byteString = atob(parts[1]);
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([arrayBuffer], { type: contentType });
+}
+
 const submitDiary = async () => {
   const formData = new FormData();
-  formData.append('title', diary.title);
+  formData.append('title', diary.value.title);
   // categoryName으로 id 찾기
   const categories = getCategories();
   const categoryId = categories.find(
-    (category: Category) => category.categoryName === diary.category,
+    (category: Category) => category.categoryName === diary.value.category,
   )?.categoryId;
   formData.append('category', String(categoryId));
-  formData.append('dreamScore', diary.dreamScore.toString());
-  formData.append('image', diary.image[0]);
-  formData.append('disclosureScope', diary.disclosureScope);
-  formData.append('content', diary.content);
+  formData.append('dreamScore', diary.value.dreamScore.toString());
+  // @ts-ignore
+  if (diary.value.image[0] instanceof File) {
+    formData.append('image', diary.value.image[0]);
+  } else {
+    const blob = dataURLToBlob(diary.value.image[0]);
+    formData.append('image', blob, 'image.png');
+  }
+  formData.append('disclosureScope', diary.value.disclosureScope);
+  formData.append('content', diary.value.content);
   const response = await postDreamDiary(formData as FormData);
   if (response.status === 201) {
     router.push({ name: 'dream-diary', params: { diaryId: response.data } });
@@ -45,7 +65,7 @@ const onInputImage = (event: any) => {
   // for (let i = 0; i < event.target.files.length; i++) {
   //   diary.image.push(event.target.files[i] as Blob);
   // }
-  diary.image.push(event.target.files[0] as Blob);
+  diary.value.image.push(event.target.files[0] as string);
 };
 
 const fileInput = ref<HTMLElement | null>(null);
@@ -57,6 +77,14 @@ const handleUploadClick = () => {
 const goToImageCreation = () => {
   router.push({ name: 'generate-image' });
 };
+
+onMounted(() => {
+  diary.value = getDiary();
+});
+
+watch(getDiary, (value) => {
+  diary.value = value;
+});
 </script>
 
 <template>

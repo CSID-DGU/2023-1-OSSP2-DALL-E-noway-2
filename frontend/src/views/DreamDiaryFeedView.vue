@@ -1,130 +1,23 @@
-<script setup lang="ts">
-
-import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ref, onMounted, watch, type Ref } from 'vue';
-import { useMyInfoStore } from '@/stores/my.info.store';
-import { categoryInfoStore } from '@/stores/category.info.store';
-import ProfileEdit from '@/components/profile/ProfileEdit.vue';
-import { useProfileStore } from '@/stores/profile.store';
-
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    score: '☆☆☆☆☆',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content:
-      '내용이긴글1아무거나작성을해볼게요밑으로내려갈까요아님옆으로밀릴까요어떻게될까요',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-  {
-    id: 2,
-    title: '게시글 제목 2',
-    user: '사용자2',
-    content: '내용이긴글2',
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    views: 5,
-  },
-  {
-    id: 3,
-    title: '게시글 제목 3',
-    user: '사용자3',
-    content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image: 'https://t1.daumcdn.net/cfile/tistory/99C6FD385D6CAD1206',
-    views: 18,
-  },
-  {
-    id: 4,
-    title: '게시글 제목 4',
-    user: '사용자4',
-    content: '내용이긴글4',
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    views: 13,
-  },
-  {
-    id: 5,
-    title: '게시글 제목 5',
-    user: '사용자5',
-    content: '내용이긴글5',
-    image: '/path/to/image5.jpg',
-    views: 7,
-  },
-]);
-
-const truncateContent = (content: string, maxLength: number) => {
-  if (content.length <= maxLength) {
-    return content;
-  } else {
-    return content.slice(0, maxLength) + '...';
-  }
-};
-
-const showCategoryOptions = ref(false);
-const selectedCategory = ref(' ');
-const textSpan = ref<HTMLElement | null>(null);
-
-const toggleCategoryOptions = () => {
-  showCategoryOptions.value = !showCategoryOptions.value;
-  if (selectedCategory.value && textSpan.value !== null) {
-    textSpan.value.style.display = 'none';
-  }
-};
-
-const selectCategory = (category: string) => {
-  selectedCategory.value = category;
-  showCategoryOptions.value = false; // 선택한 후 옵션 숨김
-};
-
-const route = useRouter();
-const newDiary = () => {
-  route.push('/dream-diary/new');
-};
-
-const { fetchAllCategories } = categoryInfoStore();
-const { setEditing, isEditing } = useProfileStore();
-
-const { query } = useRoute();
-const editing = ref(isEditing());
-const isFirstLogin = query.isFirstLogin === 'true';
-if (isFirstLogin) {
-  setEditing(true);
-  route.push('/home');
-}
-
-watch(isEditing, (value) => {
-  editing.value = value;
-});
-
-onMounted(async () => {
-  await useMyInfoStore().apiGetUser();
-  await fetchAllCategories();
-});
-</script>
-
 <template>
   <main>
     <div class="search">
       <div>
         <input
           class="search-bar"
+          v-model="searchKeyword"
           type="text"
           placeholder="검색어를 입력해주세요."
           required
+          @keydown.enter="handleSearch"
         />
       </div>
       <div class="search-left">
         <div class="select-row">
           <button @click="toggleCategoryOptions" class="dropdown-button">
-            <span ref="textSpan" class="selected-not-yet">검색어선택</span>
-            <div v-if="selectedCategory" class="selected-category">
+            <span v-if="!selectedCategory" class="selected-not-yet"
+              >검색어 선택</span
+            >
+            <div v-else class="selected-category">
               {{ selectedCategory }}
             </div>
           </button>
@@ -147,28 +40,17 @@ onMounted(async () => {
     </div>
     <div class="scroll-container">
       <div>
-        <DreamDiaryView :posts="posts" />
-        <div v-for="post in posts" :key="post.id" class="feed">
-          <RouterLink :to="`/dream-diary/${post.id}`">
+        <div v-for="post in filteredPosts" :key="post?.diaryId" class="feed">
+          <RouterLink v-if="post" :to="`/dream-diary/${post.diaryId}`">
             <div class="feed-container">
               <h2 class="feed-title">{{ post.title }}</h2>
-              <p class="feed-user">{{ post.user }}</p>
+              <p class="feed-user">{{ post.nickname }}</p>
               <p class="feed-content">
                 {{ truncateContent(post.content, 25) }}
               </p>
-              <img
-                :src="post.image"
-                alt="Post Image"
-                style="
-                  margin: 0 auto;
-                  max-width: 260px;
-                  max-height: auto
-                  top: 12px;
-                  border-radius: 16px;
-                "
-              />
+              <img :src="post.imageUrl" alt="Post Image" class="feed-image" />
               <div class="feed-view">
-                <p>👀 {{ post.views }}</p>
+                <p>👀 {{ post.viewCount }}</p>
               </div>
             </div>
           </RouterLink>
@@ -182,11 +64,122 @@ onMounted(async () => {
         style="border-radius: 24px"
       />
     </button>
-
-    <!-- 최초 로그인 시, 프로필 설정 모달 -->
-    <ProfileEdit v-if="isEditing()" />
   </main>
 </template>
+
+<script setup lang="ts">
+import { RouterLink, useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useMyInfoStore } from '@/stores/my.info.store';
+import { categoryInfoStore } from '@/stores/category.info.store';
+import type { DiaryFeed } from '@/types';
+import { getDreamDiaryFeedList } from '@/api/axios.custom';
+
+const posts = ref<DiaryFeed[]>([]);
+const arrlength = ref(1);
+const searchKeyword = ref('');
+
+const fetchData = async (searchType: string) => {
+  try {
+    const page = 1;
+    const length = 100;
+    const keyword = '';
+
+    const response = await getDreamDiaryFeedList(
+      searchType,
+      page,
+      length,
+      keyword,
+    );
+    posts.value = response.data.dreamDiaryFeeds;
+    arrlength.value = response.data.totalLength;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchKeyword = async (keyword: string, length: number) => {
+  try {
+    const searchType = selectedCategory.value;
+    const page = 1;
+
+    const response = await getDreamDiaryFeedList(
+      searchType,
+      page,
+      length,
+      keyword,
+    );
+    posts.value = response.data.dreamDiaryFeeds;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleSearch = () => {
+  fetchKeyword(searchKeyword.value, arrlength.value);
+};
+
+const truncateContent = (content: string, maxLength: number) => {
+  if (!content) {
+    return '';
+  }
+  if (content.length <= maxLength) {
+    return content;
+  } else {
+    return content.slice(0, maxLength) + '...';
+  }
+};
+
+const showCategoryOptions = ref(false);
+const selectedCategory = ref('');
+
+const toggleCategoryOptions = () => {
+  showCategoryOptions.value = !showCategoryOptions.value;
+};
+
+const selectCategory = (category: string) => {
+  selectedCategory.value = category;
+  showCategoryOptions.value = false;
+  const keyword = '';
+  fetchKeyword(keyword, arrlength.value);
+};
+
+const route = useRouter();
+const newDiary = () => {
+  route.push('/dream-diary/new');
+};
+
+const { fetchAllCategories } = categoryInfoStore();
+
+onMounted(async () => {
+  await useMyInfoStore().apiGetUser();
+  await fetchAllCategories();
+  await fetchData('전체');
+});
+
+const filteredPosts = computed(() => {
+  const searchType = selectedCategory.value;
+  const keyword = searchKeyword.value;
+  if (!keyword) {
+    return posts.value;
+  }
+  if (searchType === '제목') {
+    return posts.value.filter((post) => post.title.includes(keyword));
+  } else if (searchType === '유저') {
+    return posts.value.filter((post) => post.nickname.includes(keyword));
+  } else if (searchType === '내용') {
+    return posts.value.filter((post) => post.content.includes(keyword));
+  } else {
+    return posts.value.filter((post) => {
+      return (
+        post.title.includes(keyword) ||
+        post.nickname.includes(keyword) ||
+        post.content.includes(keyword)
+      );
+    });
+  }
+});
+</script>
 
 <style scoped>
 .newdiary-button {
@@ -304,5 +297,12 @@ onMounted(async () => {
 }
 .feed-view {
   top: 20px;
+}
+.feed-image {
+  margin: 0 auto;
+  max-width: 260px;
+  max-height: auto;
+  top: 12px;
+  border-radius: 16px;
 }
 </style>
