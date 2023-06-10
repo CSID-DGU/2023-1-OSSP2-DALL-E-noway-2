@@ -110,7 +110,12 @@ export class ProfileController {
     FileInterceptor('image', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const path = `../uploads`;
+          let path: string;
+          if (process.env.NODE_ENV === 'production') {
+            path = '../uploads';
+          } else {
+            path = 'uploads';
+          }
           if (!existsSync(path)) {
             mkdirSync(path);
           }
