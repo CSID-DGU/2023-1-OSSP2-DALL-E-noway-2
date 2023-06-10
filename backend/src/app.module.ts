@@ -30,15 +30,14 @@ import { StatModule } from './dreamdiary/calendar/stat/stat.module';
       useClass: TypeOrmConfigService,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../uploads'),
-      serveRoot: '/uploads',
+      rootPath: join(__dirname, '../../', 'frontend/dist'),
+      exclude: ['/api/(.*)', '/auth/(.*)'],
     }),
     ServeStaticModule.forRoot({
       rootPath:
         process.env.NODE_ENV === 'production'
           ? join(__dirname, './uploads')
           : join(__dirname, '../uploads'),
-      exclude: ['/api/(.*)', '/auth/(.*)'],
     }),
     AuthModule,
     UserModule,
