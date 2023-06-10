@@ -217,3 +217,27 @@ export const getAverageStatByMonth = async (
   );
   return response;
 };
+
+export const getDreamDiaryFeedList = async (
+  searchType: string,
+  page: number,
+  length: number,
+  searchKeyword: string,
+) => {
+  const response = await axiosInstance.get(
+    `/api/dream-diary/feeds/${searchType}`,
+    {
+      params: {
+        page,
+        length,
+        searchKeyword,
+      },
+    },
+  );
+  return response;
+};
+
+export const getDreamDiaryFeedPost = async (diaryId: number) => {
+  const response = await axiosInstance.get(`/api/dream-diary/${diaryId}`);
+  return response;
+};
