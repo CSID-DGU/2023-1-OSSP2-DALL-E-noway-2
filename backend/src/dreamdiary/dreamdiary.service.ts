@@ -212,10 +212,12 @@ export class DreamDiaryService {
     if (imageUrl) {
       dreamDiary.imageUrl = imageUrl;
     } else {
-      dreamDiary.imageUrl = 'default@.com';
+      dreamDiary.imageUrl =
+        'https://dream-vision.shop/uploads/Diary_DefaultImage.png';
     }
 
     const result = await this.dreamDiaryRepository.save(dreamDiary);
+
     const diaryId = result.diaryId;
 
     const categoryArray = Array.isArray(category) ? category : [category];
