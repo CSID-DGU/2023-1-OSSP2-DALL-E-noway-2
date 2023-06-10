@@ -80,7 +80,7 @@ const router = createRouter({
       component: () => import('@/views/LikeView.vue'),
     },
     {
-      path: '/profile/follow/:userId/:followType',
+      path: '/profile/follow/:userId',
       name: 'follow',
       component: () => import('@/views/FollowView.vue'),
     },

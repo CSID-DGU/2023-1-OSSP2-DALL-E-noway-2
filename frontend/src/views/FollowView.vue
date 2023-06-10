@@ -20,7 +20,7 @@ const userId = Number(params.userId);
 const { getUser } = useMyInfoStore();
 const mine = ref(getUser());
 
-const followType = ref(params.followType as FollowType);
+const followType = ref(FollowType.FOLLOWER);
 const curPage = ref(1);
 
 interface FollowList {
@@ -137,27 +137,19 @@ onMounted(async () => {
 <template>
   <div class="wrap">
     <div class="follow-bar">
-      <div class="p-1">
-        <RouterLink
-          :to="`/profile/follow/${userId}/follower`"
-          class="follow-content"
-          :class="{ none: followType === FollowType.FOLLOWING }"
-          v-on:click="changeToFollower"
-        >
-          <h1>팔로워</h1>
-        </RouterLink>
+      <div
+        class="p-1 follow-content"
+        :class="{ none: followType === FollowType.FOLLOWING }"
+        v-on:click="changeToFollower"
+      >
+        <h1>팔로워</h1>
       </div>
-      <div class="p-1">
-        <RouterLink
-          :to="`/profile/follow/${userId}/following`"
-          class="follow-content"
-          :class="{
-            none: followType === FollowType.FOLLOWER,
-          }"
-          v-on:click="changeToFollowing"
-        >
-          <h1>팔로잉</h1>
-        </RouterLink>
+      <div
+        class="p-1 follow-content"
+        :class="{ none: followType === FollowType.FOLLOWER }"
+        v-on:click="changeToFollowing"
+      >
+        <h1>팔로잉</h1>
       </div>
     </div>
 
