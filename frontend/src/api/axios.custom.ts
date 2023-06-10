@@ -7,6 +7,11 @@ export const postDreamDiary = async (dreamDiaryCreateRequest: FormData) => {
   const response = await axiosInstance.postForm(
     postDreamDiaryURL,
     dreamDiaryCreateRequest,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   );
   return response;
 };

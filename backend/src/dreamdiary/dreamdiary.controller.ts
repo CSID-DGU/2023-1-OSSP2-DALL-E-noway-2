@@ -159,7 +159,9 @@ export class DreamDiaryController {
     try {
       let imageUrl: string;
       if (image) {
-        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/uploads/${
+          image.filename
+        }`;
       }
 
       return await this.dreamDiaryService.creatDreamDiary(
@@ -218,7 +220,9 @@ export class DreamDiaryController {
       let imageUrl: string;
 
       if (image) {
-        imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+        imageUrl = `${this.configService.get<string>('beHost')}/uploads/${
+          image.filename
+        }`;
       }
 
       return this.dreamDiaryService.updateDreamDiary(

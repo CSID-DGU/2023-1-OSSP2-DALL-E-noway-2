@@ -65,9 +65,11 @@ export class OpenAIService {
       prompt,
       n,
       size,
-      response_format: 'url',
+      response_format: 'b64_json',
     });
-    return response.data.data.map((data) => data.url);
+    return response.data.data.map((data) => {
+      return `data:image/png;base64,${data.b64_json}`;
+    });
   }
 
   /**

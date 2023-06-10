@@ -10,7 +10,7 @@ export interface Diary {
   title: string;
   category: string;
   dreamScore: number;
-  image: Blob[];
+  image: string[];
   disclosureScope: DisclosureScopeType;
   content: string;
 }

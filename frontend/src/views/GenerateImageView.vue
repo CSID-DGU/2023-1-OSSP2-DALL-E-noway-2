@@ -2,12 +2,17 @@
 import { getCreditInfo, postDreamImage } from '@/api/axios.custom';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
-import router from '@/router';
+import { useRouter } from 'vue-router';
 import { useDiaryCreateStore } from '@/stores/diary.create.store';
 import { onMounted, ref, type Ref } from 'vue';
 import IconCoin from '@/components/icons/IconCoin.vue';
+import LoadingAnimation from '@/components/common/LoadingAnimation.vue';
+import type { Diary } from '@/types';
 
-const diary = useDiaryCreateStore().getDiary();
+const router = useRouter();
+
+const { getDiary } = useDiaryCreateStore();
+const diary: Ref<Diary> = ref(getDiary());
 
 interface Contents {
   credits: number;
@@ -26,6 +31,7 @@ const contents: Ref<Contents> = ref({
 });
 
 const requestCount = ref(1);
+const isLoading = ref(false);
 
 onMounted(async () => {
   try {
@@ -41,17 +47,22 @@ onMounted(async () => {
 
 const requestImage = async () => {
   try {
+    isLoading.value = true;
     const response = await postDreamImage(
-      diary.title,
-      diary.content,
+      diary.value.title,
+      diary.value.content,
       requestCount.value,
     );
     contents.value.credits = response.data.credits;
     contents.value.freeGenerateCount = response.data.freeGenerateCount;
     contents.value.maxFreeGenerateCount = response.data.maxFreeGenerateCount;
-    contents.value.generatedImages = response.data.generatedImages;
+    for (const image of response.data.generatedImages) {
+      contents.value.generatedImages.push(image);
+    }
+    isLoading.value = false;
   } catch (error) {
     console.log(error);
+    isLoading.value = false;
   }
 };
 
@@ -59,43 +70,21 @@ const temporarySaveDiary = () => {
   console.log(diary);
 };
 
-const convertUrlToBlob = async (url: string) => {
-  // cors 허용
-  const response = await fetch(url, {
-    mode: 'no-cors',
-  });
-  const blob = await response.blob();
-  return blob;
-};
-
 const registerSelectedImage = async () => {
   // selectedImages의 value에 해당하는 이미지 파일을 diary.image에 넣어준다.
   for (const [_, value] of contents.value.selectedImages) {
-    const blob = await convertUrlToBlob(value);
-    diary.image.push(blob);
+    diary.value.image.push(value);
   }
   router.push({ name: 'new-dream-diary' });
 };
 
 const selectImage = (imageId: number) => {
-  // if (contents.value.selectedImages.has(imageId)) {
-  //   contents.value.selectedImages.delete(imageId);
-  // } else {
-  //   contents.value.selectedImages.set(
-  //     imageId,
-  //     contents.value.generatedImages[imageId],
-  //   );
-  // }
-  contents.value.selectedImages.clear(); // Clear previously selected images
+  contents.value.selectedImages.clear();
   contents.value.selectedImages.set(
     imageId,
     contents.value.generatedImages[imageId],
   );
 };
-
-// onMounted(() => {
-//   requestImage();
-// });
 </script>
 
 <template>
@@ -130,7 +119,10 @@ const selectImage = (imageId: number) => {
       </div>
     </div>
 
-    <div class="image-list">
+    <div v-if="isLoading" class="loading">
+      <LoadingAnimation />
+    </div>
+    <div v-else class="image-list">
       <ul class="grid grid-cols-2 gap-4">
         <li v-for="(image, i) in contents.generatedImages" v-bind:key="i">
           <img
@@ -257,5 +249,9 @@ const selectImage = (imageId: number) => {
     left: 50%;
     transform: translateX(-50%);
   }
+}
+
+.loading {
+  height: 190px;
 }
 </style>

@@ -86,7 +86,9 @@ export class BoardController {
   ) {
     let imageUrl: string;
     if (image) {
-      imageUrl = `${this.configService.get<string>('beHost')}/${image.path}`;
+      imageUrl = `${this.configService.get<string>('beHost')}/uploads/${
+        image.filename
+      }`;
     }
     const result = await this.boardService.createPost(
       title,
