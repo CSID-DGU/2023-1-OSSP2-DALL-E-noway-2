@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseEnumPipe,
   Post,
   Put,
   Query,
@@ -21,6 +22,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
@@ -40,6 +42,7 @@ import { ConfigService } from '@nestjs/config';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { PostResponseDto } from 'src/dto/post.response.dto';
 import { PostsResponseDto } from 'src/dto/posts.response.dto';
+import { SearchType } from 'src/enum/search.type';
 
 @ApiTags('Board')
 @Controller('boards')
@@ -75,12 +78,18 @@ export class BoardController {
   @ApiBody({
     type: PostRequestDto,
   })
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
   @UseGuards(AuthGuard('jwt'))
   async createPost(
     @Body('title') title: string,
     @Body('content') content: string,
     @Body('disclosureScope') disclosureScope: DisclosureScopeType,
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
     @GetUser() user: UserDto,
     @UploadedFile() image?: any,
   ) {
@@ -156,27 +165,44 @@ export class BoardController {
     summary: '게시글 목록 조회',
     description: 'post_type에 해당하는 게시판의 게시글 목록을 조회합니다.',
   })
-  @Get('/posts/:post_type/:search_type/:search_keyword/list')
+  @Get('/posts/:post_type/:search_type/list')
   @ApiParam({
-    name: 'search_keyword',
-    type: String,
-    required: false,
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
   })
   @ApiParam({
     name: 'search_type',
-    type: String,
+    type: 'enum',
+    enum: SearchType,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'length',
+    type: 'number',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'searchKeyword',
+    type: 'string',
     required: false,
   })
+  @UseGuards(AuthGuard('jwt'))
   async postList(
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
+    @Param('search_type', new ParseEnumPipe(SearchType)) searchType: SearchType,
     @Query('page') page: number,
     @Query('length') length: number,
-    @Param('search_keyword') searchKeyword?: string,
-    @Param('search_type') searchType?: string,
+    @Query('searchKeyword') searchKeyword?: string,
   ): Promise<PostsResponseDto> {
-    const filterType = this.boardTypeMatch(boardType);
     return await this.boardService.postList(
-      filterType,
+      boardType,
       searchType,
       page,
       length,
@@ -240,11 +266,17 @@ export class BoardController {
     description:
       'post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 좋아요를 설정합니다.',
   })
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
   @Post('/posts/:post_id/:post_type/like')
   @UseGuards(AuthGuard('jwt'))
   async postLike(
     @Param('post_id') postId: number,
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
     @GetUser() user: UserDto,
   ): Promise<Favorite> {
     const postLikeDto = this.setLikeBookmarkDto(
@@ -260,11 +292,17 @@ export class BoardController {
     summary: '게시글 좋아요 취소',
     description: 'post_id에 해당하는 게시글 좋아요를 취소합니다.',
   })
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
   @Delete('/posts/:post_id/:post_type/like')
   @UseGuards(AuthGuard('jwt'))
   async postLikeCancel(
     @Param('post_id') postId: number,
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
     @GetUser() user: UserDto,
   ) {
     const postLikeDto = this.setLikeBookmarkDto(
@@ -281,11 +319,17 @@ export class BoardController {
     description:
       'post_id, post_type, userId 정보를 바탕으로 해당하는 게시글 즐겨찾기를 설정합니다.',
   })
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
   @Post('/posts/:post_id/:post_type/bookmark')
   @UseGuards(AuthGuard('jwt'))
   async postBookmark(
     @Param('post_id') postId: number,
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
     @GetUser() user: UserDto,
   ): Promise<Bookmark> {
     const postBookmarkDto = this.setLikeBookmarkDto(
@@ -301,11 +345,17 @@ export class BoardController {
     summary: '게시글 즐겨찾기 취소',
     description: 'post_id에 해당하는 게시글 즐겨찾기를 취소합니다.',
   })
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
   @Delete('/posts/:post_id/:post_type/bookmark')
   @UseGuards(AuthGuard('jwt'))
   async postBookmarkCancel(
     @Param('post_id') postId: number,
-    @Param('post_type') boardType: BoardType,
+    @Param('post_type', new ParseEnumPipe(BoardType)) boardType: BoardType,
     @GetUser() user: UserDto,
   ) {
     const postBookmarkDto = this.setLikeBookmarkDto(
