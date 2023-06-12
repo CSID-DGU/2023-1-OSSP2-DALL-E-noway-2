@@ -465,6 +465,10 @@ export class DreamDiaryService {
       where: { diaryId: diaryId },
     });
 
+    if (dreamDiary && dreamDiary.interpretation) {
+      return dreamDiary.interpretation;
+    }
+
     const interpretation = await this.openAIService.createDreamInterpretation(
       dreamDiary.title,
       dreamDiary.content,
