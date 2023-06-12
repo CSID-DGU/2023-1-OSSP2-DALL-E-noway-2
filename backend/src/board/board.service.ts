@@ -92,8 +92,8 @@ export class BoardService {
 
   // 게시글 목록 조회 기능 / 게시글의 종류와 페이지를 받아와 해당하는 게시판의 게시글 목록을 조회하는 API
   async postList(
-    filterType: FilterType,
-    searchType: string,
+    boardType: BoardType,
+    searchType: SearchType,
     page: number,
     length: number,
     searchKeyword: string,
@@ -105,13 +105,13 @@ export class BoardService {
         'board.postId',
         'board.title',
         'author.nickname',
-        'board.image',
+        'board.imageUrl',
         'board.viewCount',
         'board.createdAt',
       ])
-      .where('board.boardType = :filterType', { filterType })
-      .andWhere('board.disclosureScope = :PUBLIC', {
-        PUBLIC: DisclosureScopeType.PUBLIC,
+      .where('board.boardType = :boardType', { boardType })
+      .andWhere('board.disclosureScope = :disclosureScope', {
+        disclosureScope: DisclosureScopeType.PUBLIC,
       })
       .orderBy('board.createdAt', 'DESC');
 
