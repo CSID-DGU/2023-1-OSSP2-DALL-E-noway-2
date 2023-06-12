@@ -2,11 +2,16 @@
   <main>
     <div class="like-category">
       <div class="pageinfo">기타 게시판 목록</div>
-      <button @click="selectCategory('자유')" class="like-free">자유</button>
-      <button @click="selectCategory('수면팁')" class="like-sleep">
+      <button @click="selectCategory(BoardType.FREE)" class="like-free">
+        자유
+      </button>
+      <button @click="selectCategory(BoardType.TIP)" class="like-sleep">
         수면 팁
       </button>
-      <button @click="selectCategory('해몽의뢰')" class="like-read-dream">
+      <button
+        @click="selectCategory(BoardType.REQUEST)"
+        class="like-read-dream"
+      >
         해몽 의뢰
       </button>
     </div>
@@ -14,9 +19,12 @@
       <div>
         <input
           class="search-bar"
+          v-model="search_keyword"
           type="text"
           placeholder="검색어를 입력해주세요."
           required
+          @keypress="handleKeyPress"
+        />
         />
       </div>
       <div class="search-left">
@@ -29,33 +37,42 @@
           </button>
         </div>
         <div v-if="showResearchOptions" class="search-keyword">
-          <button @click="selectResearch('제목')" class="search-title">
+          <button
+            @click="selectResearch(searchType.TITLE)"
+            class="search-title"
+          >
             제목
           </button>
-          <button @click="selectResearch('유저')" class="search-user">
+          <button
+            @click="selectResearch(searchType.NICKNAME)"
+            class="search-user"
+          >
             유저
           </button>
-          <button @click="selectResearch('내용')" class="search-content">
+          <button
+            @click="selectResearch(searchType.CONTENT)"
+            class="search-content"
+          >
             내용
           </button>
-          <button @click="selectResearch('전체')" class="search-any">
+          <button @click="selectResearch(searchType.NONE)" class="search-any">
             전체
           </button>
         </div>
       </div>
     </div>
     <div class="scroll-container">
-      <div v-for="post in posts" :key="post.id" class="post">
-        <RouterLink :to="`/board/${post.id}`">
+      <div v-for="post in filteredPosts" :key="post.postId" class="post">
+        <RouterLink :to="`/board/${post.postId}`">
           <div class="post-content">
             <div class="post-content-left">
               <h2 class="post-title">{{ post.title }}</h2>
-              <p class="post-user">{{ post.user }}</p>
-              <p>👀 {{ post.views }}</p>
+              <p class="post-user">{{ post.nickname }}</p>
+              <p>👀 {{ post.viewCount }}</p>
             </div>
             <div class="post-content-right">
               <img
-                :src="post.image"
+                :src="post.imageUrl"
                 alt="Post Image"
                 style="max-width: 84px; height: 60px; border-radius: 8px"
               />
@@ -76,87 +93,59 @@
 
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import { ref, onMounted, computed, watch } from 'vue';
+import type { Board } from '@/types';
+import { getBoardList } from '@/api/axios.custom';
+import { BoardType } from '@/types/enum/board.type';
+import { searchType } from '@/types/enum/search.type';
 
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content: '내용이긴글1',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-  {
-    id: 2,
-    title: '게시글 제목 2',
-    user: '사용자2',
-    content: '내용이긴글2',
-    image:
-      'https://banbbom.com/data/froala/210226/3e4217ef66440659dea947942cdfb7aa18b07151.jpg',
-    views: 5,
-  },
-  {
-    id: 3,
-    title: '게시글 제목 3',
-    user: '사용자3',
-    content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShJbsvnGoJrZemz5Xj2DHm1jcitbT5pfw0eg&usqp=CAU',
-    views: 18,
-  },
-  {
-    id: 4,
-    title: '게시글 제목 4',
-    user: '사용자4',
-    content: '내용이긴글4',
-    image: '/path/to/image4.jpg',
-    views: 13,
-  },
-  {
-    id: 5,
-    title: '게시글 제목 5',
-    user: '사용자5',
-    content: '내용이긴글5',
-    image: '/path/to/image5.jpg',
-    views: 7,
-  },
-  {
-    id: 6,
-    title: '게시글 제목 6',
-    user: '사용자6',
-    content: '내용이긴글6',
-    image: '/path/to/image6.jpg',
-    views: 7,
-  },
-  {
-    id: 7,
-    title: '게시글 제목 7',
-    user: '사용자7',
-    content: '내용이긴글7',
-    image: '/path/to/image7.jpg',
-    views: 2,
-  },
-  {
-    id: 8,
-    title: '게시글 제목 8',
-    user: '사용자8',
-    content: '내용이긴글8',
-    image: '/path/to/image8.jpg',
-    views: 14,
-  },
-]);
-
+const posts = ref<Board[]>([]);
+const arrlength = ref(1);
+const search_keyword = ref('');
 const showResearchOptions = ref(false);
-const category = ref('자유');
-const selectedResearch = ref(' ');
+const category = ref<BoardType>(BoardType.FREE);
+const selectedResearch = ref<searchType>();
 const textSpan = ref<HTMLElement | null>(null);
+
+const fetchData = async (post_type: BoardType, search_type: searchType) => {
+  try {
+    const page = 1;
+    const search_keyword = '';
+    const length = arrlength.value;
+
+    const response = await getBoardList(
+      post_type,
+      page,
+      length,
+      search_keyword,
+      search_type,
+    );
+    posts.value = response.data.posts;
+    arrlength.value = response.data.totalLength;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchKeyword = async (search_keyword: string) => {
+  try {
+    const page = 1;
+    const post_type = category.value;
+    const length = arrlength.value;
+    const search_type = selectedResearch.value;
+
+    const response = await getBoardList(
+      post_type,
+      page,
+      length,
+      search_keyword,
+      search_type,
+    );
+    posts.value = response.data.posts;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const toggleResearchOptions = () => {
   showResearchOptions.value = !showResearchOptions.value;
@@ -164,11 +153,12 @@ const toggleResearchOptions = () => {
     textSpan.value.style.display = 'none';
   }
 };
-const selectCategory = (cate: string) => {
+
+const selectCategory = (cate: BoardType) => {
   category.value = cate;
 };
 
-const selectResearch = (research: string) => {
+const selectResearch = (research: searchType) => {
   selectedResearch.value = research;
   showResearchOptions.value = false;
 };
@@ -180,6 +170,40 @@ const newPost = () => {
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
+  await fetchData(category.value, selectedResearch.value);
+});
+
+const filteredPosts = computed(() => {
+  const search_type = selectedResearch.value;
+  const keyword = search_keyword.value;
+  if (!keyword) {
+    return posts.value;
+  }
+  if (search_type === searchType.TITLE) {
+    return posts.value.filter((post) => post.title.includes(keyword));
+  } else if (search_type === searchType.NICKNAME) {
+    return posts.value.filter((post) => post.nickname.includes(keyword));
+  } else if (search_type === searchType.CONTENT) {
+    return posts.value.filter((post) => post.content.includes(keyword));
+  } else {
+    return posts.value.filter((post) => {
+      return (
+        post.title.includes(keyword) ||
+        post.nickname.includes(keyword) ||
+        post.content.includes(keyword)
+      );
+    });
+  }
+});
+
+const handleKeyPress = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    await fetchKeyword('');
+  }
+};
+
+watch([selectedResearch, search_keyword], () => {
+  fetchKeyword(search_keyword.value);
 });
 </script>
 
@@ -256,7 +280,7 @@ onMounted(async () => {
   font-size: 12px;
 }
 .search-left {
-  margin-left: 42px;
+  margin-left: 22px;
 }
 .select-row {
   display: flex;

@@ -1,4 +1,5 @@
 import type { BoardType } from '@/types/enum/board.type';
+import type { searchType } from '@/types/enum/search.type';
 import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
 
@@ -262,5 +263,75 @@ export const getDreamDiaryFeedList = async (
 
 export const getDreamDiaryFeedPost = async (diaryId: number) => {
   const response = await axiosInstance.get(`/api/dream-diary/${diaryId}`);
+  return response;
+};
+
+export const modifyDiaryPost = async (
+  diaryId: number,
+  title?: string,
+  category?: string,
+  dreamScore?: number,
+  image?: Blob,
+  disclosureScope?: string,
+  content?: string,
+) => {
+  let response;
+  if (image) {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (title) formData.append('title', title);
+    if (category) formData.append('category', category);
+    if (dreamScore) formData.append('dreamScore', dreamScore.toString());
+    if (disclosureScope) formData.append('disclosureScope', disclosureScope);
+    if (content) formData.append('title', content);
+    response = await axiosInstance.putForm(
+      `/api/dream-diary/${diaryId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return response;
+  } else {
+    response = await axiosInstance.put(`/api/dream-diary/${diaryId}`, {
+      title,
+      category,
+      dreamScore,
+      disclosureScope,
+      content,
+    });
+  }
+  return response;
+};
+
+export const deleteDiaryPost = async (diaryId: number) => {
+  const response = await axiosInstance.delete(`/api/dream-diary/${diaryId}`);
+  return response;
+};
+
+export const getBoardList = async (
+  post_type: BoardType,
+  page: number,
+  length: number,
+  search_keyword: string,
+  search_type: searchType,
+) => {
+  const response = await axiosInstance.get(
+    `/api/boards/posts/${post_type}/${search_type}/list`,
+    {
+      params: {
+        page,
+        length,
+        search_keyword,
+      },
+    },
+  );
+  return response;
+};
+
+export const getBoardPost = async (postId: number) => {
+  const response = await axiosInstance.get(`/api/boards/posts/${postId}`);
   return response;
 };

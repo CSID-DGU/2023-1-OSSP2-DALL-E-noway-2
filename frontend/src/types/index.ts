@@ -79,6 +79,8 @@ export interface DiaryFeed {
   nickname: string;
   viewCount: number;
   imageUrl: string;
+  dreamScore: number;
+  createdAt: string;
 }
 
 export interface Board {
@@ -87,6 +89,8 @@ export interface Board {
   viewCount: number;
   nickname: string;
   imageUrl: string;
+  createdAt: string;
+  content: string;
 }
 
 // 카테고리 별 개수 통계
