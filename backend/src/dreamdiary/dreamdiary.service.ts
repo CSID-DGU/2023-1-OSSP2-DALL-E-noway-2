@@ -465,7 +465,12 @@ export class DreamDiaryService {
       where: { diaryId: diaryId },
     });
 
-    if (dreamDiary && dreamDiary.interpretation) {
+    if (!dreamDiary) {
+      // 꿈일기를 찾지 못한 경우 예외 처리
+      throw new NotFoundException('존재하지 않는 꿈일기 입니다.');
+    }
+
+    if (dreamDiary.interpretation) {
       return dreamDiary.interpretation;
     }
 
