@@ -51,20 +51,6 @@ const changeToFollowing = async () => {
   await initFollows(FollowType.FOLLOWING);
 };
 
-const fetchFollows = async (page: number) => {
-  let response;
-  try {
-    if (followType.value === FollowType.FOLLOWER) {
-      response = await getFollowers(userId, page, 10);
-    } else {
-      response = await getFollowings(userId, page, 10);
-    }
-    followList.value.push(response.data.follows);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const initFollows = async (followType: FollowType) => {
   let response;
   if (followType === FollowType.FOLLOWER) {
@@ -109,13 +95,24 @@ const removeFollow = async (userId: number) => {
 
 // @ts-ignore
 const loadMore = async ($state) => {
-  await fetchFollows(curPage.value + 1);
-  if (followList.value.length < 10) {
-    $state.complete();
-  } else {
-    $state.loaded();
+  let response;
+  try {
+    if (followType.value === FollowType.FOLLOWER) {
+      response = await getFollowers(userId, curPage.value + 1, 10);
+    } else {
+      response = await getFollowings(userId, curPage.value + 1, 10);
+    }
+    followList.value.push(response.data.follows);
+    if (response.data.follows.length < 10) {
+      $state.complete();
+      return;
+    } else {
+      $state.loaded();
+    }
+    ++curPage.value;
+  } catch (error) {
+    console.log(error);
   }
-  ++curPage.value;
 };
 
 const goProfile = (userId: number) => {
@@ -186,6 +183,7 @@ onMounted(async () => {
             </button>
             <button
               class="follow-button-label"
+              @click="addFollow(follow.userId)"
               v-else-if="
                 mine.userId !== userId &&
                 !follow.isFollowed &&
