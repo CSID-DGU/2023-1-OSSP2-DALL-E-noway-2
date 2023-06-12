@@ -177,13 +177,14 @@ export class ProfileController {
   @UseGuards(AuthGuard('jwt'))
   @Get(':userId/followings')
   async getFollowings(
+    @GetUser() user: UserDto,
     @Param('userId', ParseIntPipe) userId: number,
-    //default 1
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('length', ParseIntPipe) length: number,
   ) {
     try {
       const followings = await this.profileService.getFollowings(
+        user.userId,
         userId,
         page,
         length,
@@ -205,36 +206,38 @@ export class ProfileController {
     }
   }
 
-  // @ApiOperation({
-  //   summary: '유저 팔로워 조회',
-  //   description: '유저의 팔로워 리스트를 조회합니다.',
-  // })
-  // @UseGuards(AuthGuard('jwt'))
-  // @Get(':userId/followers')
-  // async getFollowers(
-  //   @Param('userId', ParseIntPipe) userId: number,
-  //   @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-  //   @Query('length', ParseIntPipe) length: number,
-  // ) {
-  //   try {
-  //     const followers = await this.profileService.getFollowers(
-  //       userId,
-  //       page,
-  //       length,
-  //     );
+  @ApiOperation({
+    summary: '유저 팔로워 조회',
+    description: '유저의 팔로워 리스트를 조회합니다.',
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':userId/followers')
+  async getFollowers(
+    @GetUser() user: UserDto,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('length', ParseIntPipe) length: number,
+  ) {
+    try {
+      const followers = await this.profileService.getFollowers(
+        user.userId,
+        userId,
+        page,
+        length,
+      );
 
-  //     return followers;
-  //   } catch (err) {
-  //     if (err instanceof TypeError || err instanceof Error) {
-  //       throw new BadRequestException(err.message);
-  //     }
-  //     if (err instanceof ForbiddenException) {
-  //       throw new ForbiddenException(err.message);
-  //     }
+      return followers;
+    } catch (err) {
+      if (err instanceof TypeError || err instanceof Error) {
+        throw new BadRequestException(err.message);
+      }
+      if (err instanceof ForbiddenException) {
+        throw new ForbiddenException(err.message);
+      }
 
-  //     throw new InternalServerErrorException(err.message);
-  //   }
-  // }
+      throw new InternalServerErrorException(err.message);
+    }
+  }
 
   @ApiOperation({
     summary: '유저 프로필에서 꿈일기 피드 조회',
@@ -354,41 +357,5 @@ export class ProfileController {
       }
       throw new InternalServerErrorException(err.message);
     }
-  }
-
-  @ApiOperation({
-    summary: '유저 팔로잉 목록에서 팔로우 여부 조회',
-    description:
-      '유저 팔로우 목록에서 로그인한 유저의 팔로우 여부를 조회해서 해당 유저의 정보와 팔로우 여부를 반환합니다.',
-  })
-  @Get(':userId/following')
-  @UseGuards(AuthGuard('jwt'))
-  async getFollowingInfo(
-    @Param('userId', ParseIntPipe) userId: number,
-    @GetUser() user: UserDto,
-  ): Promise<FollowUserResponseDto[]> {
-    const responseDto = await this.profileService.getFollowingInfo(
-      userId,
-      user.userId,
-    );
-    return responseDto;
-  }
-
-  @ApiOperation({
-    summary: '유저 팔로워 목록에서 팔로우 여부 조회',
-    description:
-      '유저 팔로워 목록에서 로그인한 유저의 해당 유저 팔로우 여부를 조회해서 유저의 정보와 팔로우 여부를 반환합니다.',
-  })
-  @Get(':userId/follower')
-  @UseGuards(AuthGuard('jwt'))
-  async getFollowerInfo(
-    @Param('userId', ParseIntPipe) userId: number,
-    @GetUser() user: UserDto,
-  ): Promise<FollowUserResponseDto[]> {
-    const responseDto = await this.profileService.getFollowerInfo(
-      userId,
-      user.userId,
-    );
-    return responseDto;
   }
 }
