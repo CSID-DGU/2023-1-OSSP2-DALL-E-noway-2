@@ -13,9 +13,8 @@ defineEmits(['update:disclosureScope']);
     @input="$emit('update:disclosureScope', $event.target.value)"
     required
   >
-    <option value="">공개범위 선택</option>
-    <option :value="DisclosureScopeType.PRIVATE">나만 보기</option>
     <option :value="DisclosureScopeType.PUBLIC">전체 공개</option>
+    <option :value="DisclosureScopeType.PRIVATE">나만 보기</option>
     <option :value="DisclosureScopeType.LIMITED_PUBLIC">팔로워만 보기</option>
   </select>
 </template>
