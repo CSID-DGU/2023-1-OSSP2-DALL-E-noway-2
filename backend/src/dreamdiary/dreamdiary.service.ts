@@ -438,10 +438,13 @@ export class DreamDiaryService {
     );
     console.log(gptPromptForDalle);
 
-    const dallePrompt = await this.openAIService.createText(
+    let dallePrompt = await this.openAIService.createText(
       gptPromptForDalle,
       'gpt-3.5-turbo',
     );
+    if (dallePrompt.length > 1000) {
+      dallePrompt = dallePrompt.slice(0, 1000);
+    }
     console.log(dallePrompt);
 
     const images = await this.openAIService.createImage(
