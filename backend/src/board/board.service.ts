@@ -54,16 +54,27 @@ export class BoardService {
 
   // 게시글 세부내용 조회 기능 / post_id에 해당하는 게시글의 세부사항을 조회하는 API
   async postShow(postId: number): Promise<PostResponseDto> {
-    const post = await this.boardRepository.findOne({ where: { postId } });
+    const post = await this.boardRepository.findOne({
+      where: { postId },
+      relations: ['author'],
+    });
     if (!post) {
       throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
     post.viewCount += 1;
     await this.boardRepository.save(post);
 
-    const postResponseDto = new PostResponseDto();
-    Object.assign(postResponseDto, post);
-    return postResponseDto;
+    return {
+      postId: post.postId,
+      userId: post.userId,
+      nickname: post.author.nickname,
+      title: post.title,
+      content: post.content,
+      boardType: post.boardType,
+      viewCount: post.viewCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    } as PostResponseDto;
   }
 
   // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API

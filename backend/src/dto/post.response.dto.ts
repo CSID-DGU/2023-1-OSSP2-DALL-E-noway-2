@@ -16,6 +16,12 @@ export class PostResponseDto {
   userId: number;
 
   @ApiProperty({
+    example: 'Dall-e',
+    description: '유저 닉네임',
+  })
+  nickname: string;
+
+  @ApiProperty({
     example: '옥상에서 떨어지는 꿈',
     description: '제목',
   })
