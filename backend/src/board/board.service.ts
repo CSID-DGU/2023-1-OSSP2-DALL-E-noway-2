@@ -74,6 +74,8 @@ export class BoardService {
       viewCount: post.viewCount,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
+      image: post.imageUrl,
+      disclosureScope: post.disclosureScope,
     } as PostResponseDto;
   }
 
