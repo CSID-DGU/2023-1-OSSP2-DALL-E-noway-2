@@ -173,7 +173,6 @@ const newPost = () => {
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
   await fetchData(category.value, selectedResearch.value);
-  arrlength.value = arrlength.value;
 });
 
 const filteredPosts = computed(() => {
