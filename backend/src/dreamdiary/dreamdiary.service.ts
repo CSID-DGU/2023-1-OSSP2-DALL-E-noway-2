@@ -311,6 +311,7 @@ export class DreamDiaryService {
 
   async deleteDreamDiary(
     diaryId: number,
+    filterType: FilterType,
     authorizedUserId: number,
   ): Promise<void> {
     const diary = await this.dreamDiaryRepository.findOne({
@@ -321,17 +322,19 @@ export class DreamDiaryService {
       throw new Error('해당 사용자는 이 일기를 삭제할 권한이 없습니다.');
     }
 
-    const deleteFavoriteCascade = await this.favoriteRepository.findOne({
-      where: { id: diaryId },
-    });
-
-    const deleteBookmarkCascade = await this.bookMarkRepository.findOne({
-      where: { id: diaryId },
-    });
-
-    await this.favoriteRepository.remove(deleteFavoriteCascade);
-    await this.bookMarkRepository.remove(deleteBookmarkCascade);
-    await this.dreamDiaryRepository.remove(diary); //일기 삭제
+    await this.userRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        await transactionalEntityManager
+          .getRepository(Favorite)
+          .delete({ id: diaryId, filterType }); //좋아요 삭제
+        await transactionalEntityManager
+          .getRepository(Bookmark)
+          .delete({ id: diaryId, filterType }); //북마크 삭제
+        await transactionalEntityManager
+          .getRepository(DreamDiary)
+          .delete({ diaryId });
+      },
+    );
   }
 
   /**
@@ -362,12 +365,16 @@ export class DreamDiaryService {
    * 꿈일기 좋아요 삭제(완료)
    * @param diaryId
    */
-  async deleteFavoriteDreamDiary(diaryId: number): Promise<void> {
-    const deleteFavoriteDiary = await this.favoriteRepository.findOne({
-      where: { id: diaryId },
+  async deleteFavoriteDreamDiary(
+    diaryId: number,
+    filterType: FilterType,
+    userId: number,
+  ): Promise<void> {
+    await this.favoriteRepository.delete({
+      id: diaryId,
+      filterType,
+      userId,
     });
-
-    await this.favoriteRepository.remove(deleteFavoriteDiary);
   }
 
   /**
@@ -398,12 +405,12 @@ export class DreamDiaryService {
    * 꿈일기 즐겨찾기 삭제(완료)
    * @param diaryId
    */
-  async deleteBookmarkDreamDiary(diaryId: number): Promise<void> {
-    const deleteBookmarkDiary = await this.bookMarkRepository.findOne({
-      where: { id: diaryId },
-    });
-
-    await this.bookMarkRepository.remove(deleteBookmarkDiary);
+  async deleteBookmarkDreamDiary(
+    diaryId: number,
+    filterType: FilterType,
+    userId: number,
+  ): Promise<void> {
+    await this.bookMarkRepository.delete({ id: diaryId, filterType, userId });
   }
 
   async createDreamDiaryImages(
