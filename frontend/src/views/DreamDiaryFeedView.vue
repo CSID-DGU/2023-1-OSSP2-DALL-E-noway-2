@@ -200,7 +200,7 @@ const filteredPosts = computed(() => {
 }
 .search-bar {
   height: 32px;
-  width: 280px;
+  width: 292px;
   top: 4px;
   background-color: #444;
   left: 32px;
@@ -210,7 +210,7 @@ const filteredPosts = computed(() => {
   font-size: 12px;
 }
 .search-left {
-  margin-left: 44px;
+  margin-left: 42px;
 }
 .select-row {
   display: flex;
@@ -293,7 +293,8 @@ const filteredPosts = computed(() => {
   font-size: 12px;
 }
 .feed-title {
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: bold;
 }
 .feed-view {
   top: 20px;

@@ -1,89 +1,79 @@
 <template>
   <main>
-    <div class="like-category">
+    <div class="board-category">
       <div class="pageinfo">기타 게시판 목록</div>
-      <button @click="selectCategory(BoardType.FREE)" class="like-free">
+      <button @click="selectBoard(BoardType.FREE)" class="board-free">
         자유
       </button>
-      <button @click="selectCategory(BoardType.TIP)" class="like-sleep">
+      <button @click="selectBoard(BoardType.TIP)" class="board-sleep">
         수면 팁
       </button>
-      <button
-        @click="selectCategory(BoardType.REQUEST)"
-        class="like-read-dream"
-      >
+      <button @click="selectBoard(BoardType.REQUEST)" class="board-request">
         해몽 의뢰
       </button>
     </div>
+
     <div class="search">
       <div>
         <input
           class="search-bar"
-          v-model="search_keyword"
+          v-model="searchKeyword"
           type="text"
           placeholder="검색어를 입력해주세요."
           required
-          @keypress="handleKeyPress"
-        />
+          @keydown.enter="handleSearch"
         />
       </div>
       <div class="search-left">
         <div class="select-row">
-          <button @click="toggleResearchOptions" class="dropdown-button">
-            <div v-if="selectedResearch" class="selected-category">
-              {{ selectedResearch }}
+          <button @click="toggleCategoryOptions" class="dropdown-button">
+            <span v-if="!selectedCategory" class="selected-not-yet"
+              >검색어 선택</span
+            >
+            <div v-else class="selected-category">
+              {{ selectedCategory }}
             </div>
           </button>
         </div>
-        <div v-if="showResearchOptions" class="search-keyword">
+        <div v-if="showCategoryOptions" class="search-keyword">
           <button
-            @click="selectResearch(searchType.TITLE)"
+            @click="selectCategory(searchType.TITLE)"
             class="search-title"
           >
             제목
           </button>
           <button
-            @click="selectResearch(searchType.NICKNAME)"
+            @click="selectCategory(searchType.NICKNAME)"
             class="search-user"
           >
             유저
           </button>
-          <button
-            @click="selectResearch(searchType.CONTENT)"
-            class="search-content"
-          >
-            내용
-          </button>
-          <button @click="selectResearch(searchType.NONE)" class="search-any">
+          <button @click="selectCategory(searchType.NONE)" class="search-any">
             전체
           </button>
         </div>
       </div>
     </div>
     <div class="scroll-container">
-      <div v-for="post in filteredPosts" :key="post.postId" class="post">
-        <RouterLink :to="`/board/${post.postId}`">
-          <div class="post-content">
-            <div class="post-content-left">
-              <h2 class="post-title">{{ post.title }}</h2>
-              <p class="post-user">{{ post.nickname }}</p>
-              <p>👀 {{ post.viewCount }}</p>
+      <div>
+        <div v-for="post in filteredPosts" :key="post?.postId" class="feed">
+          <RouterLink v-if="post" :to="`/board/${post.postId}`">
+            <div class="feed-container">
+              <h2 class="feed-title">{{ post.title }}</h2>
+              <p class="feed-user">{{ post.author.nickname }}</p>
+              <img :src="post.imageUrl" alt="Post Image" class="feed-image" />
+              <div class="feed-view">
+                <p>👀 {{ post.viewCount }}</p>
+              </div>
             </div>
-            <div class="post-content-right">
-              <img
-                :src="post.imageUrl"
-                alt="Post Image"
-                style="max-width: 84px; height: 60px; border-radius: 8px"
-              />
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </div>
       </div>
     </div>
-    <button @click="newPost" class="newpost-button">
+    <button @click="newDiary" class="newdiary-button">
       <img
         src="https://e7.pngegg.com/pngimages/852/911/png-clipart-pen-pencil-cases-coloring-book-drawing-crayon-pencil-drawing-pencil-monochrome-thumbnail.png"
-        alt="NewPost"
+        alt="New Diary"
         style="border-radius: 24px"
       />
     </button>
@@ -92,33 +82,28 @@
 
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
-import { useMyInfoStore } from '@/stores/my.info.store';
 import { ref, onMounted, computed, watch } from 'vue';
-import type { BoardPost } from '@/types';
+import { useMyInfoStore } from '@/stores/my.info.store';
+import type { BoardList } from '@/types';
 import { getBoardList } from '@/api/axios.custom';
 import { BoardType } from '@/types/enum/board.type';
 import { searchType } from '@/types/enum/search.type';
 
-const posts = ref<BoardPost[]>([]);
-const arrlength = ref(100);
-const search_keyword = ref('');
-const showResearchOptions = ref(false);
-const category = ref<BoardType>(BoardType.FREE);
-const selectedResearch = ref<searchType>(searchType.NONE);
-const textSpan = ref<HTMLElement | null>(null);
+const posts = ref<BoardList[]>([]);
+const arrlength = ref(1);
+const searchKeyword = ref('');
 
 const fetchData = async (post_type: BoardType, search_type: searchType) => {
   try {
     const page = 1;
-    const search_keyword = '';
-    const length = arrlength.value;
+    const length = 100;
 
     const response = await getBoardList(
       post_type,
+      search_type,
       page,
       length,
-      search_keyword,
-      search_type,
+      searchKeyword.value || '',
     );
     posts.value = response.data.posts;
     arrlength.value = response.data.totalLength;
@@ -126,19 +111,21 @@ const fetchData = async (post_type: BoardType, search_type: searchType) => {
     console.error(error);
   }
 };
-const fetchKeyword = async (search_keyword: string) => {
+
+const selectedBoard = ref<BoardType>(BoardType.FREE);
+const selectedCategory = ref<searchType>(searchType.NONE);
+const fetchKeyword = async (searchKeyword: string, length: number) => {
   try {
+    const post_type = selectedBoard.value;
+    const search_type = selectedCategory.value;
     const page = 1;
-    const post_type = category.value;
-    const length = arrlength.value;
-    const search_type = selectedResearch.value;
 
     const response = await getBoardList(
       post_type,
+      search_type,
       page,
       length,
-      search_keyword,
-      search_type,
+      searchKeyword || '',
     );
     posts.value = response.data.posts;
   } catch (error) {
@@ -146,71 +133,72 @@ const fetchKeyword = async (search_keyword: string) => {
   }
 };
 
-const toggleResearchOptions = () => {
-  showResearchOptions.value = !showResearchOptions.value;
-  if (selectedResearch.value && textSpan.value !== null) {
-    textSpan.value.style.display = 'none';
-  }
+const handleSearch = () => {
+  fetchKeyword(searchKeyword.value, arrlength.value);
 };
 
-const selectCategory = async (cate: BoardType) => {
-  category.value = cate;
-  await fetchData(category.value, selectedResearch.value);
+const showCategoryOptions = ref(false);
+const toggleCategoryOptions = () => {
+  showCategoryOptions.value = !showCategoryOptions.value;
 };
 
-const selectResearch = async (research: searchType) => {
-  console.log(research);
-  selectedResearch.value = research;
-  showResearchOptions.value = false;
-  await fetchData(category.value, selectedResearch.value);
+const selectCategory = async (category: searchType) => {
+  selectedCategory.value = category;
+  showCategoryOptions.value = false;
+  await fetchKeyword(searchKeyword.value, arrlength.value);
+};
+
+const selectBoard = async (boardtype: BoardType) => {
+  selectedBoard.value = boardtype;
+  await fetchData(selectedBoard.value, selectedCategory.value);
 };
 
 const route = useRouter();
-const newPost = () => {
+const newDiary = () => {
   route.push('/post/new');
 };
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
-  await fetchData(category.value, selectedResearch.value);
+  await fetchData(BoardType.FREE, searchType.NONE);
 });
 
 const filteredPosts = computed(() => {
-  const search_type = selectedResearch.value;
-  const keyword = search_keyword.value;
+  const search_type = selectedCategory.value;
+  const keyword = searchKeyword.value;
   if (!keyword) {
     return posts.value;
   }
-  if (search_type === searchType.TITLE) {
-    return posts.value.filter((post) => post.title.includes(keyword));
-  } else if (search_type === searchType.NICKNAME) {
-    return posts.value.filter((post) => post.nickname.includes(keyword));
-  } else if (search_type === searchType.CONTENT) {
-    return posts.value.filter((post) => post.content.includes(keyword));
-  } else {
-    return posts.value.filter((post) => {
+
+  const filteredBySearchType = (post: BoardList) => {
+    if (search_type === searchType.TITLE) {
+      return post.title.includes(keyword);
+    } else if (search_type === searchType.NICKNAME) {
+      return post.author.nickname.includes(keyword);
+    } else {
       return (
-        post.title.includes(keyword) ||
-        post.nickname.includes(keyword) ||
-        post.content.includes(keyword)
+        post.title.includes(keyword) || post.author.nickname.includes(keyword)
       );
-    });
-  }
+    }
+  };
+
+  const filteredByBoardType = (post: BoardList) => {
+    return post.boardType === selectedBoard.value;
+  };
+
+  return posts.value.filter(
+    (post) => filteredBySearchType(post) || filteredByBoardType(post),
+  );
 });
 
-const handleKeyPress = async (event: KeyboardEvent) => {
-  if (event.key === 'Enter') {
-    await fetchKeyword('');
-  }
-};
-
-watch([selectedResearch, search_keyword], () => {
-  fetchKeyword(search_keyword.value);
+watch([selectedCategory, searchKeyword], () => {
+  fetchKeyword(searchKeyword.value, arrlength.value);
+  fetchData(selectedBoard.value, selectedCategory.value);
 });
 </script>
 
 <style scoped>
-.like-category {
+.board-category {
   width: 360px;
   background-color: #333;
   margin: 0 auto;
@@ -226,7 +214,7 @@ watch([selectedResearch, search_keyword], () => {
   color: white;
   font-weight: bold;
 }
-.like-free {
+.board-free {
   width: 52px;
   right: 18px;
   background-color: #666;
@@ -234,20 +222,20 @@ watch([selectedResearch, search_keyword], () => {
   bottom: 19px;
   font-size: 12px;
 }
-.like-sleep {
+.board-sleep {
   width: 60px;
   background-color: #666;
   border-radius: 10px;
   bottom: 19px;
   font-size: 12px;
 }
-.like-free:hover,
-.like-sleep:hover,
-.like-read-dream:hover {
+.board-free:hover,
+.board-sleep:hover,
+.board-request:hover {
   background-color: rgb(197, 146, 255);
   font-weight: bold;
 }
-.like-read-dream {
+.board-request {
   width: 80px;
   left: 18px;
   background-color: #666;
@@ -255,11 +243,12 @@ watch([selectedResearch, search_keyword], () => {
   bottom: 19px;
   font-size: 12px;
 }
-.newpost-button {
+.newdiary-button {
   width: 40px;
   height: 40px;
   border-radius: 20px;
   z-index: 4;
+  bottom: 68px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -269,20 +258,21 @@ watch([selectedResearch, search_keyword], () => {
   flex-direction: row;
   position: fixed;
   z-index: 2;
-  top: 124px;
+  top: 120px;
 }
 .search-bar {
   height: 32px;
-  width: 290px;
+  width: 292px;
+  top: 4px;
   background-color: #444;
   left: 32px;
   padding: 8px;
-  border-radius: 16px;
-  color: #aaa;
+  border-radius: 28px;
+  color: white;
   font-size: 12px;
 }
 .search-left {
-  margin-left: 22px;
+  margin-left: 42px;
 }
 .select-row {
   display: flex;
@@ -291,42 +281,33 @@ watch([selectedResearch, search_keyword], () => {
 .search-keyword {
   font-size: 12px;
   color: black;
-  top: 8px;
+  top: 4px;
   display: flex;
   flex-direction: column;
 }
 .search-title {
   background-color: white;
   border-radius: 10px;
-  cursor: pointer;
-}
-.search-title:hover,
-.search-user:hover,
-.search-content:hover,
-.search-any:hover {
-  background-color: rgb(197, 146, 255);
-  font-weight: bold;
 }
 .search-user {
   background-color: white;
   border-radius: 10px;
   top: 2px;
 }
-
-.search-content {
+.search-any {
   background-color: white;
   border-radius: 10px;
   top: 4px;
 }
-.search-any {
-  background-color: white;
-  border-radius: 10px;
-  top: 6px;
+.search-any:hover,
+.search-title:hover,
+.search-user:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .selected-category {
   color: white;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 16px;
 }
 .selected-not-yet {
   color: #aaa;
@@ -337,15 +318,15 @@ watch([selectedResearch, search_keyword], () => {
   color: black;
   width: 60px;
   height: 32px;
+  top: 4px;
   border-radius: 28px;
 }
 .scroll-container {
-  height: 540px;
+  height: 608px;
   overflow-y: auto;
   scrollbar-width: thin;
   top: 72px;
   z-index: 1;
-  margin: 0 auto;
 }
 .scroll-container::-webkit-scrollbar {
   width: 0px;
@@ -354,30 +335,31 @@ watch([selectedResearch, search_keyword], () => {
   background-color: #444;
   border-radius: 4px;
 }
-.post {
-  padding: 12px;
+.feed {
+  width: 84%;
+  padding: 20px;
+  margin: 0 auto;
   border-style: solid;
   border-color: white;
   border-width: 1px 0;
   color: white;
-  width: 84%;
+}
+.feed-container {
+  bottom: 8px;
+  font-size: 12px;
+}
+.feed-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+.feed-view {
+  top: 20px;
+}
+.feed-image {
   margin: 0 auto;
-}
-.post-content {
-  display: flex;
-  flex-direction: row;
-}
-.post-content-left {
-  margin-right: 10px;
-  font-size: 12px;
-}
-.post-content-right {
-  margin-left: auto;
-}
-.post-title {
-  font-size: 16px;
-}
-.post-user {
-  font-size: 12px;
+  max-width: 260px;
+  max-height: auto;
+  top: 12px;
+  border-radius: 16px;
 }
 </style>

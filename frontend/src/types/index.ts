@@ -112,13 +112,32 @@ export interface DiaryPost {
   disclosureScope: string;
 }
 
-export interface BoardPost {
+export interface BoardList {
   postId: number;
   title: string;
   viewCount: number;
   nickname: string;
   imageUrl: string;
+  author: {
+    nickname: string;
+  };
+  boardType: BoardType;
+}
+export interface BoardPost {
+  postId: number;
+  author: {
+    userId: number;
+    nickname: string;
+    imageUrl: string;
+  };
+  title: string;
   content: string;
+  boardType: BoardType;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+  image: string;
+  disclosureScope: DisclosureScopeType;
 }
 
 // 카테고리 별 개수 통계

@@ -1,54 +1,148 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import '@fortawesome/fontawesome-free/css/all.css';
+import { ref, onMounted, computed } from 'vue';
+import { useMyInfoStore } from '@/stores/my.info.store';
+import type { BoardPost } from '@/types';
+import {
+  getBoardPost,
+  deleteBoardBookmark,
+  deleteBoardLike,
+  postBoardBookmark,
+  postBoardLike,
+  modifyBoardPost,
+  deleteBoardPost,
+} from '@/api/axios.custom';
+import { BoardType } from '@/types/enum/board.type';
 
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content: '내용이긴글1',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-]);
-
+const post = ref<BoardPost>();
+const routepp = useRoute();
+const route = useRouter();
+const postid = Number(routepp.params.postId);
 const showCategoryOptions = ref(false);
+const filterType = ref(BoardType.FREE);
+
+const fetchPost = async (postid: number) => {
+  try {
+    const response = await getBoardPost(postid);
+    post.value = response.data;
+    filterType.value = response.data.boardType;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchLike = async (postid: number, filterType: BoardType) => {
+  try {
+    const response = await postBoardLike(postid, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchdelLike = async (postid: number, filterType: BoardType) => {
+  try {
+    const response = await deleteBoardLike(postid, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchBm = async (postid: number, filterType: BoardType) => {
+  try {
+    const response = await postBoardBookmark(postid, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchdelBm = async (postid: number, filterType: BoardType) => {
+  try {
+    const response = await deleteBoardBookmark(postid, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
+onMounted(async () => {
+  await useMyInfoStore().apiGetUser();
+  await fetchPost(postid);
+});
+
+const gotoComment = () => {
+  route.push(`/comment/${filterType.value}/${postid}`);
+};
 
 const changeOptions = () => {
   showCategoryOptions.value = !showCategoryOptions.value;
 };
 
-const route = useRouter();
-
-const gotoComment = () => {
-  route.push('/comment/:filterType/:id');
+const checkUpdate = () => {
+  let date = post.value?.createdAt;
+  if (post.value?.updatedAt === null) {
+    return date;
+  } else {
+    date = post.value?.updatedAt;
+    return date;
+  }
 };
 
-const postModify = () => {
+const postModify = async (postid: number) => {
+  try {
+    const response = await modifyBoardPost(postid);
+    post.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
   route.push('/post/new');
 };
 
-const postDelete = () => {
-  route.push('/board-list');
+const postDelete = async (postid: number) => {
+  try {
+    const response = await deleteBoardPost(postid, filterType.value);
+    route.push('/board-list');
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-const clickLike = () => {};
+const clickedlike = ref(false);
+const clickLike = () => {
+  if (clickedlike.value === false) {
+    clickedlike.value = !clickedlike.value;
+    fetchLike(postid, filterType.value);
+  } else {
+    clickedlike.value = !clickedlike.value;
+    fetchdelLike(postid, filterType.value);
+  }
+};
 
-const clickBookmark = () => {};
+const clickedbookmark = ref(false);
+const clickBookmark = () => {
+  if (clickedbookmark.value === false) {
+    clickedbookmark.value = !clickedbookmark.value;
+    fetchBm(postid, filterType.value);
+  } else {
+    clickedbookmark.value = !clickedbookmark.value;
+    fetchdelBm(postid, filterType.value);
+  }
+};
+
+const goProfile = () => {
+  route.push(`/profile/${post.value?.author.userId}`);
+};
 </script>
 <template>
   <main>
-    <div v-for="post in posts" :key="post.id" class="post">
+    <div class="setbut">
+      <div class="select-change">
+        <button @click="changeOptions" class="change-button">⁝</button>
+      </div>
+      <div v-if="showCategoryOptions" class="delete-modify">
+        <button @click="postDelete(postid)" class="delete">삭제</button>
+        <button @click="postModify(postid)" class="modify">수정</button>
+      </div>
+    </div>
+    <div class="post">
       <div class="one-post">
         <img
-          :src="post.image"
+          :src="post?.image"
           style="
             margin: 0 auto;
             max-width: 340px;
@@ -57,48 +151,43 @@ const clickBookmark = () => {};
           "
         />
         <div class="post-box">
-          <div class="post-title">{{ post.title }}</div>
-          <div class="list-row">
-            <div class="row-left">
-              {{ post.user }}
-            </div>
-            <div class="row-middle">
-              {{ post.createdAt }}
-            </div>
-            <duv class="row-right"> 👀 {{ post.views }} </duv>
+          <div class="post-title">{{ post?.title }}</div>
+          <div @click="goProfile" class="user">
+            <img
+              :src="post?.author.imageUrl"
+              style="max-width: 20px; max-height: 20px; border-radius: 10px"
+            />
+            <div class="user-name">{{ post?.author.nickname }}</div>
           </div>
+          <div class="post-date">
+            {{
+              checkUpdate()?.slice(0, 10) + ' ' + checkUpdate()?.slice(11, 19)
+            }}
+          </div>
+          <div class="post-view">👀 {{ post?.viewCount }}</div>
           <div class="post-content">
-            <h1>{{ post.content }}</h1>
-            <div class="icon-row">
-              <button @click="clickLike" class="click-like">
-                <i class="fas fa-heart"> {{ post.likes }}</i>
-              </button>
-              <button @click="clickBookmark" class="click-bookmark">
-                <i class="fas fa-bookmark"> {{ post.bookmarks }}</i>
-              </button>
-              <button @click="gotoComment" class="go-comment">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
+            <h1>{{ post?.content }}</h1>
           </div>
         </div>
       </div>
-    </div>
-    <div class="select-change">
-      <button @click="changeOptions" class="change-button">⁝</button>
-    </div>
-    <div v-if="showCategoryOptions" class="delete-modify">
-      <button @click="postDelete()" class="delete">삭제</button>
-      <button @click="postModify()" class="modify">수정</button>
+      <div class="seticon">
+        <div class="icon-row">
+          <button @click="clickLike" class="click-like">
+            <i class="fas fa-heart"></i>
+          </button>
+          <button @click="clickBookmark" class="click-bookmark">
+            <i class="fas fa-bookmark"></i>
+          </button>
+          <button @click="gotoComment" class="go-comment">
+            <i class="fas fa-comment"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </main>
 </template>
 
 <style scoped>
-.post {
-  width: auto;
-  color: white;
-}
 .one-post {
   overflow-y: auto;
   scrollbar-width: thin;
@@ -109,9 +198,9 @@ const clickBookmark = () => {};
   width: 0px;
 }
 .post-box {
-  top: 16px;
   width: 320px;
   margin: 0 auto;
+  color: white;
 }
 .post-title {
   font-size: 24px;
@@ -119,18 +208,18 @@ const clickBookmark = () => {};
   text-align: center;
 }
 .icon-row {
-  top: 16px;
   z-index: 2;
+  text-align: center;
+  font-size: 20px;
 }
 .go-comment {
-  left: 224px;
+  left: 40px;
 }
 .go-comment i {
   color: white;
-  font-size: 20px;
 }
 .go-comment:hover i {
-  color: magenta;
+  color: rgb(255, 225, 0);
 }
 .click-like {
   cursor: pointer;
@@ -138,44 +227,59 @@ const clickBookmark = () => {};
 .click-like i {
   font-size: 20px;
 }
+.click-like:hover i {
+  color: rgb(253, 80, 80);
+}
 .click-bookmark {
   left: 20px;
 }
 .click-bookmark i {
   font-size: 20px;
 }
-.list-row {
+.click-bookmark:hover i {
+  color: rgb(105, 85, 255);
+}
+.user {
+  font-size: 12px;
   display: flex;
   flex-direction: row;
+}
+.user-name {
+  left: 12px;
+}
+.post-date {
   font-size: 12px;
 }
-.row-middle {
-  left: 16px;
-}
-.row-right {
-  left: 156px;
+.post-view {
+  font-size: 12px;
 }
 .post-content {
-  height: 302px;
+  min-height: auto;
+}
+.seticon {
+  right: 20px;
+  color: white;
+}
+.setbut {
+  left: 340px;
 }
 .change-button {
+  position: fixed;
   background-color: white;
   color: #000;
   width: 28px;
   height: 28px;
   z-index: 4;
   border-radius: 28px;
-  left: 374px;
-  bottom: 476px;
+  bottom: 656px;
 }
 .delete-modify {
+  position: fixed;
   font-size: 12px;
-  font-weight: bold;
   color: black;
   display: flex;
   flex-direction: column;
-  left: 368px;
-  bottom: 476px;
+  bottom: 620px;
   z-index: 4;
   width: 40px;
 }
@@ -183,10 +287,17 @@ const clickBookmark = () => {};
   top: 4px;
   background-color: white;
   border-radius: 10px;
+  right: 6px;
 }
 .modify {
   background-color: white;
   top: 8px;
   border-radius: 10px;
+  right: 6px;
+}
+.delete:hover,
+.modify:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 </style>

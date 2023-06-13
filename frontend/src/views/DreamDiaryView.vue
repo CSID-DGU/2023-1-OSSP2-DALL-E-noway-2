@@ -8,13 +8,19 @@ import {
   getDreamDiaryFeedPost,
   modifyDiaryPost,
   putInterprete,
+  postDiaryLike,
+  postDiaryBookmark,
+  deleteDiaryBookmark,
+  deleteDiaryLike,
 } from '@/api/axios.custom';
 import type { DiaryPost } from '@/types';
+import { FilterType } from '@/types/enum/filter.type';
 
 const routepp = useRoute();
 const route = useRouter();
 const diaryid = Number(routepp.params.diaryId);
 const post = ref<DiaryPost | null>(null);
+const filterType = ref(FilterType.DIARY);
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
@@ -31,8 +37,36 @@ const fetchPost = async (diaryId: number) => {
   }
 };
 
+const fetchLike = async (diaryId: number) => {
+  try {
+    const response = await postDiaryLike(diaryId);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchdelLike = async (diaryId: number, filterType: FilterType) => {
+  try {
+    const response = await deleteDiaryLike(diaryId, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchBm = async (diaryId: number) => {
+  try {
+    const response = await postDiaryBookmark(diaryId);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const fetchdelBm = async (diaryId: number, filterType: FilterType) => {
+  try {
+    const response = await deleteDiaryBookmark(diaryId, filterType);
+  } catch (error) {
+    console.error(error);
+  }
+};
 const gotoComment = () => {
-  route.push('/comment');
+  route.push(`/comment/${filterType.value}/${diaryid}`);
 };
 
 const showCategoryOptions = ref(false);
@@ -53,12 +87,12 @@ const postModify = async (diaryId: number) => {
 
 const postDelete = async (diaryId: number) => {
   try {
-    const response = await deleteDiaryPost(diaryId);
+    const response = await deleteDiaryPost(diaryId, filterType.value);
+    route.push('/home');
     return response;
   } catch (error) {
     console.error(error);
   }
-  route.push('/home');
 };
 
 const boolInterprete = ref(false);
@@ -79,16 +113,28 @@ const buttonInterprete = () => {
 
 const clickedlike = ref(false);
 const clickLike = () => {
-  if (post?.value) {
+  if (clickedlike.value === false) {
     clickedlike.value = !clickedlike.value;
+    fetchLike(diaryid);
+  } else {
+    clickedlike.value = !clickedlike.value;
+    fetchdelLike(diaryid, filterType.value);
   }
 };
 
 const clickedbookmark = ref(false);
 const clickBookmark = () => {
-  if (post?.value) {
+  if (clickedbookmark.value === false) {
     clickedbookmark.value = !clickedbookmark.value;
+    fetchBm(diaryid);
+  } else {
+    clickedbookmark.value = !clickedbookmark.value;
+    fetchdelBm(diaryid, filterType.value);
   }
+};
+
+const goProfile = () => {
+  route.push(`/profile/${post.value?.user.userId}`);
 };
 
 const star = ref('');
@@ -134,9 +180,12 @@ const scoretostar = () => {
         <div class="post-box">
           <div class="post-score">{{ star }}</div>
           <div class="post-title">{{ post?.title }}</div>
-          <div class="user-nickname">
-            작성자 :
-            {{ post?.user.nickname }}
+          <div @click="goProfile" class="user">
+            <img
+              :src="post?.user.imageUrl"
+              style="max-width: 20px; max-height: 20px; border-radius: 10px"
+            />
+            <div class="user-name">{{ post?.user.nickname }}</div>
           </div>
           <div class="post-time">
             {{
@@ -232,8 +281,13 @@ const scoretostar = () => {
 .click-bookmark:hover i {
   color: rgb(105, 85, 255);
 }
-.user-nickname {
+.user {
   font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+.user-name {
+  left: 12px;
 }
 .post-time {
   font-size: 12px;
@@ -243,10 +297,6 @@ const scoretostar = () => {
 }
 .post-content {
   min-height: auto;
-}
-.post-tag {
-  top: 8px;
-  font-size: 12px;
 }
 .read-dream {
   font-size: 12px;
