@@ -226,13 +226,20 @@ export class BoardController {
     summary: '게시글 삭제',
     description: 'post_id에 해당하는 게시글을 삭제합니다.',
   })
-  @Delete('/posts/:post_id')
+  @ApiParam({
+    name: 'post_type',
+    type: 'enum',
+    enum: BoardType,
+    required: true,
+  })
+  @Delete('/posts/:post_id/:post_type')
   @UseGuards(AuthGuard('jwt'))
-  async postDelete(@Param('post_id') postId: number, @GetUser() user: UserDto) {
-    const postRequestDto = new PostRequestDto();
-    postRequestDto.postId = postId;
-    postRequestDto.userId = user.userId;
-    return await this.boardService.postDelete(postRequestDto);
+  async postDelete(
+    @Param('post_id') postId: number,
+    @Param('post_type') boardType: BoardType,
+    @GetUser() user: UserDto,
+  ) {
+    return await this.boardService.postDelete(postId, boardType, user.userId);
   }
 
   //URL을 통해 받아오는 BoardType과 FilterType을 매칭시켜주는 함수

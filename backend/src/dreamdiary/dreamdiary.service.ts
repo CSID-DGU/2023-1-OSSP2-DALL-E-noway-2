@@ -318,11 +318,15 @@ export class DreamDiaryService {
       where: { diaryId: diaryId },
     }); //삭제할 일기
 
+    if (!diary) {
+      throw new NotFoundException('해당 일기를 찾을 수 없습니다.');
+    }
+
     if (diary.userId !== authorizedUserId) {
       throw new Error('해당 사용자는 이 일기를 삭제할 권한이 없습니다.');
     }
 
-    await this.userRepository.manager.transaction(
+    await this.dreamDiaryRepository.manager.transaction(
       async (transactionalEntityManager) => {
         await transactionalEntityManager
           .getRepository(Favorite)
