@@ -7,13 +7,14 @@ import {
   deleteDiaryPost,
   getDreamDiaryFeedPost,
   modifyDiaryPost,
+  putInterprete,
 } from '@/api/axios.custom';
-import type { DiaryFeed } from '@/types';
+import type { DiaryPost } from '@/types';
 
 const routepp = useRoute();
 const route = useRouter();
 const diaryid = Number(routepp.params.diaryId);
-const post = ref<DiaryFeed | null>(null);
+const post = ref<DiaryPost | null>(null);
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
@@ -60,9 +61,20 @@ const postDelete = async (diaryId: number) => {
   route.push('/home');
 };
 
-const showInterprete = ref(false);
+const boolInterprete = ref(false);
+const showInterprete = ref('');
+const interprete = async (diaryid: number) => {
+  try {
+    const response = await putInterprete(diaryid);
+    showInterprete.value = response.data.interpretation;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const buttonInterprete = () => {
-  showInterprete.value = !showInterprete.value;
+  boolInterprete.value = !boolInterprete.value;
+  interprete(diaryid);
 };
 
 const clickedlike = ref(false);
@@ -111,7 +123,7 @@ const scoretostar = () => {
     <div class="post">
       <div class="one-post">
         <img
-          :src="post?.imageUrl"
+          :src="post?.diaryImageUrl"
           style="
             margin: 0 auto;
             max-width: 340px;
@@ -122,23 +134,23 @@ const scoretostar = () => {
         <div class="post-box">
           <div class="post-score">{{ star }}</div>
           <div class="post-title">{{ post?.title }}</div>
-          <div class="list-row">
-            <div class="row-left">
-              {{ post?.nickname }}
-            </div>
-            <div class="row-middle">
-              {{ post?.createdAt }}
-            </div>
-            <duv class="row-right"> 👀 {{ post?.viewCount }} </duv>
+          <div class="user-nickname">
+            작성자 :
+            {{ post?.user.nickname }}
           </div>
+          <div class="post-time">
+            {{
+              post?.createdAt.slice(0, 10) + ' ' + post?.createdAt.slice(11, 19)
+            }}
+          </div>
+          <div class="post-view">👀 {{ post?.viewCount }}</div>
           <div class="post-content">
             <h1>{{ post?.content }}</h1>
             <button @click="buttonInterprete" class="read-dream">
               해몽보기
             </button>
-            <div v-if="showInterprete" class="interpretation">
-              <!--{{ post?.interpretation }}
-              -->
+            <div v-if="boolInterprete" class="interpretation">
+              {{ showInterprete }}
             </div>
           </div>
         </div>
@@ -220,16 +232,14 @@ const scoretostar = () => {
 .click-bookmark:hover i {
   color: rgb(105, 85, 255);
 }
-.list-row {
-  display: flex;
-  flex-direction: row;
+.user-nickname {
   font-size: 12px;
 }
-.row-middle {
-  left: 16px;
+.post-time {
+  font-size: 12px;
 }
-.row-right {
-  left: 148px;
+.post-view {
+  font-size: 12px;
 }
 .post-content {
   min-height: auto;
@@ -246,7 +256,6 @@ const scoretostar = () => {
 }
 .interpretation {
   font-size: 12px;
-  top: 16px;
 }
 .seticon {
   right: 20px;

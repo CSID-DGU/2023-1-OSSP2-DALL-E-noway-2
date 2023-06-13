@@ -79,8 +79,6 @@ export interface DiaryFeed {
   nickname: string;
   viewCount: number;
   imageUrl: string;
-  dreamScore: number;
-  createdAt: string;
 }
 
 export interface Board {
@@ -89,7 +87,37 @@ export interface Board {
   viewCount: number;
   nickname: string;
   imageUrl: string;
+}
+
+export interface CalendarList {
+  year: number;
+  month: number;
+  days: CalendarDayInfo[];
+}
+
+export interface DiaryPost {
+  diaryId: number;
+  title: string;
+  content: string;
+  category: string;
+  dreamScore: number;
+  viewCount: number;
+  user: {
+    userId: number;
+    nickname: string;
+    imageUrl: string;
+  };
   createdAt: string;
+  diaryImageUrl: string;
+  disclosureScope: string;
+}
+
+export interface BoardPost {
+  postId: number;
+  title: string;
+  viewCount: number;
+  nickname: string;
+  imageUrl: string;
   content: string;
 }
 

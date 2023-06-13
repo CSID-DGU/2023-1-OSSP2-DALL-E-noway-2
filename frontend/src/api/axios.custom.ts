@@ -281,9 +281,8 @@ export const modifyDiaryPost = async (
     formData.append('image', image);
     if (title) formData.append('title', title);
     if (category) formData.append('category', category);
-    if (dreamScore) formData.append('dreamScore', dreamScore.toString());
     if (disclosureScope) formData.append('disclosureScope', disclosureScope);
-    if (content) formData.append('title', content);
+    if (content) formData.append('content', content);
     response = await axiosInstance.putForm(
       `/api/dream-diary/${diaryId}`,
       formData,
@@ -298,7 +297,6 @@ export const modifyDiaryPost = async (
     response = await axiosInstance.put(`/api/dream-diary/${diaryId}`, {
       title,
       category,
-      dreamScore,
       disclosureScope,
       content,
     });
@@ -333,5 +331,12 @@ export const getBoardList = async (
 
 export const getBoardPost = async (postId: number) => {
   const response = await axiosInstance.get(`/api/boards/posts/${postId}`);
+  return response;
+};
+
+export const putInterprete = async (id: number) => {
+  const response = await axiosInstance.put(
+    `/api/dream-diary/${id}/interpretation`,
+  );
   return response;
 };

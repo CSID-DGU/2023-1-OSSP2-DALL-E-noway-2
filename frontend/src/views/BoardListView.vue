@@ -30,7 +30,6 @@
       <div class="search-left">
         <div class="select-row">
           <button @click="toggleResearchOptions" class="dropdown-button">
-            <span ref="textSpan" class="selected-not-yet">검색어선택</span>
             <div v-if="selectedResearch" class="selected-category">
               {{ selectedResearch }}
             </div>
@@ -95,13 +94,13 @@
 import { RouterLink, useRouter } from 'vue-router';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { ref, onMounted, computed, watch } from 'vue';
-import type { Board } from '@/types';
+import type { BoardPost } from '@/types';
 import { getBoardList } from '@/api/axios.custom';
 import { BoardType } from '@/types/enum/board.type';
 import { searchType } from '@/types/enum/search.type';
 
-const posts = ref<Board[]>([]);
-const arrlength = ref(1);
+const posts = ref<BoardPost[]>([]);
+const arrlength = ref(100);
 const search_keyword = ref('');
 const showResearchOptions = ref(false);
 const category = ref<BoardType>(BoardType.FREE);
@@ -154,13 +153,16 @@ const toggleResearchOptions = () => {
   }
 };
 
-const selectCategory = (cate: BoardType) => {
+const selectCategory = async (cate: BoardType) => {
   category.value = cate;
+  await fetchData(category.value, selectedResearch.value);
 };
 
-const selectResearch = (research: searchType) => {
+const selectResearch = async (research: searchType) => {
+  console.log(research);
   selectedResearch.value = research;
   showResearchOptions.value = false;
+  await fetchData(category.value, selectedResearch.value);
 };
 
 const route = useRouter();
@@ -171,6 +173,7 @@ const newPost = () => {
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
   await fetchData(category.value, selectedResearch.value);
+  arrlength.value = arrlength.value;
 });
 
 const filteredPosts = computed(() => {
