@@ -105,7 +105,7 @@ const arrlength = ref(1);
 const search_keyword = ref('');
 const showResearchOptions = ref(false);
 const category = ref<BoardType>(BoardType.FREE);
-const selectedResearch = ref<searchType>();
+const selectedResearch = ref<searchType>(searchType.NONE);
 const textSpan = ref<HTMLElement | null>(null);
 
 const fetchData = async (post_type: BoardType, search_type: searchType) => {

@@ -31,7 +31,7 @@ const fetchPost = async (diaryId: number) => {
 };
 
 const gotoComment = () => {
-  route.push('/omment');
+  route.push('/comment');
 };
 
 const showCategoryOptions = ref(false);
@@ -133,8 +133,7 @@ const scoretostar = () => {
           </div>
           <div class="post-content">
             <h1>{{ post?.content }}</h1>
-            <!-- <div class="post-tag">{{ post?.tags }}</div>
-            --><button @click="buttonInterprete" class="read-dream">
+            <button @click="buttonInterprete" class="read-dream">
               해몽보기
             </button>
             <div v-if="showInterprete" class="interpretation">
