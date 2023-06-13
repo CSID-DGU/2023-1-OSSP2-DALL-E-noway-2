@@ -438,10 +438,13 @@ export class DreamDiaryService {
     );
     console.log(gptPromptForDalle);
 
-    const dallePrompt = await this.openAIService.createText(
+    let dallePrompt = await this.openAIService.createText(
       gptPromptForDalle,
       'gpt-3.5-turbo',
     );
+    if (dallePrompt.length > 1000) {
+      dallePrompt = dallePrompt.slice(0, 1000);
+    }
     console.log(dallePrompt);
 
     const images = await this.openAIService.createImage(
@@ -464,6 +467,15 @@ export class DreamDiaryService {
     const dreamDiary = await this.dreamDiaryRepository.findOne({
       where: { diaryId: diaryId },
     });
+
+    if (!dreamDiary) {
+      // 꿈일기를 찾지 못한 경우 예외 처리
+      throw new NotFoundException('존재하지 않는 꿈일기 입니다.');
+    }
+
+    if (dreamDiary.interpretation) {
+      return dreamDiary.interpretation;
+    }
 
     const interpretation = await this.openAIService.createDreamInterpretation(
       dreamDiary.title,

@@ -64,16 +64,36 @@
         style="border-radius: 24px"
       />
     </button>
+    <!-- 최초 로그인 시, 프로필 설정 모달 -->
+    <ProfileEdit v-if="isEditing()" />
   </main>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted, computed } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import { categoryInfoStore } from '@/stores/category.info.store';
 import type { DiaryFeed } from '@/types';
 import { getDreamDiaryFeedList } from '@/api/axios.custom';
+import { useProfileStore } from '@/stores/profile.store';
+import ProfileEdit from '@/components/profile/ProfileEdit.vue';
+
+const { setEditing, isEditing } = useProfileStore();
+const route = useRouter();
+const newDiary = () => {
+  route.push('/dream-diary/new');
+};
+const { query } = useRoute();
+const editing = ref(isEditing());
+const isFirstLogin = query.isFirstLogin === 'true';
+if (isFirstLogin) {
+  setEditing(true);
+  route.push('/home');
+}
+watch(isEditing, (value) => {
+  editing.value = value;
+});
 
 const posts = ref<DiaryFeed[]>([]);
 const arrlength = ref(1);
@@ -142,11 +162,6 @@ const selectCategory = (category: string) => {
   showCategoryOptions.value = false;
   const keyword = '';
   fetchKeyword(keyword, arrlength.value);
-};
-
-const route = useRouter();
-const newDiary = () => {
-  route.push('/dream-diary/new');
 };
 
 const { fetchAllCategories } = categoryInfoStore();

@@ -51,20 +51,6 @@ const changeToFollowing = async () => {
   await initFollows(FollowType.FOLLOWING);
 };
 
-const fetchFollows = async (page: number) => {
-  let response;
-  try {
-    if (followType.value === FollowType.FOLLOWER) {
-      response = await getFollowers(userId, page, 10);
-    } else {
-      response = await getFollowings(userId, page, 10);
-    }
-    followList.value.push(...response.data);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const initFollows = async (followType: FollowType) => {
   let response;
   if (followType === FollowType.FOLLOWER) {
@@ -73,7 +59,8 @@ const initFollows = async (followType: FollowType) => {
     response = await getFollowings(userId, 1, 10);
   }
   if (response.status === 200) {
-    followList.value = response.data;
+    followList.value = response.data.follows;
+    console.log(followList.value);
   }
 };
 
@@ -108,13 +95,24 @@ const removeFollow = async (userId: number) => {
 
 // @ts-ignore
 const loadMore = async ($state) => {
-  await fetchFollows(curPage.value + 1);
-  if (followList.value.length < 10) {
-    $state.complete();
-  } else {
-    $state.loaded();
+  let response;
+  try {
+    if (followType.value === FollowType.FOLLOWER) {
+      response = await getFollowers(userId, curPage.value + 1, 10);
+    } else {
+      response = await getFollowings(userId, curPage.value + 1, 10);
+    }
+    followList.value.push(response.data.follows);
+    if (response.data.follows.length < 10) {
+      $state.complete();
+      return;
+    } else {
+      $state.loaded();
+    }
+    ++curPage.value;
+  } catch (error) {
+    console.log(error);
   }
-  ++curPage.value;
 };
 
 const goProfile = (userId: number) => {
@@ -152,54 +150,54 @@ onMounted(async () => {
         <h1>팔로잉</h1>
       </div>
     </div>
-
+    <!-- follow.userId !== mine.userId -->
     <div class="follow-list">
-      <div
-        v-for="follow in followList"
-        :key="follow.userId"
-        class="follow-card"
-      >
-        <!-- 1행: 이미지 -->
-        <div class="follow-image" @click="goProfile(follow.userId)">
-          <img :src="follow.imageUrl" alt="Profile Image" />
-        </div>
-        <!-- 2행: 닉네임 -->
-        <div class="follow-info">
-          <div class="name">{{ follow.nickname }}</div>
-        </div>
-        <!-- 3행: 팔로우 버튼 -->
-        <div class="follow-button">
-          <button
-            @click="removeFollow(follow.userId)"
-            class="follow-button-label"
-            v-if="mine.userId === userId && followType === FollowType.FOLLOWER"
-          >
-            삭제
-          </button>
-          <button
-            v-else-if="mine.userId !== userId && !follow.isFollowed"
-            @click="addFollow(follow.userId)"
-            class="follow-button-label"
-            :class="{
-              'other-not-followed': !follow.isFollowed,
-            }"
-          >
-            팔로우
-          </button>
-          <button
-            v-else-if="mine.userId !== userId && follow.isFollowed"
-            class="follow-button-label"
-          >
-            팔로잉
-          </button>
-          <button
-            v-else-if="
-              mine.userId === userId && followType === FollowType.FOLLOWING
-            "
-            class="follow-button-label"
-          >
-            팔로잉
-          </button>
+      <div v-for="follow in followList" :key="follow.userId">
+        <div class="follow-card" v-if="follow.userId !== 0">
+          <!-- 1행: 이미지 -->
+          <div class="follow-image" @click="goProfile(follow.userId)">
+            <img :src="follow.imageUrl" alt="Profile Image" />
+          </div>
+          <!-- 2행: 닉네임 -->
+          <div class="follow-info">
+            <div class="name">{{ follow.nickname }}</div>
+          </div>
+          <!-- 3행: 팔로우 버튼 -->
+          <div class="follow-button">
+            <button
+              @click="removeFollow(follow.userId)"
+              class="follow-button-label"
+              v-if="
+                mine.userId === userId && followType === FollowType.FOLLOWER
+              "
+            >
+              삭제
+            </button>
+            <button
+              class="follow-button-label"
+              v-else-if="
+                mine.userId === userId && followType === FollowType.FOLLOWING
+              "
+            >
+              팔로잉
+            </button>
+            <button
+              class="follow-button-label"
+              @click="addFollow(follow.userId)"
+              v-else-if="
+                mine.userId !== userId &&
+                !follow.isFollowed &&
+                follow.userId !== mine.userId &&
+                follow.userId !== mine.userId
+              "
+              :class="{
+                'other-not-followed': !follow.isFollowed,
+              }"
+            >
+              팔로우
+            </button>
+            <button class="follow-button-label" v-else>팔로잉</button>
+          </div>
         </div>
       </div>
       <InfiniteLoading @infinite="loadMore"></InfiniteLoading>

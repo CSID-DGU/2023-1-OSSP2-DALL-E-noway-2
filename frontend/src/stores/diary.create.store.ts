@@ -9,7 +9,7 @@ export const useDiaryCreateStore = defineStore('diary-create', () => {
     category: '',
     dreamScore: 0,
     image: [],
-    disclosureScope: DisclosureScopeType.PRIVATE,
+    disclosureScope: DisclosureScopeType.PUBLIC,
     content: '',
   });
 
