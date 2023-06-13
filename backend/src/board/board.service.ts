@@ -66,8 +66,11 @@ export class BoardService {
 
     return {
       postId: post.postId,
-      userId: post.userId,
-      nickname: post.author.nickname,
+      author: {
+        userId: post.author.userId,
+        nickname: post.author.nickname,
+        imageUrl: post.author.imageUrl,
+      },
       title: post.title,
       content: post.content,
       boardType: post.boardType,
