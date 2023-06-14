@@ -31,6 +31,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { SearchType } from 'src/enum/search.type';
@@ -48,6 +49,7 @@ import { ConfigService } from '@nestjs/config';
 import { DreamDiaryResponseDto } from 'src/dto/dreamdiary.response.dto';
 import { GenerateDreamDiaryImagesRequestDto } from 'src/dto/generate.dreamdiary.images.request.dto';
 import { GeneratedImagesResponseDto } from 'src/dto/generated.images.response.dto';
+import { FilterType } from 'src/enum/filter.type';
 
 @ApiTags('dream-diary')
 @Controller('dream-diary')
@@ -256,14 +258,24 @@ export class DreamDiaryController {
   })
   @ApiCreatedResponse({ description: '꿈일기 삭제합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @ApiParam({
+    name: 'filterType',
+    type: 'enum',
+    enum: FilterType,
+  })
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':diaryId')
+  @Delete(':diaryId/:filterType')
   async deleteDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
+    @Param('filterType') filterType: FilterType,
     @GetUser() user: UserDto,
   ) {
     try {
-      return this.dreamDiaryService.deleteDreamDiary(diaryId, user.userId);
+      return this.dreamDiaryService.deleteDreamDiary(
+        diaryId,
+        filterType,
+        user.userId,
+      );
     } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);
@@ -299,13 +311,24 @@ export class DreamDiaryController {
   })
   @ApiCreatedResponse({ description: '좋아요 삭제합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @ApiParam({
+    name: 'filterType',
+    type: 'enum',
+    enum: FilterType,
+  })
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':diaryId/like')
+  @Delete(':diaryId/:filterType/like')
   async deleteFavoriteDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
+    @Param('filterType') filterType: FilterType,
+    @GetUser() user: UserDto,
   ) {
     try {
-      return this.dreamDiaryService.deleteFavoriteDreamDiary(diaryId);
+      return this.dreamDiaryService.deleteFavoriteDreamDiary(
+        diaryId,
+        filterType,
+        user.userId,
+      );
     } catch (err) {
       //기타 에러 전체에서 처리
       throw new InternalServerErrorException(err.message);
@@ -341,13 +364,24 @@ export class DreamDiaryController {
   })
   @ApiCreatedResponse({ description: '즐겨찾기 삭제합니다.' })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @ApiParam({
+    name: 'filterType',
+    type: 'enum',
+    enum: FilterType,
+  })
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':diaryId/bookmark')
+  @Delete(':diaryId/:filterType/bookmark')
   async deleteBookmarkDreamDiary(
     @Param('diaryId', ParseIntPipe) diaryId: number,
+    @Param('filterType') filterType: FilterType,
+    @GetUser() user: UserDto,
   ) {
     try {
-      return this.dreamDiaryService.deleteBookmarkDreamDiary(diaryId);
+      return this.dreamDiaryService.deleteBookmarkDreamDiary(
+        diaryId,
+        filterType,
+        user.userId,
+      );
     } catch (err) {
       //기타 에러 전체에서 처리
     }

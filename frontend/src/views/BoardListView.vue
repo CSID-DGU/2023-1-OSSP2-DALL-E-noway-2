@@ -1,73 +1,79 @@
 <template>
   <main>
-    <div class="like-category">
+    <div class="board-category">
       <div class="pageinfo">기타 게시판 목록</div>
-      <button @click="selectCategory('자유')" class="like-free">자유</button>
-      <button @click="selectCategory('수면팁')" class="like-sleep">
+      <button @click="selectBoard(BoardType.FREE)" class="board-free">
+        자유
+      </button>
+      <button @click="selectBoard(BoardType.TIP)" class="board-sleep">
         수면 팁
       </button>
-      <button @click="selectCategory('해몽의뢰')" class="like-read-dream">
+      <button @click="selectBoard(BoardType.REQUEST)" class="board-request">
         해몽 의뢰
       </button>
     </div>
+
     <div class="search">
       <div>
         <input
           class="search-bar"
+          v-model="searchKeyword"
           type="text"
           placeholder="검색어를 입력해주세요."
           required
+          @keydown.enter="handleSearch"
         />
       </div>
       <div class="search-left">
         <div class="select-row">
-          <button @click="toggleResearchOptions" class="dropdown-button">
-            <span ref="textSpan" class="selected-not-yet">검색어선택</span>
-            <div v-if="selectedResearch" class="selected-category">
-              {{ selectedResearch }}
+          <button @click="toggleCategoryOptions" class="dropdown-button">
+            <span v-if="!selectedCategory" class="selected-not-yet"
+              >검색어 선택</span
+            >
+            <div v-else class="selected-category">
+              {{ selectedCategory }}
             </div>
           </button>
         </div>
-        <div v-if="showResearchOptions" class="search-keyword">
-          <button @click="selectResearch('제목')" class="search-title">
+        <div v-if="showCategoryOptions" class="search-keyword">
+          <button
+            @click="selectCategory(searchType.TITLE)"
+            class="search-title"
+          >
             제목
           </button>
-          <button @click="selectResearch('유저')" class="search-user">
+          <button
+            @click="selectCategory(searchType.NICKNAME)"
+            class="search-user"
+          >
             유저
           </button>
-          <button @click="selectResearch('내용')" class="search-content">
-            내용
-          </button>
-          <button @click="selectResearch('전체')" class="search-any">
+          <button @click="selectCategory(searchType.NONE)" class="search-any">
             전체
           </button>
         </div>
       </div>
     </div>
     <div class="scroll-container">
-      <div v-for="post in posts" :key="post.id" class="post">
-        <RouterLink :to="`/board/${post.id}`">
-          <div class="post-content">
-            <div class="post-content-left">
-              <h2 class="post-title">{{ post.title }}</h2>
-              <p class="post-user">{{ post.user }}</p>
-              <p>👀 {{ post.views }}</p>
+      <div>
+        <div v-for="post in filteredPosts" :key="post?.postId" class="feed">
+          <RouterLink v-if="post" :to="`/board/${post.postId}`">
+            <div class="feed-container">
+              <h2 class="feed-title">{{ post.title }}</h2>
+              <p class="feed-user">{{ post.author.nickname }}</p>
+              <img :src="post.imageUrl" alt="Post Image" class="feed-image" />
+              <div class="feed-view">
+                <p>👀 {{ post.viewCount }}</p>
+              </div>
             </div>
-            <div class="post-content-right">
-              <img
-                :src="post.image"
-                alt="Post Image"
-                style="max-width: 84px; height: 60px; border-radius: 8px"
-              />
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </div>
       </div>
     </div>
-    <button @click="newPost" class="newpost-button">
+    <button @click="newDiary" class="newdiary-button">
       <img
         src="https://e7.pngegg.com/pngimages/852/911/png-clipart-pen-pencil-cases-coloring-book-drawing-crayon-pencil-drawing-pencil-monochrome-thumbnail.png"
-        alt="NewPost"
+        alt="New Diary"
         style="border-radius: 24px"
       />
     </button>
@@ -76,115 +82,123 @@
 
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
+import type { BoardList } from '@/types';
+import { getBoardList } from '@/api/axios.custom';
+import { BoardType } from '@/types/enum/board.type';
+import { searchType } from '@/types/enum/search.type';
 
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content: '내용이긴글1',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-  {
-    id: 2,
-    title: '게시글 제목 2',
-    user: '사용자2',
-    content: '내용이긴글2',
-    image:
-      'https://banbbom.com/data/froala/210226/3e4217ef66440659dea947942cdfb7aa18b07151.jpg',
-    views: 5,
-  },
-  {
-    id: 3,
-    title: '게시글 제목 3',
-    user: '사용자3',
-    content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShJbsvnGoJrZemz5Xj2DHm1jcitbT5pfw0eg&usqp=CAU',
-    views: 18,
-  },
-  {
-    id: 4,
-    title: '게시글 제목 4',
-    user: '사용자4',
-    content: '내용이긴글4',
-    image: '/path/to/image4.jpg',
-    views: 13,
-  },
-  {
-    id: 5,
-    title: '게시글 제목 5',
-    user: '사용자5',
-    content: '내용이긴글5',
-    image: '/path/to/image5.jpg',
-    views: 7,
-  },
-  {
-    id: 6,
-    title: '게시글 제목 6',
-    user: '사용자6',
-    content: '내용이긴글6',
-    image: '/path/to/image6.jpg',
-    views: 7,
-  },
-  {
-    id: 7,
-    title: '게시글 제목 7',
-    user: '사용자7',
-    content: '내용이긴글7',
-    image: '/path/to/image7.jpg',
-    views: 2,
-  },
-  {
-    id: 8,
-    title: '게시글 제목 8',
-    user: '사용자8',
-    content: '내용이긴글8',
-    image: '/path/to/image8.jpg',
-    views: 14,
-  },
-]);
+const posts = ref<BoardList[]>([]);
+const arrlength = ref(1);
+const searchKeyword = ref('');
 
-const showResearchOptions = ref(false);
-const category = ref('자유');
-const selectedResearch = ref(' ');
-const textSpan = ref<HTMLElement | null>(null);
+const fetchData = async (post_type: BoardType, search_type: searchType) => {
+  try {
+    const page = 1;
+    const length = 100;
 
-const toggleResearchOptions = () => {
-  showResearchOptions.value = !showResearchOptions.value;
-  if (selectedResearch.value && textSpan.value !== null) {
-    textSpan.value.style.display = 'none';
+    const response = await getBoardList(
+      post_type,
+      search_type,
+      page,
+      length,
+      searchKeyword.value || '',
+    );
+    posts.value = response.data.posts;
+    arrlength.value = response.data.totalLength;
+  } catch (error) {
+    console.error(error);
   }
 };
-const selectCategory = (cate: string) => {
-  category.value = cate;
+
+const selectedBoard = ref<BoardType>(BoardType.FREE);
+const selectedCategory = ref<searchType>(searchType.NONE);
+const fetchKeyword = async (searchKeyword: string, length: number) => {
+  try {
+    const post_type = selectedBoard.value;
+    const search_type = selectedCategory.value;
+    const page = 1;
+
+    const response = await getBoardList(
+      post_type,
+      search_type,
+      page,
+      length,
+      searchKeyword || '',
+    );
+    posts.value = response.data.posts;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-const selectResearch = (research: string) => {
-  selectedResearch.value = research;
-  showResearchOptions.value = false;
+const handleSearch = () => {
+  fetchKeyword(searchKeyword.value, arrlength.value);
+};
+
+const showCategoryOptions = ref(false);
+const toggleCategoryOptions = () => {
+  showCategoryOptions.value = !showCategoryOptions.value;
+};
+
+const selectCategory = async (category: searchType) => {
+  selectedCategory.value = category;
+  showCategoryOptions.value = false;
+  await fetchKeyword(searchKeyword.value, arrlength.value);
+};
+
+const selectBoard = async (boardtype: BoardType) => {
+  selectedBoard.value = boardtype;
+  await fetchData(selectedBoard.value, selectedCategory.value);
 };
 
 const route = useRouter();
-const newPost = () => {
+const newDiary = () => {
   route.push('/post/new');
 };
 
 onMounted(async () => {
   await useMyInfoStore().apiGetUser();
+  await fetchData(BoardType.FREE, searchType.NONE);
+});
+
+const filteredPosts = computed(() => {
+  const search_type = selectedCategory.value;
+  const keyword = searchKeyword.value;
+  if (!keyword) {
+    return posts.value;
+  }
+
+  const filteredBySearchType = (post: BoardList) => {
+    if (search_type === searchType.TITLE) {
+      return post.title.includes(keyword);
+    } else if (search_type === searchType.NICKNAME) {
+      return post.author.nickname.includes(keyword);
+    } else {
+      return (
+        post.title.includes(keyword) || post.author.nickname.includes(keyword)
+      );
+    }
+  };
+
+  const filteredByBoardType = (post: BoardList) => {
+    return post.boardType === selectedBoard.value;
+  };
+
+  return posts.value.filter(
+    (post) => filteredBySearchType(post) || filteredByBoardType(post),
+  );
+});
+
+watch([selectedCategory, searchKeyword], () => {
+  fetchKeyword(searchKeyword.value, arrlength.value);
+  fetchData(selectedBoard.value, selectedCategory.value);
 });
 </script>
 
 <style scoped>
-.like-category {
+.board-category {
   width: 360px;
   background-color: #333;
   margin: 0 auto;
@@ -200,7 +214,7 @@ onMounted(async () => {
   color: white;
   font-weight: bold;
 }
-.like-free {
+.board-free {
   width: 52px;
   right: 18px;
   background-color: #666;
@@ -208,20 +222,20 @@ onMounted(async () => {
   bottom: 19px;
   font-size: 12px;
 }
-.like-sleep {
+.board-sleep {
   width: 60px;
   background-color: #666;
   border-radius: 10px;
   bottom: 19px;
   font-size: 12px;
 }
-.like-free:hover,
-.like-sleep:hover,
-.like-read-dream:hover {
+.board-free:hover,
+.board-sleep:hover,
+.board-request:hover {
   background-color: rgb(197, 146, 255);
   font-weight: bold;
 }
-.like-read-dream {
+.board-request {
   width: 80px;
   left: 18px;
   background-color: #666;
@@ -229,11 +243,12 @@ onMounted(async () => {
   bottom: 19px;
   font-size: 12px;
 }
-.newpost-button {
+.newdiary-button {
   width: 40px;
   height: 40px;
   border-radius: 20px;
   z-index: 4;
+  bottom: 68px;
   left: 360px;
   background-color: white;
   transform: rotate(80deg);
@@ -243,16 +258,17 @@ onMounted(async () => {
   flex-direction: row;
   position: fixed;
   z-index: 2;
-  top: 124px;
+  top: 120px;
 }
 .search-bar {
   height: 32px;
-  width: 290px;
+  width: 292px;
+  top: 4px;
   background-color: #444;
   left: 32px;
   padding: 8px;
-  border-radius: 16px;
-  color: #aaa;
+  border-radius: 28px;
+  color: white;
   font-size: 12px;
 }
 .search-left {
@@ -265,42 +281,33 @@ onMounted(async () => {
 .search-keyword {
   font-size: 12px;
   color: black;
-  top: 8px;
+  top: 4px;
   display: flex;
   flex-direction: column;
 }
 .search-title {
   background-color: white;
   border-radius: 10px;
-  cursor: pointer;
-}
-.search-title:hover,
-.search-user:hover,
-.search-content:hover,
-.search-any:hover {
-  background-color: rgb(197, 146, 255);
-  font-weight: bold;
 }
 .search-user {
   background-color: white;
   border-radius: 10px;
   top: 2px;
 }
-
-.search-content {
+.search-any {
   background-color: white;
   border-radius: 10px;
   top: 4px;
 }
-.search-any {
-  background-color: white;
-  border-radius: 10px;
-  top: 6px;
+.search-any:hover,
+.search-title:hover,
+.search-user:hover {
+  background-color: rgb(197, 146, 255);
+  font-weight: bold;
 }
 .selected-category {
   color: white;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 16px;
 }
 .selected-not-yet {
   color: #aaa;
@@ -311,15 +318,15 @@ onMounted(async () => {
   color: black;
   width: 60px;
   height: 32px;
+  top: 4px;
   border-radius: 28px;
 }
 .scroll-container {
-  height: 540px;
+  height: 608px;
   overflow-y: auto;
   scrollbar-width: thin;
   top: 72px;
   z-index: 1;
-  margin: 0 auto;
 }
 .scroll-container::-webkit-scrollbar {
   width: 0px;
@@ -328,30 +335,31 @@ onMounted(async () => {
   background-color: #444;
   border-radius: 4px;
 }
-.post {
-  padding: 12px;
+.feed {
+  width: 84%;
+  padding: 20px;
+  margin: 0 auto;
   border-style: solid;
   border-color: white;
   border-width: 1px 0;
   color: white;
-  width: 84%;
+}
+.feed-container {
+  bottom: 8px;
+  font-size: 12px;
+}
+.feed-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+.feed-view {
+  top: 20px;
+}
+.feed-image {
   margin: 0 auto;
-}
-.post-content {
-  display: flex;
-  flex-direction: row;
-}
-.post-content-left {
-  margin-right: 10px;
-  font-size: 12px;
-}
-.post-content-right {
-  margin-left: auto;
-}
-.post-title {
-  font-size: 16px;
-}
-.post-user {
-  font-size: 12px;
+  max-width: 260px;
+  max-height: auto;
+  top: 12px;
+  border-radius: 16px;
 }
 </style>

@@ -1,6 +1,8 @@
 import type { BoardType } from '@/types/enum/board.type';
+import type { searchType } from '@/types/enum/search.type';
 import type { AxiosResponse } from 'axios';
 import { axiosInstance } from './axios.instance';
+import type { FilterType } from '@/types/enum/filter.type';
 
 const postDreamDiaryURL = '/api/dream-diary';
 export const postDreamDiary = async (dreamDiaryCreateRequest: FormData) => {
@@ -262,5 +264,191 @@ export const getDreamDiaryFeedList = async (
 
 export const getDreamDiaryFeedPost = async (diaryId: number) => {
   const response = await axiosInstance.get(`/api/dream-diary/${diaryId}`);
+  return response;
+};
+
+export const modifyDiaryPost = async (
+  diaryId: number,
+  title?: string,
+  category?: string,
+  dreamScore?: number,
+  image?: Blob,
+  disclosureScope?: string,
+  content?: string,
+) => {
+  let response;
+  if (image) {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (title) formData.append('title', title);
+    if (category) formData.append('category', category);
+    if (disclosureScope) formData.append('disclosureScope', disclosureScope);
+    if (content) formData.append('content', content);
+    response = await axiosInstance.putForm(
+      `/api/dream-diary/${diaryId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return response;
+  } else {
+    response = await axiosInstance.put(`/api/dream-diary/${diaryId}`, {
+      title,
+      category,
+      disclosureScope,
+      content,
+    });
+  }
+  return response;
+};
+
+export const deleteDiaryPost = async (
+  diaryId: number,
+  filterType: FilterType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/dream-diary/${diaryId}/${filterType}`,
+  );
+  return response;
+};
+
+export const getBoardList = async (
+  post_type: BoardType,
+  search_type: searchType,
+  page: number,
+  length: number,
+  searchKeyword: string,
+) => {
+  const response = await axiosInstance.get(
+    `/api/boards/posts/${post_type}/${search_type}/list`,
+    {
+      params: {
+        page,
+        length,
+        searchKeyword,
+      },
+    },
+  );
+  return response;
+};
+
+export const getBoardPost = async (postId: number) => {
+  const response = await axiosInstance.get(`/api/boards/posts/${postId}`);
+  return response;
+};
+
+export const putInterprete = async (id: number) => {
+  const response = await axiosInstance.put(
+    `/api/dream-diary/${id}/interpretation`,
+  );
+  return response;
+};
+
+export const postDiaryLike = async (diaryId: number) => {
+  const response = await axiosInstance.post(`/api/dream-diary/${diaryId}/like`);
+  return response;
+};
+export const postDiaryBookmark = async (diaryId: number) => {
+  const response = await axiosInstance.post(
+    `/api/dream-diary/${diaryId}/bookmark`,
+  );
+  return response;
+};
+export const deleteDiaryLike = async (
+  diaryId: number,
+  filterType: FilterType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/dream-diary/${diaryId}/${filterType}/like`,
+  );
+  return response;
+};
+export const deleteDiaryBookmark = async (
+  diaryId: number,
+  filterType: FilterType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/dream-diary/${diaryId}/${filterType}/bookmark`,
+  );
+  return response;
+};
+export const postBoardLike = async (post_id: number, post_type: BoardType) => {
+  const response = await axiosInstance.post(
+    `/api/boards/posts/${post_id}/${post_type}/like`,
+  );
+  return response;
+};
+export const postBoardBookmark = async (
+  post_id: number,
+  post_type: BoardType,
+) => {
+  const response = await axiosInstance.post(
+    `/api/boards/posts/${post_id}/${post_type}/bookmark`,
+  );
+  return response;
+};
+export const deleteBoardLike = async (
+  post_id: number,
+  post_type: BoardType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/boards/posts/${post_id}/${post_type}/like`,
+  );
+  return response;
+};
+export const deleteBoardBookmark = async (
+  post_id: number,
+  post_type: BoardType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/boards/posts/${post_id}/${post_type}/bookmark`,
+  );
+  return response;
+};
+
+export const modifyBoardPost = async (
+  post_id: number,
+  title?: string,
+  content?: string,
+  image?: Blob,
+  disclosureScope?: string,
+) => {
+  let response;
+  if (image) {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (title) formData.append('title', title);
+    if (disclosureScope) formData.append('disclosureScope', disclosureScope);
+    if (content) formData.append('content', content);
+    response = await axiosInstance.putForm(
+      `/api/boards/posts/${post_id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return response;
+  } else {
+    response = await axiosInstance.put(`/api/boards/posts/${post_id}`, {
+      title,
+      disclosureScope,
+      content,
+    });
+  }
+  return response;
+};
+
+export const deleteBoardPost = async (
+  post_id: number,
+  post_type: BoardType,
+) => {
+  const response = await axiosInstance.delete(
+    `/api/boards/posts/${post_id}/${post_type}`,
+  );
   return response;
 };
