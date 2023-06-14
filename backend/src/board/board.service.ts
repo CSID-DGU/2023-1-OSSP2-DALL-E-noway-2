@@ -203,6 +203,17 @@ export class BoardService {
   async postLike(postLikeDto: PostLikeDto): Promise<Favorite> {
     const board = await this.favoriteRepository.create(postLikeDto);
     board.createdAt = new Date();
+    if (
+      await this.favoriteRepository.findOne({
+        where: {
+          id: postLikeDto.id,
+          filterType: postLikeDto.filterType,
+          userId: postLikeDto.userId,
+        },
+      })
+    ) {
+      return board;
+    }
     return await this.favoriteRepository.save(board);
   }
 
@@ -222,6 +233,17 @@ export class BoardService {
   async postBookmark(postBookmarkDto: PostBookmarkDto): Promise<Bookmark> {
     const board = await this.bookmarkRepository.create(postBookmarkDto);
     board.createdAt = new Date();
+    if (
+      await this.favoriteRepository.findOne({
+        where: {
+          id: postBookmarkDto.id,
+          filterType: postBookmarkDto.filterType,
+          userId: postBookmarkDto.userId,
+        },
+      })
+    ) {
+      return board;
+    }
     return await this.bookmarkRepository.save(board);
   }
 
