@@ -12,6 +12,7 @@ import { computed, onMounted, ref, type Ref } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import IconSend from '@/components/icons/IconSend.vue';
 import IconThreeDots from '@/components/icons/IconThreeDots.vue';
+import dayjs from 'dayjs';
 
 const { params } = useRoute();
 const filterType = ref(params.filterType as string);
@@ -177,7 +178,9 @@ onMounted(async () => {
             <h1>{{ comment.content }}</h1>
           </div>
           <div class="comment-date">
-            <h1>{{ comment.createdAt }}</h1>
+            <h1>
+              {{ dayjs(comment.createdAt).format('YYYY-MM-DD HH:mm:ss') }}
+            </h1>
           </div>
           <!-- ... 토글 버튼 -->
           <div
@@ -296,7 +299,7 @@ onMounted(async () => {
 
 <style scoped>
 .wrap {
-  @apply w-full flex flex-col justify-center h-full z-[1] bg-black;
+  @apply w-full flex flex-col justify-center h-full z-[1];
   @apply text-white;
 }
 

@@ -14,6 +14,7 @@ import {
   deleteBoardPost,
 } from '@/api/axios.custom';
 import { BoardType } from '@/types/enum/board.type';
+import dayjs from 'dayjs';
 
 const post = ref<BoardPost>();
 const routepp = useRoute();
@@ -160,9 +161,7 @@ const goProfile = () => {
             <div class="user-name">{{ post?.author.nickname }}</div>
           </div>
           <div class="post-date">
-            {{
-              checkUpdate()?.slice(0, 10) + ' ' + checkUpdate()?.slice(11, 19)
-            }}
+            {{ dayjs(checkUpdate()).format('YYYY-MM-DD HH:mm:ss') }}
           </div>
           <div class="post-view">👀 {{ post?.viewCount }}</div>
           <div class="post-content">

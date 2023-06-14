@@ -15,6 +15,7 @@ import {
 } from '@/api/axios.custom';
 import type { DiaryPost } from '@/types';
 import { FilterType } from '@/types/enum/filter.type';
+import dayjs from 'dayjs';
 
 const routepp = useRoute();
 const route = useRouter();
@@ -188,9 +189,7 @@ const scoretostar = () => {
             <div class="user-name">{{ post?.user.nickname }}</div>
           </div>
           <div class="post-time">
-            {{
-              post?.createdAt.slice(0, 10) + ' ' + post?.createdAt.slice(11, 19)
-            }}
+            {{ dayjs(post?.createdAt).format('YYYY-MM-DD HH:mm:ss') }}
           </div>
           <div class="post-view">👀 {{ post?.viewCount }}</div>
           <div class="post-content">
