@@ -16,6 +16,7 @@ import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOperation,
+  ApiParam,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { DreamDiaryFeedsResponseDto } from 'src/dto/dreamdiary.feeds.response.dto';
@@ -23,6 +24,7 @@ import { GetUser } from 'src/decorator/user.decorator';
 import { UserDto } from 'src/dto/user.dto';
 import { FilterType } from 'src/enum/filter.type';
 import { BoardFeedsResponseDto } from 'src/dto/likebookmark.boards.response.dto';
+import { BoardType } from 'src/enum/board.type';
 
 @Controller()
 export class LikeBookmarkListController {
@@ -107,11 +109,17 @@ export class LikeBookmarkListController {
     description: '게시판 좋아요 피드 목록을 조회합니다.',
   })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
+  @ApiParam({
+    name: 'posttype',
+    description: '게시판 타입',
+    type: 'enum',
+    enum: BoardType,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Get('like/:posttype/boards')
   async getLikeBoardFeeds(
     @GetUser() user: UserDto,
-    @Param('posttype') posttype: FilterType,
+    @Param('posttype') posttype: BoardType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('length', ParseIntPipe) length: number,
   ): Promise<BoardFeedsResponseDto> {
@@ -143,12 +151,18 @@ export class LikeBookmarkListController {
   @ApiCreatedResponse({
     description: '게시판 즐겨찾기 피드 목록을 조회합니다.',
   })
+  @ApiParam({
+    name: 'posttype',
+    description: '게시판 타입',
+    type: 'enum',
+    enum: BoardType,
+  })
   @ApiBadRequestResponse({ description: '잘못된 요청입니다.' })
   @UseGuards(AuthGuard('jwt'))
   @Get('bookmarks/:posttype/boards')
   async getBookmarkBoardFeeds(
     @GetUser() user: UserDto,
-    @Param('posttype') posttype: FilterType,
+    @Param('posttype') posttype: BoardType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('length', ParseIntPipe) length: number,
   ): Promise<BoardFeedsResponseDto> {

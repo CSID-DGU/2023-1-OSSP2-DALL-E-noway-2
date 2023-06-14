@@ -452,3 +452,51 @@ export const deleteBoardPost = async (
   );
   return response;
 };
+
+export const getDiaryLike = async (page: number, length: number) => {
+  const response = await axiosInstance.get(`/api/like/dream-diary`, {
+    params: {
+      page,
+      length,
+    },
+  });
+  return response;
+};
+export const getDiaryBookmark = async (page: number, length: number) => {
+  const response = await axiosInstance.get(`/api/bookmarks/dream-diary`, {
+    params: {
+      page,
+      length,
+    },
+  });
+  return response;
+};
+export const getBoardLike = async (
+  posttype: FilterType,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(`/api/like/${posttype}/boards`, {
+    params: {
+      page,
+      length,
+    },
+  });
+  return response;
+};
+export const getBoardBookmark = async (
+  posttype: string,
+  page: number,
+  length: number,
+) => {
+  const response = await axiosInstance.get(
+    `/api/bookmarks/${posttype}/boards`,
+    {
+      params: {
+        page,
+        length,
+      },
+    },
+  );
+  return response;
+};
