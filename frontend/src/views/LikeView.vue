@@ -27,7 +27,7 @@ const showdiary = async (page: number, length: number) => {
 };
 
 const post_type = ref<BoardType>(BoardType.FREE);
-const showboard = async (posttype: string, page: number, length: number) => {
+const showboard = async (posttype: BoardType, page: number, length: number) => {
   try {
     page = 1;
     const posttype = post_type.value;
@@ -53,6 +53,7 @@ const truncateContent = (content: string, maxLength: number) => {
 
 onMounted(async () => {
   await showdiary(1, arrlength.value);
+  await showboard(post_type.value, 1, arrlength.value);
 });
 </script>
 
@@ -108,17 +109,17 @@ onMounted(async () => {
       </template>
       <template v-else>
         <div class="scroll-container">
-          <div v-for="post in bposts" :key="bpost.postId" class="post">
-            <RouterLink :to="`/board/${post.id}`">
+          <div v-for="post in bposts" :key="post.postId" class="post">
+            <RouterLink :to="`/board/${post.postId}`">
               <div class="post-content">
                 <div class="post-content-left">
                   <h2 class="post-title">{{ post.title }}</h2>
-                  <p class="post-user">{{ post.user }}</p>
-                  <p>👀 {{ post.views }}</p>
+                  <p class="post-user">{{ post.nickname }}</p>
+                  <p>👀 {{ post.viewCount }}</p>
                 </div>
                 <div class="post-content-right">
                   <img
-                    :src="post.image"
+                    :src="post.imageUrl"
                     alt="Post Image"
                     style="max-width: 84px; height: 60px; border-radius: 8px"
                   />
