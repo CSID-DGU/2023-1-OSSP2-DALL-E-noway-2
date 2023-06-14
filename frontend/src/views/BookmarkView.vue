@@ -1,59 +1,46 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-const posts = ref([
-  // 게시글 데이터 (가상 데이터로 대체)
-  {
-    id: 1,
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    score: '☆☆☆☆☆',
-    title: '게시글 제목 1',
-    user: '사용자1',
-    createdAt: '2023.05.16 9:20',
-    content:
-      '내용이긴글1아무거나작성을해볼게요밑으로내려갈까요아님옆으로밀릴까요어떻게될까요',
-    views: 32,
-    likes: 10,
-    bookmarks: 5,
-  },
-  {
-    id: 2,
-    title: '게시글 제목 2',
-    user: '사용자2',
-    content: '내용이긴글2',
-    image:
-      'https://avatars.githubusercontent.com/u/31301280?s=200&v=4splash.com/photo-1621574539437-4b5b5b5b5b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyMjI0NjB8MHwxfHNlYXJjaHwxfHxkcmVhbXN0aW9ufGVufDB8fHx8MTYyMjE0NjY5Mg&ixlib=rb-1.2.1&q=80&w=1080',
-    views: 5,
-  },
-  {
-    id: 3,
-    title: '게시글 제목 3',
-    user: '사용자3',
-    content: '내용이긴글3달리노웨이이거작동하나요제발',
-    image: 'https://t1.daumcdn.net/cfile/tistory/99C6FD385D6CAD1206',
-    views: 18,
-  },
-  {
-    id: 4,
-    title: '게시글 제목 4',
-    user: '사용자4',
-    content: '내용이긴글4',
-    image:
-      'https://i.pinimg.com/originals/55/7d/38/557d38dc2749c7aa8e0dba5b8f4415b0.jpg',
-    views: 13,
-  },
-  {
-    id: 5,
-    title: '게시글 제목 5',
-    user: '사용자5',
-    content: '내용이긴글5',
-    image: '/path/to/image5.jpg',
-    views: 7,
-  },
-]);
+import { RouterLink, useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useMyInfoStore } from '@/stores/my.info.store';
+import { categoryInfoStore } from '@/stores/category.info.store';
+import type { BoardList, DiaryFeed } from '@/types';
+import {
+  getDiaryLike,
+  getBoardLike,
+  getDiaryBookmark,
+  getBoardBookmark,
+} from '@/api/axios.custom';
+import { BoardType } from '@/types/enum/board.type';
+
+const dposts = ref<DiaryFeed[]>([]);
+const bposts = ref<BoardList[]>([]);
+const arrlength = ref(100);
+
+const showdiary = async (page: number, length: number) => {
+  try {
+    page = 1;
+    const response = await getDiaryBookmark(page, length);
+    arrlength.value = response.data.totalLength;
+    dposts.value = response.data.dreamDiaryFeeds;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const post_type = ref<BoardType>(BoardType.FREE);
+const showboard = async (posttype: BoardType, page: number, length: number) => {
+  try {
+    page = 1;
+    const posttype = post_type.value;
+    const response = await getBoardBookmark(posttype, page, length);
+    arrlength.value = response.data.totalLength;
+    bposts.value = response.data.posts;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const category = ref('꿈일기목록');
-
 const selectCategory = (cate: string) => {
   category.value = cate;
 };
@@ -65,6 +52,11 @@ const truncateContent = (content: string, maxLength: number) => {
     return content.slice(0, maxLength) + '...';
   }
 };
+
+onMounted(async () => {
+  showdiary(1, arrlength.value);
+  showboard(post_type.value, 1, arrlength.value);
+});
 </script>
 
 <template>
@@ -93,17 +85,17 @@ const truncateContent = (content: string, maxLength: number) => {
       <template v-if="category === '꿈일기목록'">
         <div class="scroll-container">
           <div>
-            <DreamDiaryView :posts="posts" />
-            <div v-for="post in posts" :key="post.id" class="feed">
-              <RouterLink :to="`/dream-diary/${post.id}`">
+            <DreamDiaryView :posts="dposts" />
+            <div v-for="post in dposts" :key="post.diaryId" class="feed">
+              <RouterLink :to="`/dream-diary/${post.diaryId}`">
                 <div class="feed-container">
                   <h2 class="feed-title">{{ post.title }}</h2>
-                  <p class="feed-user">{{ post.user }}</p>
+                  <p class="feed-user">{{ post.nickname }}</p>
                   <p class="feed-content">
                     {{ truncateContent(post.content, 25) }}
                   </p>
                   <img
-                    :src="post.image"
+                    :src="post.imageUrl"
                     alt="Post Image"
                     style="
                       margin: 0 auto;
@@ -114,7 +106,7 @@ const truncateContent = (content: string, maxLength: number) => {
                     "
                   />
                   <div class="feed-view">
-                    <p>👀 {{ post.views }}</p>
+                    <p>👀 {{ post.viewCount }}</p>
                   </div>
                 </div>
               </RouterLink>
@@ -124,17 +116,17 @@ const truncateContent = (content: string, maxLength: number) => {
       </template>
       <template v-else>
         <div class="scroll-container">
-          <div v-for="post in posts" :key="post.id" class="post">
-            <RouterLink :to="`/board/${post.id}`">
+          <div v-for="post in bposts" :key="post.postId" class="post">
+            <RouterLink :to="`/board/${post.postId}`">
               <div class="post-content">
                 <div class="post-content-left">
                   <h2 class="post-title">{{ post.title }}</h2>
-                  <p class="post-user">{{ post.user }}</p>
-                  <p>👀 {{ post.views }}</p>
+                  <p class="post-user">{{ post.nickname }}</p>
+                  <p>👀 {{ post.viewCount }}</p>
                 </div>
                 <div class="post-content-right">
                   <img
-                    :src="post.image"
+                    :src="post.imageUrl"
                     alt="Post Image"
                     style="max-width: 84px; height: 60px; border-radius: 8px"
                   />
