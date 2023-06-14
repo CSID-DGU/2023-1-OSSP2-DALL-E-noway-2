@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router';
 import '@fortawesome/fontawesome-free/css/all.css';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useMyInfoStore } from '@/stores/my.info.store';
 import type { BoardPost } from '@/types';
 import {
@@ -34,28 +34,28 @@ const fetchPost = async (postid: number) => {
 };
 const fetchLike = async (postid: number, filterType: BoardType) => {
   try {
-    const response = await postBoardLike(postid, filterType);
+    await postBoardLike(postid, filterType);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchdelLike = async (postid: number, filterType: BoardType) => {
   try {
-    const response = await deleteBoardLike(postid, filterType);
+    await deleteBoardLike(postid, filterType);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchBm = async (postid: number, filterType: BoardType) => {
   try {
-    const response = await postBoardBookmark(postid, filterType);
+    await postBoardBookmark(postid, filterType);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchdelBm = async (postid: number, filterType: BoardType) => {
   try {
-    const response = await deleteBoardBookmark(postid, filterType);
+    await deleteBoardBookmark(postid, filterType);
   } catch (error) {
     console.error(error);
   }

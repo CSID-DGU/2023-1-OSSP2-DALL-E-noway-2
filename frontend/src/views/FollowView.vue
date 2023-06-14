@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { FollowType } from '@/types/enum/follow.type';
 import { onMounted, ref, type Ref } from 'vue';
 import {

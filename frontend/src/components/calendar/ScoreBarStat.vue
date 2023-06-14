@@ -10,7 +10,7 @@ import {
   LinearScale,
   BarElement,
 } from 'chart.js';
-import type { ChartData, ChartOptions } from 'chart.js';
+import type { ChartOptions } from 'chart.js';
 import { categoryInfoStore } from '@/stores/category.info.store';
 import type { ScoreStat } from '@/types';
 import { getScoreStatByMonth } from '@/api/axios.custom';

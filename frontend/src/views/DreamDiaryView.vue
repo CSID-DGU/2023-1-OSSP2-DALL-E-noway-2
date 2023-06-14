@@ -40,28 +40,28 @@ const fetchPost = async (diaryId: number) => {
 
 const fetchLike = async (diaryId: number) => {
   try {
-    const response = await postDiaryLike(diaryId);
+    await postDiaryLike(diaryId);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchdelLike = async (diaryId: number, filterType: FilterType) => {
   try {
-    const response = await deleteDiaryLike(diaryId, filterType);
+    await deleteDiaryLike(diaryId, filterType);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchBm = async (diaryId: number) => {
   try {
-    const response = await postDiaryBookmark(diaryId);
+    await postDiaryBookmark(diaryId);
   } catch (error) {
     console.error(error);
   }
 };
 const fetchdelBm = async (diaryId: number, filterType: FilterType) => {
   try {
-    const response = await deleteDiaryBookmark(diaryId, filterType);
+    await deleteDiaryBookmark(diaryId, filterType);
   } catch (error) {
     console.error(error);
   }

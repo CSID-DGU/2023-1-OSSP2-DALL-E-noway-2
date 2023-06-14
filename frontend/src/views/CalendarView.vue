@@ -14,7 +14,7 @@ import CountPieStat from '@/components/calendar/CountPieStat.vue';
 import ScoreBarStat from '@/components/calendar/ScoreBarStat.vue';
 import AverageBarStat from '@/components/calendar/AverageBarStat.vue';
 
-const { getUser, apiGetUser } = useMyInfoStore();
+const { apiGetUser } = useMyInfoStore();
 const calendarInfo = useCalendarInfoStore();
 const {
   showIsLoading,
@@ -48,7 +48,6 @@ const clickDate = async (date: number) => {
   }
 };
 
-const mine = ref(getUser());
 const lastDate = ref(showLastDate());
 const day = ref(showDay());
 const isLoading = ref(showIsLoading());

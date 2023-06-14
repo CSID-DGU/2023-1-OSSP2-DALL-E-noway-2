@@ -81,30 +81,6 @@ const initBoardList = async (
 
 const curDiaryPage = ref(1);
 
-const fetchDiaryFeeds = async (page: number, length: number) => {
-  try {
-    const response = await getUserDiaryFeeds(userId, page, length);
-    const results = response.data;
-    if (response.status === 200) {
-      // response.data의 각 요소 중 diaryImageUrl을 diaryFeeds의 각 요소 중 imageUrl로 옮겨줌
-      for (let i = 0; i < results.dreamDiaryFeeds.length; i += 1) {
-        diaryFeeds.value.push({
-          diaryId: results.dreamDiaryFeeds[i].diaryId,
-          title: results.dreamDiaryFeeds[i].title,
-          content: results.dreamDiaryFeeds[i].content,
-          nickname: results.dreamDiaryFeeds[i].nickname,
-          viewCount: results.dreamDiaryFeeds[i].viewCount,
-          imageUrl: results.dreamDiaryFeeds[i].diaryImageUrl,
-        });
-      }
-    } else {
-      console.log(response);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 // @ts-ignore
 const loadMoreDiary = async ($state) => {
   try {

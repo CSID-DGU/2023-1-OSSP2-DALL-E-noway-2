@@ -77,32 +77,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
     saveStorageSelectedDate();
   };
 
-  // 요일 계산
-  const showDayText = () => {
-    const day = new Date(year.value, month.value, selectDate.value).getDay();
-    switch (day) {
-      case 0:
-        return '일';
-      case 1:
-        return '월';
-      case 2:
-        return '화';
-      case 3:
-        return '수';
-      case 4:
-        return '목';
-      case 5:
-        return '금';
-      case 6:
-        return '토';
-    }
-  };
-
-  // 선택한 날짜 텍스트 (2.20 월요일)
-  const showSelectedDateText = () => {
-    return `${showMonth() + 1}.${showSelectedDate()} ${showDayText()}요일`;
-  };
-
   const showDateTitle = () => {
     return dateTitle.value;
   };
@@ -118,16 +92,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
       date: showSelectedDate(),
     };
     saveStorage('showDate', showDate);
-  };
-
-  // 오늘 날짜로 초기화
-  const resetSelectedDate = () => {
-    year.value = today.value.getFullYear();
-    month.value = today.value.getMonth();
-    setSelectedDate(today.value.getDate());
-    day.value = new Date(year.value, month.value).getDay();
-    lastDate.value = new Date(year.value, month.value + 1, 0).getDate();
-    setDateTitle();
   };
 
   // 해당 월 1일의 요일 계산하기
@@ -226,10 +190,6 @@ export const useCalendarInfoStore = defineStore('calendar-info', () => {
 
   const showSelectedDiaryFeed = () => {
     return selectedDiaryFeed.value;
-  };
-
-  const setSelectedDiaryFeed = (data: DiaryFeed) => {
-    selectedDiaryFeed.value = data;
   };
 
   // 선택한 날짜 일기 피드 정보 API 호출

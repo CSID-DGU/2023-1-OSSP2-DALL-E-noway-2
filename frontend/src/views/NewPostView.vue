@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import StarRating from '@/components/dreamDiary/StarRating.vue';
-import { postDreamDiary, postNewPost } from '@/api/axios.custom';
-import type { Category, Post } from '@/types/index';
-import CategorySelect from '@/components/dreamDiary/CategorySelect.vue';
+import { postNewPost } from '@/api/axios.custom';
 import WhiteBGButton from '@/components/dreamDiary/WhiteBGButton.vue';
 import BlackBGButton from '@/components/dreamDiary/BlackBGButton.vue';
 import DisclosureScopeSelect from '@/components/dreamDiary/DisclosureScopeSelect.vue';
-import { useDiaryCreateStore } from '@/stores/diary.create.store';
-import { DisclosureScopeType } from '@/types/enum/disclosure.scope.type';
 import { usePostCreateStore } from '@/stores/post.create.store';
 import { BoardType } from '@/types/enum/board.type';
 

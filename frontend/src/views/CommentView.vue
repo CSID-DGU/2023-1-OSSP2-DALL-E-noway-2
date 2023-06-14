@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   getAllComments,
-  getProfile,
   postComment,
   postReply,
   deleteComment,

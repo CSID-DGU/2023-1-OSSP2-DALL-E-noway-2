@@ -72,6 +72,7 @@ const temporarySaveDiary = () => {
 
 const registerSelectedImage = async () => {
   // selectedImages의 value에 해당하는 이미지 파일을 diary.image에 넣어준다.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const [_, value] of contents.value.selectedImages) {
     diary.value.image.push(value);
   }
