@@ -57,7 +57,47 @@ Dream Vision은 꿈을 향한 여정을 더욱 풍요롭게 만들어줄 것입�
 
 ## 🔖 기능 안내
 
-작성 예정
+<div align="center">
+
+<table>
+<tr>
+<th> 꿈일기 작성 이동 </th>
+<th> 꿈일기 작성 </th>
+</tr>
+<tr>
+<td>
+
+![꿈일기작성이동](https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2/assets/83565255/0bed3276-eafd-44ca-afb6-70edc5462914)
+
+</td>
+<td>
+
+![꿈일기작성](https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2/assets/83565255/d32bedc0-c79d-44a2-930f-1bdb3cd3e737)
+
+</td>
+</tr>
+
+</table>
+
+<table>
+<tr>
+<th> 꿈일기 이미지 생성 </th>
+<th> 해몽 생성 </th>
+</tr>
+<tr>
+<td>
+
+![꿈일기이미지생성](https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2/assets/83565255/77da842d-862a-497d-93ed-60c6a6f84821)
+
+</td>
+<td>
+
+![해몽생성](https://github.com/CSID-DGU/2023-1-OSSP2-DALL-E-noway-2/assets/83565255/5c09ded1-6d9a-4fa1-a496-3d6cb650cccc)
+
+</td>
+</tr>
+</table>
+</div>
 
 <br/>
 <br/>
@@ -172,6 +212,7 @@ yarn start:dev
 ```
 
 아래는 별도의 터미널에서 실행해야 합니다.
+
 ```bash
 cd frontend # 프로젝트 홈 경로에서 실행
 yarn dev
