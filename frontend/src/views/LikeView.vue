@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted, computed } from 'vue';
-import { useMyInfoStore } from '@/stores/my.info.store';
-import { categoryInfoStore } from '@/stores/category.info.store';
+import { RouterLink } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import type { BoardList, DiaryFeed } from '@/types';
-import {
-  getDiaryLike,
-  getBoardLike,
-  getDreamDiaryFeedList,
-} from '@/api/axios.custom';
-import { BoardType } from '@/types/enum/board.type';
+import { getDiaryLike, getBoardLike } from '@/api/axios.custom';
+import { FilterType } from '@/types/enum/filter.type';
 
 const dposts = ref<DiaryFeed[]>([]);
 const bposts = ref<BoardList[]>([]);
@@ -21,26 +15,48 @@ const showdiary = async (page: number, length: number) => {
     const response = await getDiaryLike(page, length);
     arrlength.value = response.data.totalLength;
     dposts.value = response.data.dreamDiaryFeeds;
+    post_type.value = FilterType.DIARY;
   } catch (error) {
     console.error(error);
   }
 };
 
-const post_type = ref<BoardType>(BoardType.FREE);
-const showboard = async (posttype: BoardType, page: number, length: number) => {
+const post_type = ref<FilterType>(FilterType.DIARY);
+const showboard = async (
+  posttype: FilterType,
+  page: number,
+  length: number,
+) => {
   try {
     page = 1;
-    const posttype = post_type.value;
+    posttype = post_type.value;
     const response = await getBoardLike(posttype, page, length);
     arrlength.value = response.data.totalLength;
-    bposts.value = response.data.posts;
+    bposts.value = response.data.boardFeeds;
   } catch (error) {
     console.error(error);
   }
 };
 const category = ref('');
-const selectCategory = (cate: string) => {
+const selectCategory = async (cate: string) => {
   category.value = cate;
+  if (cate === '자유') {
+    post_type.value = FilterType.FREE;
+    await showboard(post_type.value, 1, arrlength.value);
+    await showboard(post_type.value, 1, arrlength.value);
+  } else if (cate === '수면팁') {
+    post_type.value = FilterType.TIP;
+    await showboard(post_type.value, 1, arrlength.value);
+    await showboard(post_type.value, 1, arrlength.value);
+  } else if (cate === '해몽의뢰') {
+    post_type.value = FilterType.REQUEST;
+    await showboard(post_type.value, 1, arrlength.value);
+    await showboard(post_type.value, 1, arrlength.value);
+  } else if (cate === '꿈일기목록') {
+    post_type.value = FilterType.DIARY;
+    await showdiary(1, arrlength.value);
+    await showdiary(1, arrlength.value);
+  }
 };
 
 const truncateContent = (content: string, maxLength: number) => {
@@ -53,7 +69,7 @@ const truncateContent = (content: string, maxLength: number) => {
 
 onMounted(async () => {
   await showdiary(1, arrlength.value);
-  await showboard(post_type.value, 1, arrlength.value);
+  await selectCategory('꿈일기목록');
 });
 </script>
 
@@ -129,10 +145,6 @@ onMounted(async () => {
           </div>
         </div>
       </template>
-      <!--
-      <template v-else-if="category === '수면팁'"></template>
-      <template v-else-if="category === '해몽의뢰'"></template>
-      -->
     </div>
   </main>
 </template>

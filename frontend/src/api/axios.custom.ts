@@ -472,7 +472,7 @@ export const getDiaryBookmark = async (page: number, length: number) => {
   return response;
 };
 export const getBoardLike = async (
-  posttype: BoardType,
+  posttype: FilterType,
   page: number,
   length: number,
 ) => {
