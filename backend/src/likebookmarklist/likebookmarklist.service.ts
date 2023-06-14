@@ -16,6 +16,7 @@ import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { User } from 'src/entities/user.entity';
+import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { FilterType } from 'src/enum/filter.type';
 import { Repository } from 'typeorm';
@@ -135,7 +136,7 @@ export class LikeBookmarkListService {
 
   async getBoardLikeFeeds(
     userId: number,
-    postType: FilterType,
+    postType: BoardType,
     currentPage: number,
     length: number,
   ): Promise<BoardFeedsResponseDto> {
@@ -167,6 +168,7 @@ export class LikeBookmarkListService {
     const totalLength = await this.favoriteRepository.count({
       where: {
         userId,
+        // @ts-ignore
         filterType: postType,
       },
     });
@@ -181,7 +183,7 @@ export class LikeBookmarkListService {
 
   async getBookmarkBoardFeeds(
     userId: number,
-    postType: FilterType,
+    postType: BoardType,
     currentPage: number,
     length: number,
   ): Promise<BoardFeedsResponseDto> {
@@ -213,6 +215,7 @@ export class LikeBookmarkListService {
     const totalLength = await this.bookMarkRepository.count({
       where: {
         userId,
+        // @ts-ignore
         filterType: postType,
       },
     });
