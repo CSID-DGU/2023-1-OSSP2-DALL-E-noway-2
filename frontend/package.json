@@ -18,6 +18,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",
+    "dayjs": "^1.11.8",
     "pinia": "^2.0.32",
     "swiper": "^9.3.2",
     "v3-infinite-loading": "^1.2.2",

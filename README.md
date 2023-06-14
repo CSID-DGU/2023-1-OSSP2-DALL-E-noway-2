@@ -165,11 +165,16 @@ docker compose up --build -d
 **5. 앱 실행**
 
 ```bash
-yarn --cwd backend start:dev
+cd backend
+mkdir -p uploads
+cp image.png uploads
+yarn start:dev
 ```
 
+아래는 별도의 터미널에서 실행해야 합니다.
 ```bash
-yarn --cwd frontend dev
+cd frontend # 프로젝트 홈 경로에서 실행
+yarn dev
 ```
 
 **6. 사이트 접속**

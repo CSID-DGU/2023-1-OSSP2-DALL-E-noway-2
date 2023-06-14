@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
+import { UserDto } from './user.dto';
 
 export class PostResponseDto {
   @ApiProperty({
@@ -10,10 +11,14 @@ export class PostResponseDto {
   postId: number;
 
   @ApiProperty({
-    example: 1,
-    description: '유저 ID',
+    example: {
+      userId: 1,
+      nickname: 'Dall-e',
+      imageUrl: 'https://example.com',
+    },
+    description: '작성자 정보',
   })
-  userId: number;
+  author: UserDto;
 
   @ApiProperty({
     example: '옥상에서 떨어지는 꿈',

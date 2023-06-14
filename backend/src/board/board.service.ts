@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
@@ -50,16 +54,32 @@ export class BoardService {
 
   // 게시글 세부내용 조회 기능 / post_id에 해당하는 게시글의 세부사항을 조회하는 API
   async postShow(postId: number): Promise<PostResponseDto> {
-    const post = await this.boardRepository.findOne({ where: { postId } });
+    const post = await this.boardRepository.findOne({
+      where: { postId },
+      relations: ['author'],
+    });
     if (!post) {
       throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
     post.viewCount += 1;
     await this.boardRepository.save(post);
 
-    const postResponseDto = new PostResponseDto();
-    Object.assign(postResponseDto, post);
-    return postResponseDto;
+    return {
+      postId: post.postId,
+      author: {
+        userId: post.author.userId,
+        nickname: post.author.nickname,
+        imageUrl: post.author.imageUrl,
+      },
+      title: post.title,
+      content: post.content,
+      boardType: post.boardType,
+      viewCount: post.viewCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      image: post.imageUrl,
+      disclosureScope: post.disclosureScope,
+    } as PostResponseDto;
   }
 
   // 게시글 세부내용 수정 기능 / post_id에 해당하는 게시글의 세부사항을 수정하는 API
@@ -92,8 +112,8 @@ export class BoardService {
 
   // 게시글 목록 조회 기능 / 게시글의 종류와 페이지를 받아와 해당하는 게시판의 게시글 목록을 조회하는 API
   async postList(
-    filterType: FilterType,
-    searchType: string,
+    boardType: BoardType,
+    searchType: SearchType,
     page: number,
     length: number,
     searchKeyword: string,
@@ -105,13 +125,13 @@ export class BoardService {
         'board.postId',
         'board.title',
         'author.nickname',
-        'board.image',
+        'board.imageUrl',
         'board.viewCount',
         'board.createdAt',
       ])
-      .where('board.boardType = :filterType', { filterType })
-      .andWhere('board.disclosureScope = :PUBLIC', {
-        PUBLIC: DisclosureScopeType.PUBLIC,
+      .where('board.boardType = :boardType', { boardType })
+      .andWhere('board.disclosureScope = :disclosureScope', {
+        disclosureScope: DisclosureScopeType.PUBLIC,
       })
       .orderBy('board.createdAt', 'DESC');
 
@@ -148,38 +168,33 @@ export class BoardService {
   }
 
   // 게시글 삭제 기능 // post_id에 해당하는 게시글을 삭제하는 API
-  async postDelete(postRequestDto: PostRequestDto) {
-    const result = await this.boardRepository
-      .createQueryBuilder('board')
-      .delete()
-      .where('postId = :postId', { postId: postRequestDto.postId })
-      .andWhere('userId = :userId', { userId: postRequestDto.userId })
-      .execute();
-
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Could not find post with postId, userId / ${postRequestDto.postId}, ${postRequestDto.userId}`,
-      );
-    } else {
-      // 삭제가 성공했다는 말은 해당 게시글이 삭제되었다는 말이므로 해당 게시글의 좋아요, 북마크도 삭제함.
-      // 게시글 삭제시 해당 게시글의 좋아요 삭제
-      await this.favoriteRepository
-        .createQueryBuilder('favorite')
-        .delete()
-        .where('id = :postId', { postId: postRequestDto.postId })
-        .andWhere('userId = :userId', { userId: postRequestDto.userId })
-        .execute();
-
-      // 게시글 삭제시 해당 게시글의 좋아요 삭제
-      await this.bookmarkRepository
-        .createQueryBuilder('bookmark')
-        .delete()
-        .where('id = :postId', { postId: postRequestDto.postId })
-        .andWhere('userId = :userId', { userId: postRequestDto.userId })
-        .execute();
+  async postDelete(postId: number, boardType: BoardType, userId: number) {
+    const post = await this.boardRepository.findOne({
+      where: { postId },
+    });
+    if (!post) {
+      throw new NotFoundException(`Could not find post with ID ${postId}`);
     }
 
-    return result;
+    if (post.userId !== userId) {
+      throw new ForbiddenException('Invalid user');
+    }
+
+    await this.boardRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        await transactionalEntityManager
+          .getRepository(Favorite)
+          // @ts-ignore
+          .delete({ id: postId, filterType: boardType }); //좋아요 삭제
+        await transactionalEntityManager
+          .getRepository(Bookmark)
+          // @ts-ignore
+          .delete({ id: postId, filterType: boardType }); //북마크 삭제
+        await transactionalEntityManager
+          .getRepository(Board)
+          .delete({ postId }); //게시글 삭제
+      },
+    );
   }
 
   // 게시글 좋아요 설정 기능 / 게시글의 ID를 받아와 해당하는 게시글의 좋아요를 설정하는 API
