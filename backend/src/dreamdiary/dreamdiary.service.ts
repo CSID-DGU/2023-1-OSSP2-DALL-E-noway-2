@@ -9,8 +9,6 @@ import { DiaryCategory } from 'src/entities/diary.category.entity';
 import { User } from 'src/entities/user.entity';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { SearchType } from 'src/enum/search.type';
-import { v4 as uuid } from 'uuid';
-import { DreamDiaryUpdateRequestDto } from 'src/dto/dreamdiary.update.request.dto';
 import { Category } from 'src/entities/category.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { Bookmark } from 'src/entities/bookmark.entity';

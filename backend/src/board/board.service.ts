@@ -6,7 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostBookmarkDto } from 'src/dto/post.bookmark.dto';
 import { PostLikeDto } from 'src/dto/post.like.dto';
-import { PostRequestDto } from 'src/dto/post.request.dto';
 import { PostResponseDto } from 'src/dto/post.response.dto';
 import { PostsResponseDto } from 'src/dto/posts.response.dto';
 import { Board } from 'src/entities/board.entity';
@@ -14,7 +13,6 @@ import { Bookmark } from 'src/entities/bookmark.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { BoardType } from 'src/enum/board.type';
 import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
-import { FilterType } from 'src/enum/filter.type';
 import { SearchType } from 'src/enum/search.type';
 import { Repository } from 'typeorm';
 

@@ -32,7 +32,6 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
-import { FollowUserResponseDto } from 'src/dto/follow.user.response.dto';
 
 @ApiTags('Profile')
 @Controller('users')

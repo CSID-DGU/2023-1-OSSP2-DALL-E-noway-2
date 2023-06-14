@@ -22,7 +22,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { DreamDiaryFeedsResponseDto } from 'src/dto/dreamdiary.feeds.response.dto';
 import { GetUser } from 'src/decorator/user.decorator';
 import { UserDto } from 'src/dto/user.dto';
-import { FilterType } from 'src/enum/filter.type';
 import { BoardFeedsResponseDto } from 'src/dto/likebookmark.boards.response.dto';
 import { BoardType } from 'src/enum/board.type';
 

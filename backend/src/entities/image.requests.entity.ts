@@ -1,5 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-import { User } from './user.entity';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('image_requests')
 export class ImageRequests {

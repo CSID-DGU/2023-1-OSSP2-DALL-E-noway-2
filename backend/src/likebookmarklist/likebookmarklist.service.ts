@@ -17,7 +17,6 @@ import { DreamDiary } from 'src/entities/dream.diary.entity';
 import { Favorite } from 'src/entities/favorite.entity';
 import { User } from 'src/entities/user.entity';
 import { BoardType } from 'src/enum/board.type';
-import { DisclosureScopeType } from 'src/enum/disclosure.scope.type';
 import { FilterType } from 'src/enum/filter.type';
 import { Repository } from 'typeorm';
 
